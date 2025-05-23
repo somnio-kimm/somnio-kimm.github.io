@@ -19,11 +19,10 @@ This project focuses on developing a deep learning-based system to forecast mont
     • Transformer-based architectures
     • AutoEncoder
     • GAN-based models
-• Visualization: Matplotlib, Seaborn, Plotly
+• Visualization: Matplotlib, Seaborn, Plotly  
 • Web Application: Streamlit for interactive result visualization
-• Development Environment: Jupyter Notebook, VSCode
-• Version Control: Git, GitHub ￼
-
+• Development Environment: Jupyter Notebook, VSCode  
+• Version Control: Git, GitHub  
 
 ### 🔍 Key Features
 1. Data Preprocessing
@@ -42,5 +41,5 @@ This project focuses on developing a deep learning-based system to forecast mont
 • Developed an interactive Streamlit web application for real-time result exploration.  
 
 ### 📈 Sample Results
-• Best Model: ConvLSTM2D with optimized hyperparameters
+• Best Model: ConvLSTM2D with optimized hyperparameters  
 • Performance Metrics:  
