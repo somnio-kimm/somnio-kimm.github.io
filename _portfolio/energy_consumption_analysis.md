@@ -12,7 +12,7 @@ This project aims to build and evaluate machine learning pipelines to forecast e
 
 ### 🧰 Tools and Technologies
 • Languages: Python  
-• Libraries: pandas, NumPy, scikit-learn, XGBoost, LightGBM, matplotlib, seaborn  
+• Libraries: pandas, NumPy, scikit-learn, XGBoost, matplotlib, seaborn  
 • Development Environment: Jupyter Notebook, VSCode  
 • Version Control: Git, GitHub  
 
