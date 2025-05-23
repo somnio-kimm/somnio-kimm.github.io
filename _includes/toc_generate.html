@@ -5,9 +5,9 @@
     {% assign level = heading | slice: 0, 1 %}
     {% assign heading_text = heading | split: '>' | last | split: '</h' | first %}
     {% assign anchor = heading_text | slugify %}
-    {% assign id_attr = 'id="' | append: anchor | append: '"' %}
-    {% assign new_heading = '<h' | append: level | append: ' ' | append: id_attr | append: '>' | append: heading_text | append: '</h' | append: level | append: '>' %}
-    {% assign toc = toc | append: '<li class="toc-level-' | append: level | append: '"><a href="#' | append: anchor | append: '">' | append: heading_text | append: '</a></li>' %}
+    <li class="toc-level-{{ level }}">
+      <a href="#{{ anchor }}">{{ heading_text }}</a>
+    </li>
   {% endif %}
 {% endfor %}
-<ul class="toc-list">{{ toc }}</ul>
+<ul class="{{ include.class | default: 'toc__menu' }}">{{ toc }}</ul>
