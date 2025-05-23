@@ -8,7 +8,7 @@ collection: portfolio
 This project aims to build and evaluate machine learning pipelines to forecast electricity consumption using real-world data provided by Korea Electric Power Corporation (KEPCO). It integrates multiple regression models, including ensemble techniques like stacking, and incorporates feature importance analysis to enhance interpretability.  
 • Project Duration: March 31, 2025 – April 10, 2025   
 • Data Source: Korea Electric Power Corporation (KEPCO)  
-• Repository: GitHub - somnio-kimm/energy_consumption_analysis  
+• Repository: [GitHub - somnio-kimm/energy_consumption_analysis](https://github.com/somnio-kimm/energy_consumption_analysis)
 
 ### 🧰 Tools and Technologies
 • Languages: Python  
