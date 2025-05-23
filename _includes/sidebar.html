@@ -7,11 +7,6 @@
     {% include author-profile.html %}
   {% endif %}
 
-  {%- comment -%} TOC inserted here {%- endcomment -%}
-  {% if page.toc and page.toc_sticky %}
-    {% include toc.html %}
-  {% endif %}
-
   {% if page.sidebar %}
     {% for s in page.sidebar %}
       {% if s.image %}
