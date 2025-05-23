@@ -1,0 +1,15 @@
+.toc {
+  background: #f8f8f8;
+  padding: 1rem;
+  border-left: 4px solid #ccc;
+  margin-bottom: 2rem;
+}
+
+.toc__menu {
+  list-style: none;
+  padding-left: 0;
+}
+
+.toc__menu li {
+  margin: 0.25rem 0;
+}
