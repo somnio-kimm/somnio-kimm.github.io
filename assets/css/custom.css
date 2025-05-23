@@ -1,3 +1,28 @@
+.main-content-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.main-content {
+  flex: 1;
+  max-width: 800px;
+}
+
+.sidebar__right {
+  width: 240px;
+  position: sticky;
+  top: 100px;
+  align-self: flex-start;
+}
+
+.toc__menu {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 1rem;
+}
+
 .toc {
   background: #f8f8f8;
   padding: 1rem;
