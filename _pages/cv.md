@@ -39,6 +39,8 @@ Skills
 * Programming Language: Python, C++ (Intermediate), Shell Script, Fortran, SQL (Beginner)
 * Language: Korean (Native), English, Japanese (Advanced), Chinese, German (Beginner)
 
+
+<!-- This is a comment
 Publications
 ======
   <ul>{% for post in site.publications reversed %}
@@ -56,3 +58,4 @@ Teaching
   <ul>{% for post in site.teaching reversed %}
     {% include archive-single-cv.html %}
   {% endfor %}</ul>
+-->
