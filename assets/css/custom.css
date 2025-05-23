@@ -53,3 +53,7 @@
 .toc__menu li {
   margin: 0.25rem 0;
 }
+
+.page__footer-follow h2:contains("Sitemap") {
+  display: none;
+}
