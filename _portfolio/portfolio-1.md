@@ -1,25 +1,22 @@
 ---
 title: "Energy Consumption Analysis"
-excerpt: "<img src='/images/500x300.png'>"
+excerpt: ""
 collection: portfolio
 ---
 
-📌 Overview
-=====
+### 📌 Overview
 This project aims to build and evaluate machine learning pipelines to forecast electricity consumption using real-world data provided by Korea Electric Power Corporation (KEPCO). It integrates multiple regression models, including ensemble techniques like stacking, and incorporates feature importance analysis to enhance interpretability.  
 • Project Duration: March 31, 2025 – April 10, 2025   
 • Data Source: Korea Electric Power Corporation (KEPCO)  
 • Repository: GitHub - somnio-kimm/energy_consumption_analysis  
 
-🧰 Tools and Technologies
-=====
+### 🧰 Tools and Technologies
 • Languages: Python  
 • Libraries: pandas, NumPy, scikit-learn, XGBoost, LightGBM, matplotlib, seaborn  
 • Development Environment: Jupyter Notebook, VSCode  
 • Version Control: Git, GitHub  
 
-🔍 Key Features
-=====
+### 🔍 Key Features
 1. Data Preprocessing
 • Cleaned missing values and removed outliers to improve model quality.  
 • Performed feature engineering and normalization to optimize model performance.  
@@ -33,7 +30,6 @@ This project aims to build and evaluate machine learning pipelines to forecast e
 • Conducted residual analysis and visualized feature importances for interpretability.  
 • Identified key predictors of energy consumption such as temperature and time-of-day.  
 
-📈 Sample Results
-=====
+### 📈 Sample Results
 •Best Model: Stacked Ensemble (XGBoost + LightGBM + Linear Regression)  
 •Performance: RMSE = 1.47, R² = 0.91 (example values, update with real metrics)  
