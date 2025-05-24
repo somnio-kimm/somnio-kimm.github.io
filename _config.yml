@@ -9,7 +9,7 @@
 # Basic Site Settings
 locale                   : "en-US"
 site_theme               : "default"
-title                    : "Deep Chat of ML"
+title                    : "Deep Chat of Perplexity"
 title_separator          : "-"
 name                     : &name "Soo Min Kimm"
 description              : &description "Hi, I am Soo Min, a data scientist."
