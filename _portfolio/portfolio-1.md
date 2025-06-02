@@ -35,4 +35,4 @@ This project converts Morse code into numerical values and visualizes them using
 🎨 Design
 ---
 - Schematics
-    ![circuitry](_portfolio/images/portfolio-1-1.png)
+    ![circuitry](./_portfolio/images/portfolio-1-1.png)
