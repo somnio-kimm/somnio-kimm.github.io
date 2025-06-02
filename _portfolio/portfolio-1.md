@@ -9,7 +9,6 @@ collection: portfolio
 This project converts Morse code into numerical values and visualizes them using a 7-segment LED display. It integrates various sensors (optical and vibration), embedded programming with Arduino, and hardware components like LEDs and resistors. The design highlights real-time signal acquisition and mapping to LED patterns.
 - Project Duration: Nov 12, 2017 - Dec 10, 2017
 - Tools: Arduino IDE, Oscilloscope, Redboard
----
 
 🧰 Tools and Technologies
 ---
@@ -17,7 +16,6 @@ This project converts Morse code into numerical values and visualizes them using
 - Sensors: QRD1114 Reflective Object Sensors, Vibration Sensor
 - Output Devices: Common Anode 7-Segment Display, LEDs
 - Development: Arduino IDE, Serial Monitor
----
 
 🔍 Key Features
 ---
@@ -33,10 +31,8 @@ This project converts Morse code into numerical values and visualizes them using
 4. Timing Control
 - Delays and millis() ensure non-blocking behavior.
 - Pulse width detection via pulseIn().
----
 
 🎨 Design
 ---
 - Schematics
-    ![circuitry](images/portfolio-1-1.png)
----
+    ![circuitry](_portfolio/images/portfolio-1-1.png)
