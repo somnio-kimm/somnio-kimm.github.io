@@ -34,5 +34,5 @@ This project converts Morse code into numerical values and visualizes them using
 
 🎨 Design
 ---
-- Schematics
-    <img src="./images/portfolio/portfolio-1-1.png" alt="Schematic" width="80%">
+- Schematics  
+    <img src="../images/portfolio/portfolio-1-1.png" alt="Schematic" width="80%">
