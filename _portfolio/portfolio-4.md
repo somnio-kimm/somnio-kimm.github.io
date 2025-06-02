@@ -4,14 +4,14 @@ excerpt: "Image prediction of glacier"
 collection: portfolio
 ---
 
-### 📌 Overview
+📌 Overview
 ---
 This project focuses on developing a deep learning-based system to forecast monthly Antarctic glacier coverage using historical satellite imagery. By experimenting with various temporal models, the project aims to enhance the accuracy of glacier distribution predictions, contributing to climate change research and environmental monitoring.  
 - Project Duration: April 28, 2025 – May 16, 2025
 - Data Source: [National Snow and Ice Data Center (NSIDC)](https://nsidc.org/data/seaice_index/data-and-image-archive)  
 - Repository: [GitHub - somnio-kimm/antarctic_glacier_analysis](https://github.com/somnio-kimm/antarctic_glacier_analysis)
 
-### 🧰 Tools and Technologies
+🧰 Tools and Technologies
 ---
 - Development Environment: VSCode, Jupyter Notebook  
 - Version Control: Git, GitHub
@@ -27,8 +27,7 @@ This project focuses on developing a deep learning-based system to forecast mont
     - U-Net + GAN
 - Web Application: Streamlit for interactive result visualization
  
-
-### 🔍 Key Features
+🔍 Key Features
 ---
 1. Data Preprocessing
 - Processed historical satellite time series images.  
@@ -41,7 +40,7 @@ This project focuses on developing a deep learning-based system to forecast mont
 - Evaluated model performance using metrics such as MSE, SSIM, and PSNR.  
 - Developed an interactive Streamlit web application for real-time result exploration.  
 
-### 📈 Sample Results
+📈 Sample Results
 ---
 - Best Model: AE + GRU
 - Performance Metrics

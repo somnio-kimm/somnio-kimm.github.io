@@ -9,7 +9,6 @@ collection: portfolio
 This project introduces a wearable, vibration-based navigation device designed for cyclists and skateboarders. The system pairs with a mobile app and uses haptic feedback to communicate navigation cues, eliminating the need for screen interaction while riding. By leveraging Bluetooth connectivity and solar-powered endurance, this design aims to enhance both safety and usability.
 - Project Duration: Feb 12, 2021 - May 5, 2021
 - Tools: Arduino, Bluetooth Module, Solar Panel, Vibration Motors
----
 
 🧰 Tools and Technologies
 ---
@@ -18,7 +17,6 @@ This project introduces a wearable, vibration-based navigation device designed f
 - Power: Rechargeable Battery, Flexible Solar Panel
 - Input: Companion Mobile App (Turn-by-turn navigation)
 - Output: Dual Vibration Motors
----
 
 🔍 Key Features
 ---
@@ -34,13 +32,12 @@ This project introduces a wearable, vibration-based navigation device designed f
 4. Power Sustainability
 - Designed for 1.5 hours minimum runtime per charge.
 - Solar panel extends usage under daylight conditions.
----
 
 🎨 Design
 ---
-- Surface Design  
+- High-Level Design  
     <p align="center">
-        <img src="/images/portfolio/portfolio-2-1.png" alt="Surface Design" width="80%">
+        <img src="/images/portfolio/portfolio-2-1.png" alt="High-Level Design" width="80%">
     </p>
 - Block Diagram  
     <p align="center">
@@ -48,13 +45,13 @@ This project introduces a wearable, vibration-based navigation device designed f
     </p>
 - Power Supply  
     <p align="center">
-        <img src="/images/portfolio/portfolio-2-3.png" alt="Power Supply" width="80%">
+        <img src="/images/portfolio/portfolio-2-3.png" alt="Power Supply" width="100%">
     </p>
 - Microcontroller  
     <p align="center">
-        <img src="/images/portfolio/portfolio-2-4.png" alt="Microcontroller" width="80%">
+        <img src="/images/portfolio/portfolio-2-4.png" alt="Microcontroller" width="100%">
     </p>
 - App Design  
     <p align="center">
-        <img src="/images/portfolio/portfolio-2-5.png" alt="App Design" width="80%">
+        <img src="/images/portfolio/portfolio-2-5.png" alt="App Design" width="60%">
     </p>
