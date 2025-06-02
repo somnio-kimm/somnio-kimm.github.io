@@ -7,7 +7,7 @@ collection: portfolio
 📌 Overview
 ---
 This project introduces a wearable, vibration-based navigation device designed for cyclists and skateboarders. The system pairs with a mobile app and uses haptic feedback to communicate navigation cues, eliminating the need for screen interaction while riding. By leveraging Bluetooth connectivity and solar-powered endurance, this design aims to enhance both safety and usability.
-- Project Duration: Spring 2025
+- Project Duration: Feb 12, 2021 - May 5, 2021
 - Tools: Arduino, Bluetooth Module, Solar Panel, Vibration Motors
 ---
 
