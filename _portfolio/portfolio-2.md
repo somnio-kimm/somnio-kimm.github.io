@@ -39,12 +39,22 @@ This project introduces a wearable, vibration-based navigation device designed f
 🎨 Design
 ---
 - Surface Design  
-    ![surface_design](images/portfolio-2-1.png)
+    <p align="center">
+        <img src="/images/portfolio/portfolio-2-1.png" alt="Surface Design" width="80%">
+    </p>
 - Block Diagram  
-    ![block_diagram](images/portfolio-2-2.png)
+    <p align="center">
+        <img src="/images/portfolio/portfolio-2-2.png" alt="Block Diagram" width="80%">
+    </p>
 - Power Supply  
-    ![power_supply](images/portfolio-2-3.png)
+    <p align="center">
+        <img src="/images/portfolio/portfolio-2-3.png" alt="Power Supply" width="80%">
+    </p>
 - Microcontroller  
-    ![microcontroller](images/portfolio-2-4.png)
+    <p align="center">
+        <img src="/images/portfolio/portfolio-2-4.png" alt="Microcontroller" width="80%">
+    </p>
 - App Design  
-    ![app_design](images/portfolio-2-5.png)
+    <p align="center">
+        <img src="/images/portfolio/portfolio-2-5.png" alt="App Design" width="80%">
+    </p>

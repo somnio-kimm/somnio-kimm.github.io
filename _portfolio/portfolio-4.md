@@ -49,4 +49,6 @@ This project focuses on developing a deep learning-based system to forecast mont
     - SSIM: 0.9848
     - PSNR: 39.89
 
-![glacier_analysis](images/portfolio-4-1.png)
+<p align="center">
+    <img src="/images/portfolio/portfolio-4-1.png" alt="Glacier" width="100%">
+</p>
