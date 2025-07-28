@@ -1,5 +1,5 @@
 ---
-title: "fAIce"
+title: "TellingByfAIce"
 excerpt: "Interactive expression recognition game powered by real-time emotion detection"
 collection: portfolio
 ---
