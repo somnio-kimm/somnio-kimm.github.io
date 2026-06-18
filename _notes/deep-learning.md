@@ -9,7 +9,7 @@ toc_sticky: true
 
 Notes on deep-learning architectures and the mechanisms behind them.
 
-{% assign suborder = "Transformers & Attention|Glossary" | split: "|" %}
+{% assign suborder = "Transformers & Attention" | split: "|" %}
 {% for sub in suborder %}
   {% assign items = site.notes | where: "category", "Deep Learning" | where: "subcategory", sub | sort: "title" %}
   {% if items.size > 0 %}

@@ -20,9 +20,9 @@ The post already references that path, so once the file exists the image renders
 | DINO | https://app.notion.com/p/3e50097f3e60832287010184024ee40e | `dino-1.png` (student–teacher objective) |
 | YOLO | https://app.notion.com/p/a160097f3e608201a0c6012395c3d01f | `yolo-1.png` (grid predictions) |
 | ACT | https://app.notion.com/p/9bd0097f3e60827e83018157d97c77c1 | `act-1.png` (action chunking), `act-2.png` (temporal ensembling) |
+| OpenVLA | https://app.notion.com/p/06a0097f3e6083909352018000436aac | `openvla-1.png` (architecture) |
+| OpenVLA-OFT | https://app.notion.com/p/ce50097f3e6082d4856d015e5ef8e0c2 | `openvla-oft-1.png` (recipe) |
 | FAST | https://app.notion.com/p/35e0097f3e608036b6adc794d6ca6af9 | `fast-1.png` (binning), `fast-2.png` (DCT pipeline), `fast-3.png` (DCT coefficients) |
 | Knowledge-Insulating VLA | https://app.notion.com/p/35e0097f3e6080f6925ac6b8270cf018 | `ki-vla-1.png` (overview), `ki-vla-2.png` (block attention) |
 | PaliGemma | https://app.notion.com/p/7290097f3e60832da4aa81cf689e7e69 | `paligemma-1.png` (architecture), `paligemma-2.png` (contrastive encoder), `paligemma-3.png` (SigLIP), `paligemma-4.png` (normalisation), `paligemma-5.png` (KV cache) |
-| Jargon (glossary) | https://app.notion.com/p/ba60097f3e6083868a3b01b59232cb0a | `jargon-1.png` (precision–recall curve) |
-
 _More rows are appended as further image-bearing notes are converted._
