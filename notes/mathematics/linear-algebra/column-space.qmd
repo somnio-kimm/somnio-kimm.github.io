@@ -1,0 +1,16 @@
+---
+title: Column Space
+description: The span of a matrix's columns.
+categories:
+- Linear Algebra
+---
+
+For an $m \times n$ matrix $A$, the **column space** $\operatorname{col}(A) \subseteq \mathbb{R}^m$ is the span of the columns of $A$.
+
+**Example.**
+
+$$
+\operatorname{col}\begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix} = \operatorname{span}\{(1,1), (1,-1)\} = \{ (a+b,\ a-b) \mid a, b \in \mathbb{R} \} = \mathbb{R}^2
+$$
+
+since any $(x, y)$ can be written as $a(1,1) + b(1,-1)$ with $a = \tfrac{x+y}{2}$ and $b = \tfrac{x-y}{2}$.

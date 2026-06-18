@@ -1,0 +1,74 @@
+---
+title: 'VAE: Auto-Encoding Variational Bayes'
+description: Encode data into a Gaussian latent and decode it back; maximise the ELBO
+  (reconstruction − KL) and backprop through sampling via the reparameterisation trick.
+categories:
+- Generative Models
+---
+
+## Objective
+
+| Term | Description |
+|---|---|
+| Data point $x$ | Observed data from the unknown distribution $p(x)$ |
+| Latent code $z$ | Lower-dimensional vector capturing factors of variation |
+| Marginal likelihood $p_\theta(x)=\int p_\theta(x\mid z)p(z)\,dz$ | Intractable — maximise its ELBO instead |
+| Prior $p(z)=\mathcal{N}(0,I)$ | Fixed design choice |
+| True posterior $p_\theta(z\mid x)$ | Intractable |
+| Encoder (approx. posterior) $q_\phi(z\mid x)=\mathcal{N}(\mu_\phi(x),\sigma_\phi^2(x)I)$ | Inference model, weights $\phi$ |
+| Decoder (likelihood) $p_\theta(x\mid z)=\mathcal{N}(\mu_\theta(z),\sigma_\theta^2(z)I)$ | Generative model, weights $\theta$ |
+
+Unlike a plain autoencoder, which maps each input to a single latent point, the VAE represents data as a **Gaussian** in latent space. The prior forces the encoder to arrange codes so the decoder sees the whole region — without it there are empty "holes" the decoder never learned to decode.
+
+## ELBO
+
+$$
+\mathbb{E}_{q_\phi(z\mid x)}\Big[\log\frac{p(x,z)}{q_\phi(z\mid x)}\Big] = \underbrace{\mathbb{E}_{q_\phi(z\mid x)}[\log p_\theta(x\mid z)]}_{\text{reconstruction}} - \underbrace{D_{KL}\big(q_\phi(z\mid x)\,\|\,p(z)\big)}_{\text{prior matching}}.
+$$
+
+With only the reconstruction term the encoder collapses to a deterministic point ($q_\phi\to\delta(z-\mu_\phi(x))$, variance $\to 0$). The KL term keeps it stochastic and close to the prior.
+
+## Reparameterisation trick
+
+Sampling $z\sim q_\phi(z\mid x)$ blocks gradients. Rewrite it as a deterministic function of independent noise:
+
+$$
+z = \mu_\phi(x) + \sigma_\phi(x)\odot\epsilon, \qquad \epsilon\sim\mathcal{N}(0,I),
+$$
+
+so $\nabla_\phi \mathbb{E}_{\epsilon}[f(z)] = \mathbb{E}_{\epsilon}[\nabla_\phi f(z)]$ and backprop flows through $\mu_\phi,\sigma_\phi$.
+
+## Architecture
+
+![VAE encoder–decoder](/images/notes/vae-1.png)
+
+## Code
+
+```python
+class Model(nn.Module):
+    def __init__(self, Encoder, Decoder):
+        super().__init__()
+        self.Encoder, self.Decoder = Encoder, Decoder
+
+    def reparameterization(self, mean, var):
+        epsilon = torch.randn_like(var).to(DEVICE)
+        return mean + var * epsilon                 # reparameterisation trick
+
+    def forward(self, x):
+        mean, log_var = self.Encoder(x)
+        z = self.reparameterization(mean, torch.exp(0.5 * log_var))
+        return self.Decoder(z), mean, log_var
+
+def loss_function(x, x_hat, mean, log_var):
+    recon = F.binary_cross_entropy(x_hat, x, reduction='sum')
+    kld   = -0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp())
+    return recon + kld
+```
+
+## References
+
+- [arXiv:1312.6114 — Auto-Encoding Variational Bayes](https://arxiv.org/abs/1312.6114)
+- [arXiv:1906.02691 — An Introduction to Variational Autoencoders](https://arxiv.org/abs/1906.02691)
+- [arXiv:1606.05908 — Tutorial on Variational Autoencoders](https://arxiv.org/abs/1606.05908)
+- [Lilian Weng — From Autoencoder to Beta-VAE](https://lilianweng.github.io/posts/2018-08-12-vae/)
+- [Video — Deepia](https://www.youtube.com/watch?v=qJeaCHQ1k2w)

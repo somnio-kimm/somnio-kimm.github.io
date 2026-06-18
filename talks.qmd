@@ -1,0 +1,29 @@
+---
+title: "Talks"
+---
+
+Seminar talks, with slides.
+
+## Generative Models
+
+*Seminar · 7 November 2025*
+
+A survey of the major families of generative models — VAEs, GANs, diffusion, and flow-based methods.
+
+[Download slides (PDF)](/files/generative-models.pdf){.btn .btn-primary .btn-sm}
+
+## State-Space Models
+
+*Seminar · 21 October 2025*
+
+State-space models (SSMs) for sequence modeling — from the continuous-time formulation through discretisation to selective scans (Mamba).
+
+[Download slides (PDF)](/files/state-space-models.pdf){.btn .btn-primary .btn-sm}
+
+## Computer Vision: Object Recognition
+
+*Seminar · 21 October 2025*
+
+Object recognition in computer vision — backbones, detection, and segmentation.
+
+[Download slides (PDF)](/files/computer-vision.pdf){.btn .btn-primary .btn-sm}

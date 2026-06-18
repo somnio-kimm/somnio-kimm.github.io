@@ -1,0 +1,35 @@
+---
+title: "Soo Min Kimm"
+subtitle: "Deep Chat of Perplexity"
+about:
+  template: trestles
+  image: profile.png
+  image-shape: round
+  links:
+    - icon: github
+      text: GitHub
+      href: https://github.com/somnio-kimm
+    - text: Google Scholar
+      href: https://scholar.google.com/citations?user=3wFHPnEAAAAJ
+    - text: ORCID
+      href: https://orcid.org/0009-0006-5662-9627
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/somnio-kimm/
+    - icon: envelope
+      text: Email
+      href: mailto:somnio.kimm@gmail.com
+---
+
+I'm **Soo Min Kimm**, a researcher in **embodied AI and robot learning** at **Tommoro Robotics**. I hold an **M.S. in Electrical & Computer Engineering** and a **B.S. in Electrical Engineering** and **Mathematics** from the **University of Illinois Urbana-Champaign**.
+
+I like turning hard ideas into small, working things — from vision–language–action models for robots down to circuits on a breadboard. *Deep Chat of Perplexity* is where I think out loud about them.
+
+**Currently:** training and evaluating vision–language–action models at Tommoro Robotics, and a co-author on [Habilis-β](https://arxiv.org/abs/2602.18813).
+
+## What you'll find here
+
+- **[Notes](notes/index.qmd)** — deep dives into the ML papers I'm reading, worked through from the math up.
+- **[Publications](publications.qmd)** — preprints and my M.S. thesis.
+- **[Talks](talks.qmd)** — seminar slides.
+- **[CV](cv.qmd)** — the full record.

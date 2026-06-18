@@ -1,0 +1,11 @@
+/*-- scss:defaults --*/
+$primary: #2a76dd;
+$font-size-root: 17px;
+$toc-font-size: 0.85rem;
+
+/*-- scss:rules --*/
+.navbar-title { font-weight: 700; letter-spacing: 0.2px; }
+
+// Make the notes listing cards a little softer.
+.quarto-grid-item.card { border-radius: 0.6rem; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+.quarto-grid-item.card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }

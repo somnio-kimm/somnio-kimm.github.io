@@ -1,0 +1,98 @@
+---
+title: 'ViT: An Image is Worth 16×16 Words'
+description: 'Treating image patches as tokens: split into patches, embed, add a CLS
+  token + positional embeddings, and run a standard Transformer encoder.'
+categories:
+- Vision · Transformers
+---
+
+Paper: [arXiv:2010.11929](https://arxiv.org/abs/2010.11929)
+
+## Architecture
+
+![ViT: image split into patches, linearly embedded with a CLS token and positional embeddings, fed to a Transformer encoder](/images/notes/vit-1.png)
+
+## Code
+
+**Patch & position embedding** — split the image into non-overlapping patches via a strided conv, prepend a learnable CLS token, and add positional embeddings.
+
+```python
+class PatchEmbedding(nn.Module):
+    def __init__(self, img_size, patch_size, in_channels, embed_dim):
+        super().__init__()
+        self.patch_size = patch_size
+        # Each conv kernel covers exactly one (patch_size × patch_size) region → embed_dim vector
+        self.proj = nn.Conv2d(in_channels, embed_dim, kernel_size=patch_size, stride=patch_size)
+        num_patches = (img_size // patch_size) ** 2
+        # Learnable CLS token representing the whole image
+        self.cls_token = nn.Parameter(torch.randn(1, 1, embed_dim))
+        # Positional embeddings: 1 (CLS) + num_patches positions
+        self.pos_embed = nn.Parameter(torch.randn(1, 1 + num_patches, embed_dim))
+
+    def forward(self, x):                      # x: (B, C, H, W)
+        B = x.size(0)
+        x = self.proj(x)                       # (B, embed_dim, H/P, W/P)
+        x = x.flatten(2).transpose(1, 2)       # (B, num_patches, embed_dim)
+        cls_token = self.cls_token.expand(B, -1, -1)
+        x = torch.cat((cls_token, x), dim=1)   # (B, 1 + num_patches, embed_dim)
+        x = x + self.pos_embed
+        return x
+```
+
+**MLP block** — two linear layers with a GELU activation and dropout.
+
+```python
+class MLP(nn.Module):
+    def __init__(self, in_features, hidden_features, dropout_rate):
+        super().__init__()
+        self.fc_1 = nn.Linear(in_features, hidden_features)
+        self.fc_2 = nn.Linear(hidden_features, in_features)
+        self.dropout = nn.Dropout(p=dropout_rate)
+
+    def forward(self, x):
+        x = self.dropout(F.gelu(self.fc_1(x)))
+        x = self.dropout(self.fc_2(x))
+        return x
+```
+
+**Transformer encoder layer** — pre-norm multi-head self-attention + MLP, each with a residual connection.
+
+```python
+class TransformerEncoderLayer(nn.Module):
+    def __init__(self, embed_dim, num_heads, mlp_dim, dropout_rate):
+        super().__init__()
+        self.norm_1 = nn.LayerNorm(embed_dim)
+        self.attn = nn.MultiheadAttention(embed_dim, num_heads, dropout=dropout_rate, batch_first=True)
+        self.norm_2 = nn.LayerNorm(embed_dim)
+        self.mlp = MLP(embed_dim, mlp_dim, dropout_rate)
+
+    def forward(self, x):
+        norm_x = self.norm_1(x)
+        attn_out, _ = self.attn(norm_x, norm_x, norm_x)   # Q = K = V
+        x = x + attn_out                                  # residual
+        norm_x = self.norm_2(x)
+        x = x + self.mlp(norm_x)                          # residual
+        return x
+```
+
+**Full model** — patch-embed, stack of encoder layers, final norm, and a classification head on the CLS token.
+
+```python
+class VisionTransformer(nn.Module):
+    def __init__(self, img_size, patch_size, in_channels, num_classes,
+                 embed_dim, depth, num_heads, mlp_dim, dropout_rate):
+        super().__init__()
+        self.patch_embed = PatchEmbedding(img_size, patch_size, in_channels, embed_dim)
+        self.encoder = nn.Sequential(
+            *[TransformerEncoderLayer(embed_dim, num_heads, mlp_dim, dropout_rate) for _ in range(depth)]
+        )
+        self.norm = nn.LayerNorm(embed_dim)
+        self.head = nn.Linear(embed_dim, num_classes)
+
+    def forward(self, x):
+        x = self.patch_embed(x)
+        x = self.encoder(x)
+        x = self.norm(x)
+        cls_token = x[:, 0, :]          # CLS token as the image representation
+        return self.head(cls_token)
+```

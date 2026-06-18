@@ -1,0 +1,27 @@
+---
+title: "Curriculum Vitae"
+---
+
+## Education
+
+- **M.S. in Electrical & Computer Engineering**, University of Illinois Urbana-Champaign, 2025
+- **B.S. in Electrical Engineering / Mathematics**, University of Illinois Urbana-Champaign, 2021
+
+## Experience
+
+**Analog Signal Processing** — Teaching Assistant
+University of Illinois Urbana-Champaign · Aug 2018 – May 2021, Aug 2022 – May 2023
+Assisted with building and troubleshooting filters and radio circuits.
+
+**Heliophysics Research and Applications** — Research Assistant
+University of Illinois Urbana-Champaign · Aug 2021 – Aug 2022
+Performed polar-wind modelling to simulate ion variations and developed a visualisation tool.
+
+**Decoding the Brain** — Research Assistant
+National University of Singapore · May 2019 – Jul 2019
+Conducted spectral analysis of hippocampal signals and reduced background noise for spike-sorting.
+
+## Skills
+
+- **Programming:** Python, C++ (intermediate), Shell, Fortran, SQL (beginner)
+- **Languages:** Korean (native), English, Japanese (advanced), Chinese, German (beginner)

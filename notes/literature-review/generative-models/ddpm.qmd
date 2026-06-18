@@ -1,0 +1,89 @@
+---
+title: 'DDPM: Denoising Diffusion Probabilistic Models'
+description: Destroy data with a fixed Gaussian forward process, then learn the reverse
+  denoising process; training reduces to predicting the added noise.
+categories:
+- Generative Models
+---
+
+## Objective
+
+A fixed **forward** process gradually adds Gaussian noise to an image until it becomes pure noise ($\mathcal{N}(0,I)$); a learned **reverse** process removes the noise step by step to recover a clean image. Doing it stepwise is tractable because estimating small perturbations is easier than describing the full distribution. The network predicts the noise of a Gaussian $\mathcal{N}(\mu,\sigma^2)$.
+
+## Forward process
+
+![Forward diffusion](/images/notes/ddpm-1.png)
+
+Naively, $x_1 = x_0 + \beta\epsilon$ with $\epsilon\sim\mathcal{N}(0,1)$ gives $q(x_1\mid x_0)=\mathcal{N}(x_0,\beta)$ and, accumulating, $q(x_t\mid x_0)=\mathcal{N}(x_0, t\beta)$ — but the variance diverges as $t\to\infty$, so it never converges to $\mathcal{N}(0,1)$. Rescaling fixes this:
+
+$$
+q(x_t\mid x_{t-1}) = \mathcal{N}\!\big(\sqrt{1-\beta_t}\,x_{t-1},\ \beta_t\big) \;\Rightarrow\; q(x_t\mid x_0) = \mathcal{N}\!\big(\sqrt{\bar\alpha_t}\,x_0,\ 1-\bar\alpha_t\big)
+$$
+
+with $\alpha_t = 1-\beta_t$ and $\bar\alpha_t = \prod_{s=1}^t \alpha_s$. The complete (Markov) forward and reverse chains are
+
+$$
+q(x_{1:T}\mid x_0) = \prod_{t=1}^T q(x_t\mid x_{t-1}), \qquad p_\theta(x_{0:T}) = p_\theta(x_T)\prod_{t=1}^T p_\theta(x_{t-1}\mid x_t).
+$$
+
+The reverse process is conditioned on nothing — it starts from pure Gaussian noise.
+
+## ELBO
+
+Minimise the negative log-likelihood; Jensen's inequality gives the ELBO:
+
+$$
+-\log p_\theta(x_0) = -\log \mathbb{E}_{q(x_{1:T}\mid x_0)}\frac{p_\theta(x_{0:T})}{q(x_{1:T}\mid x_0)} \le -\mathbb{E}_{q(x_{1:T}\mid x_0)}\log\frac{p_\theta(x_{0:T})}{q(x_{1:T}\mid x_0)}.
+$$
+
+Expanding and using $\mathbb{E}[-\log\frac{q}{p}]=D_{KL}(q\|p)$, the per-step term is $\mathbb{E}_{q}\big[D_{KL}\big(q(x_{t-1}\mid x_t,x_0)\,\|\,p_\theta(x_{t-1}\mid x_t)\big)\big]$. Here $q(x_{t-1}\mid x_t,x_0)$ is the **true posterior** (the teacher the model imitates); by Bayes' rule it is Gaussian, $q(x_{t-1}\mid x_t,x_0)=\mathcal{N}(\tilde\mu_t,\tilde\beta_t)$.
+
+## Loss
+
+![Posterior mean](/images/notes/ddpm-2.png)
+
+Choosing $p_\theta(x_{t-1}\mid x_t)=\mathcal{N}(\mu_\theta,\sigma_\theta)$ with **fixed** $\sigma_\theta$, the KL reduces to matching means:
+
+$$
+D_{KL} = \frac{1}{2\sigma_t^2}\|\tilde\mu_t - \mu_\theta\|^2, \qquad \tilde\mu_t = \frac{1}{\sqrt{\alpha_t}}\Big(x_t - \frac{\beta_t}{\sqrt{1-\bar\alpha_t}}\epsilon\Big).
+$$
+
+Parameterising $\mu_\theta$ the same way and predicting the noise $\epsilon_\theta(x_t,t)$ gives the simple training objective
+
+$$
+\mathcal{L} = \mathbb{E}_q\Big[\sum_{t>1}\frac{\beta_t^2}{2\sigma_t^2\alpha_t(1-\bar\alpha_t)}\|\epsilon - \epsilon_\theta(x_t,t)\|^2\Big].
+$$
+
+## Architecture
+
+![U-Net denoiser](/images/notes/ddpm-3.png)
+
+A U-Net predicts the noise, conditioned on the timestep via a sinusoidal embedding.
+
+## Code
+
+```python
+def linear_beta_schedule(timesteps, start=0.0001, end=0.02):
+    return torch.linspace(start, end, timesteps)
+
+def forward_diffusion_sample(x_0, t, device="cpu"):
+    """Return the noisy image at timestep t and the noise that was added."""
+    noise = torch.randn_like(x_0)
+    sqrt_acp_t   = get_index_from_list(sqrt_alphas_cumprod, t, x_0.shape)
+    sqrt_1macp_t = get_index_from_list(sqrt_one_minus_alphas_cumprod, t, x_0.shape)
+    return sqrt_acp_t.to(device) * x_0.to(device) \
+        + sqrt_1macp_t.to(device) * noise.to(device), noise.to(device)
+
+def get_loss(model, x_0, t):
+    x_noisy, noise = forward_diffusion_sample(x_0, t, device)
+    noise_pred = model(x_noisy, t)
+    return F.l1_loss(noise, noise_pred)
+```
+
+The denoiser is a standard `SimpleUnet` with a `SinusoidalPositionEmbeddings` time embedding injected into each block.
+
+## References
+
+- [arXiv:2006.11239](https://arxiv.org/abs/2006.11239)
+- [Calvin Luo — Understanding Diffusion Models](https://calvinyluo.com/2022/08/26/diffusion-tutorial.html)
+- Videos: [Deepia](https://www.youtube.com/watch?v=EhndHhIvWWw), [Outlier](https://www.youtube.com/watch?v=HoKDTa5jHvg), [DeepFindr](https://www.youtube.com/watch?v=a4Yfz2FxXiY)

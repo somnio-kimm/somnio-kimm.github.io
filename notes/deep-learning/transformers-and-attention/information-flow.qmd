@@ -1,0 +1,111 @@
+---
+title: Information Flow
+description: 'Signal-propagation path length: why RNNs are O(T), attention is O(1)
+  — and the O(T²) memory price you pay for it.'
+categories:
+- Transformers & Attention
+---
+
+In sequence modelling, the distance between related pieces of information is variable. For instance, in the sentence "The robot that I bought yesterday at the store near my house ran out of its battery," the noun ("robot") and its possessive pronoun ("its") are separated by 12 intermediate words.
+
+Signal-propagation path length measures how efficiently an architecture transmits a state from the past to the present.
+
+- If a model requires processing steps proportional to the distance between tokens, the path length is $\mathcal{O}(T)$ (linear).
+- If a model connects any two arbitrary tokens in a single step, regardless of distance, the path length is $\mathcal{O}(1)$ (constant).
+
+## RNNs / LSTMs
+
+In a recurrent architecture, information is processed like a chain reaction. To connect the first token ($x_{1}$) to the $T$-th token ($x_{T}$), the model must execute $T$ sequential updates to its hidden state.
+
+```{mermaid}
+graph LR
+    subgraph RNN_Chain ["RNN O(T) Sequential Chain"]
+        x1[Token x_1] --> h1((h_1))
+        x2[Token x_2] --> h2((h_2))
+        x3[Token x_3] --> h3((h_3))
+        xT[Token x_T] --> hT((h_T))
+
+        h1 -->|Step 1| h2
+        h2 -->|Step 2| h3
+        h3 -->|... Step T-1 ...| hT
+    end
+
+    style h1 fill:#f9f,stroke:#333
+    style hT fill:#f9f,stroke:#333
+```
+
+### Forward Pass
+
+Mathematically, the hidden state $\mathbf{h}$ at step $t$ is tightly bound to the immediately preceding hidden state:
+
+$$
+\mathbf{h}_t = \tanh(\mathbf{W}_{hh}\mathbf{h}_{t-1} + \mathbf{W}_{xh}\mathbf{x}_t + \mathbf{b})
+$$
+
+To compute the final state $\mathbf{h}_{T}$, one cannot bypass any prior steps. Along this path, the initial signal becomes diluted, overwritten, or distorted by the incoming contexts of the intermediate tokens.
+
+### Backward Pass
+
+During training, the model calculates how the error at the final step ($L_{T}$) is affected by the weights used at the first step. Using the chain rule, the gradient must flow backward through the exact same sequential path:
+
+$$
+\frac{\partial L_T}{\partial \mathbf{h}_1} = \frac{\partial L_T}{\partial \mathbf{h}_T} \times \frac{\partial \mathbf{h}_T}{\partial \mathbf{h}_{T-1}} \times \frac{\partial \mathbf{h}_{T-1}}{\partial \mathbf{h}_{T-2}} \times \dots \times \frac{\partial \mathbf{h}_2}{\partial \mathbf{h}_1}
+$$
+
+This long chain of matrix multiplications causes the vanishing gradient problem. If the values in the weight matrices are slightly too small, multiplying them thousands of times drives the gradient to zero. The earliest layers stop learning because the error signal never reaches them across the long $\mathcal{O}(T)$ path.
+
+## Attention
+
+The attention mechanism alters this routing topology. It eliminates the recurrent step entirely. Instead of forcing tokens to pass information down a line, attention projects every token into a fully connected computational graph within a single layer.
+
+```{mermaid}
+graph TD
+    subgraph Trans_Highway ["Transformer O(1) All-to-All Matrix Highway"]
+        x1[Token x_1]
+        x2[Token x_2]
+        x3[Token x_3]
+        xT[Token x_T]
+
+        Matrix{Attention Matrix Q · Kᵀ / √d_k}
+
+        x1 -->|Direct Vector Projection| Matrix
+        x2 -->|Direct Vector Projection| Matrix
+        x3 -->|Direct Vector Projection| Matrix
+        xT -->|Direct Vector Projection| Matrix
+
+        Matrix -->|Direct Contextualized Output| x1
+        Matrix -->|Direct Contextualized Output| x2
+        Matrix -->|Direct Contextualized Output| x3
+        Matrix -->|Direct Contextualized Output| xT
+    end
+
+    style Matrix fill:#bbf,stroke:#333,stroke-width:2px
+```
+
+During a single self-attention operation, the model calculates the attention weight matrix ($\mathbf{A}$) by computing the inner product of all queries and keys simultaneously.
+
+$$
+\mathbf{A} = \text{Softmax}\left(\frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{d_k}}\right)
+$$
+
+Entry $A_{T, 1}$ represents the direct coordination score between token $T$ and token $1$. When computing the contextualised output for token $T$, the value payload of token $1$ ($\mathbf{v}_{1}$) is scaled by $A_{T, 1}$ and added directly to the output:
+
+$$
+\mathbf{o}_T = A_{T,1}\mathbf{v}_1 + A_{T,2}\mathbf{v}_2 + \dots + A_{T,T}\mathbf{v}_T
+$$
+
+Since token $1$ and token $T$ are directly paired inside the attention matrix $A$, the step connecting them is direct, and the gradient path no longer depends on sequence length:
+
+$$
+\frac{\partial \mathbf{o}_T}{\partial \mathbf{v}_1} = A_{T,1}
+$$
+
+During backpropagation, the error signal at step $T$ steps directly across this attention highway to reach the parameters at step $1$ in a single hop ($\mathcal{O}(1)$), bypassing the vanishing-gradient problem along the sequence-length axis.
+
+## Trade-Off
+
+While reducing the path length to $\mathcal{O}(1)$ resolves the long-range dependency problem, it is bounded by a fundamental trade-off: information-routing path length vs. computational space complexity.
+
+To maintain a direct $\mathcal{O}(1)$ path between any two points, the system must compute and store the relationships for all possible pairs. For a sequence of length $T$, the attention matrix tracks a grid of $T \times T$ interactions.
+
+Deep-learning architectures traded away linear computational scaling ($\mathcal{O}(T)$) to achieve perfect, uninhibited gradient flow ($\mathcal{O}(1)$ path length). This quadratic space requirement ($\mathcal{O}(T^2)$) is the core constraint that modern hardware optimisations are designed to handle.

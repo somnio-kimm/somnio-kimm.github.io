@@ -1,0 +1,162 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - index.qmd
+    - publications.qmd
+    - talks.qmd
+    - cv.qmd
+    - notes/
+  resources:
+    - images/
+    - files/
+
+website:
+  title: "Deep Chat of Perplexity"
+  description: "Soo Min Kimm — research notes, publications, and talks."
+  site-url: "https://somnio-kimm.github.io"
+  repo-url: "https://github.com/somnio-kimm/somnio-kimm.github.io"
+  search:
+    location: navbar
+    type: overlay
+  navbar:
+    background: primary
+    pinned: true
+    left:
+      - href: index.qmd
+        text: Home
+      - href: publications.qmd
+        text: Publications
+      - href: talks.qmd
+        text: Talks
+      - href: cv.qmd
+        text: CV
+      - href: notes/index.qmd
+        text: Notes
+    right:
+      - icon: github
+        href: https://github.com/somnio-kimm
+        aria-label: GitHub
+      - icon: linkedin
+        href: https://www.linkedin.com/in/somnio-kimm/
+        aria-label: LinkedIn
+  sidebar:
+    - id: notes
+      title: "Notes"
+      style: floating
+      collapse-level: 1
+      contents:
+        - href: notes/index.qmd
+          text: "All notes"
+        - section: "Mathematics"
+          contents:
+            - section: "Linear Algebra"
+              contents:
+                - notes/mathematics/linear-algebra/row-echelon-form.qmd
+                - notes/mathematics/linear-algebra/augmented-matrix.qmd
+                - notes/mathematics/linear-algebra/coefficient-matrix.qmd
+                - notes/mathematics/linear-algebra/column-space.qmd
+                - notes/mathematics/linear-algebra/elementary-row-operation.qmd
+                - notes/mathematics/linear-algebra/gaussian-elimination.qmd
+                - notes/mathematics/linear-algebra/linear-combination.qmd
+                - notes/mathematics/linear-algebra/linear-dependence.qmd
+                - notes/mathematics/linear-algebra/linear-map.qmd
+                - notes/mathematics/linear-algebra/matrix.qmd
+                - notes/mathematics/linear-algebra/span.qmd
+                - notes/mathematics/linear-algebra/vector.qmd
+                - notes/mathematics/linear-algebra/vector-space.qmd
+                - notes/mathematics/linear-algebra/vector-subspace.qmd
+            - section: "Optimisation"
+              contents:
+                - notes/mathematics/optimisation/convex-optimisation.qmd
+                - notes/mathematics/optimisation/optimisation.qmd
+        - section: "Deep Learning"
+          contents:
+            - section: "Transformers & Attention"
+              contents:
+                - notes/deep-learning/transformers-and-attention/attention.qmd
+                - notes/deep-learning/transformers-and-attention/information-flow.qmd
+        - section: "Reinforcement Learning"
+          contents:
+            - section: "Foundations"
+              contents:
+                - notes/reinforcement-learning/foundations/bellman-equation.qmd
+                - notes/reinforcement-learning/foundations/bootstrapping.qmd
+                - notes/reinforcement-learning/foundations/k-armed-bandit-problem.qmd
+                - notes/reinforcement-learning/foundations/markov-decision-process.qmd
+                - notes/reinforcement-learning/foundations/policy-improvement-theorem.qmd
+                - notes/reinforcement-learning/foundations/probability-of-trajectory.qmd
+                - notes/reinforcement-learning/foundations/randomness-in-rl.qmd
+                - notes/reinforcement-learning/foundations/rl-terms.qmd
+            - section: "Policy Optimization"
+              contents:
+                - notes/reinforcement-learning/policy-optimization/policy-gradients.qmd
+                - notes/reinforcement-learning/policy-optimization/surrogate-objective.qmd
+            - section: "Imitation Learning"
+              contents:
+                - notes/reinforcement-learning/imitation-learning/behaviour-cloning.qmd
+                - notes/reinforcement-learning/imitation-learning/dataset-aggregation-dagger.qmd
+        - section: "Literature Review"
+          contents:
+            - section: "Vision · Detection & Segmentation"
+              contents:
+                - notes/literature-review/vision-detection-and-segmentation/detr.qmd
+                - notes/literature-review/vision-detection-and-segmentation/fast-r-cnn.qmd
+                - notes/literature-review/vision-detection-and-segmentation/faster-r-cnn.qmd
+                - notes/literature-review/vision-detection-and-segmentation/r-cnn.qmd
+                - notes/literature-review/vision-detection-and-segmentation/ssd.qmd
+                - notes/literature-review/vision-detection-and-segmentation/yolo.qmd
+            - section: "Vision · Transformers"
+              contents:
+                - notes/literature-review/vision-transformers/dino.qmd
+                - notes/literature-review/vision-transformers/vit.qmd
+            - section: "Language"
+              contents:
+                - notes/literature-review/language/bert.qmd
+                - notes/literature-review/language/llama.qmd
+            - section: "Multimodal"
+              contents:
+                - notes/literature-review/multimodal/clip.qmd
+                - notes/literature-review/multimodal/paligemma.qmd
+            - section: "Generative Models"
+              contents:
+                - notes/literature-review/generative-models/ddpm.qmd
+                - notes/literature-review/generative-models/flow-matching.qmd
+                - notes/literature-review/generative-models/normalizing-flow.qmd
+                - notes/literature-review/generative-models/score-matching.qmd
+                - notes/literature-review/generative-models/vae.qmd
+            - section: "Efficient Sequence"
+              contents:
+                - notes/literature-review/efficient-sequence/mamba.qmd
+            - section: "Training & Compression"
+              contents:
+                - notes/literature-review/training-and-compression/knowledge-distillation.qmd
+            - section: "Robot Learning (VLA)"
+              contents:
+                - notes/literature-review/robot-learning-vla/act.qmd
+                - notes/literature-review/robot-learning-vla/diffusion-policy.qmd
+                - notes/literature-review/robot-learning-vla/fast.qmd
+                - notes/literature-review/robot-learning-vla/knowledge-insulating-vla.qmd
+                - notes/literature-review/robot-learning-vla/openvla-oft.qmd
+                - notes/literature-review/robot-learning-vla/openvla.qmd
+                - notes/literature-review/robot-learning-vla/pi05.qmd
+                - notes/literature-review/robot-learning-vla/pi06.qmd
+                - notes/literature-review/robot-learning-vla/pi0.qmd
+  page-footer:
+    center: "© 2026 Soo Min Kimm · Built with [Quarto](https://quarto.org)"
+
+format:
+  html:
+    theme:
+      light: [cosmo, styles.scss]
+      dark: [darkly, styles.scss]
+    toc: true
+    toc-depth: 3
+    code-copy: true
+    code-overflow: wrap
+    highlight-style: github
+    html-math-method: mathjax
+    mermaid:
+      theme: default
+    grid:
+      sidebar-width: 320px

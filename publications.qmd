@@ -1,0 +1,19 @@
+---
+title: "Publications"
+---
+
+## Preprints
+
+**Habilis-β: A Fast-Motion and Long-Lasting On-Device Vision-Language-Action Model**
+Kang, J., Park, T., An, J., **Kimm, S. M.**, et al. (2026). *arXiv:2602.18813*.
+[arXiv](https://arxiv.org/abs/2602.18813)
+
+An on-device vision–language–action (VLA) model for fast-motion, long-duration real-world robot deployment. In 1-hour continuous-run evaluations it achieves strong performance under the PRP metrics, compared with π₀.₅ in both simulation and the real world. *(Tommoro Robotics; cs.RO / cs.LG.)*
+
+## Theses
+
+**Ionospheric Outflow: From Fundamental Theory to Modern Modeling Frameworks**
+**Kimm, S. M.** (2025). *M.S. Thesis, University of Illinois Urbana-Champaign* (Advisor: Raluca Ilie).
+[IDEALS](https://hdl.handle.net/2142/129196)
+
+My M.S. thesis examines plasma exchange between Earth and space — how charged particles escape from the ionosphere — covering theoretical foundations, modeling approaches from classical to contemporary frameworks, and mechanisms such as ambipolar electric fields and wave–particle interactions.

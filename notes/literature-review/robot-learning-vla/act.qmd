@@ -1,0 +1,45 @@
+---
+title: 'ACT: Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware'
+description: Action Chunking with Transformers — a CVAE policy that predicts chunks
+  of future actions, with temporal ensembling, on the low-cost ALOHA platform.
+categories:
+- Robot Learning (VLA)
+---
+
+Paper: [arXiv:2304.13705](https://arxiv.org/abs/2304.13705)
+
+## Introduction
+
+Fine manipulation needs precise, contact-rich, closed-loop behaviour, which is usually expensive; low-cost robots are less precise and accumulate compounding errors. Rather than modelling physics explicitly, ACT learns end-to-end from images to actions. End-to-end learning struggles with compounding errors and with non-Markovian human demonstrations (pauses, corrections). To address this, the authors propose a teleoperation system and the **Action Chunking Transformer (ACT)**, which predicts sequences of $k$ future joint positions instead of single steps.
+
+During teleoperation a sequence of $(o_t, a_t)$ is collected, where $o_t$ is the observation (camera images + proprioceptive state) and $a_t$ is the action (control command). An **action chunk** is $k$ consecutive actions $a_{t:t+k} = (a_t, a_{t+1}, \dots, a_{t+k})$. Temporal ensembling then smooths overlapping predictions.
+
+## ALOHA hardware
+
+- **Arms:** two ViperX 6-DoF arms (750 g payload, 1.5 m span, 5–8 mm accuracy).
+- **Grippers:** custom 3D-printed fingers with grip tape.
+- **Teleoperation:** leader–follower joint-space mapping.
+- **Cameras:** 4 × Logitech C922x webcams (480×640 RGB @ 50 Hz) — 2 wrist, 1 front, 1 top.
+
+## Action chunking with transformers
+
+For pixel-to-action policies, compounding errors are especially bad because trajectories are long and high-frequency. RL and imitation learning assume the environment is Markovian (the next action depends only on the current state), but human demonstrations violate this — pauses, hesitations, and grip adjustments introduce temporal correlations that depend on time itself. A standard policy $\pi_\theta(a_t \mid s_t)$ sees the same state twice (before and after a pause) but should act differently, so it struggles. **Action chunking** predicts a whole chunk $\pi_\theta(a_{t:t+k} \mid s_t)$, reducing the effective horizon by a factor of $k$ and absorbing pauses within a chunk.
+
+![ACT: action chunking predicts k future actions per step](/images/notes/act-1.png)
+
+To smooth the actions, at each step $k$ future actions are predicted, so chunks overlap. An exponential weighting $w_i = \exp(-m \cdot i)$ (where $w_0$ is the oldest action and $m$ sets the speed of incorporation) aggregates **actions predicted for the same time step** — this is **temporal ensembling** (unlike usual smoothing, which aggregates adjacent time steps).
+
+![ACT: temporal ensembling of overlapping action chunks](/images/notes/act-2.png)
+
+Human demonstrations are variable (different styles, stochasticity in low-precision regions), so the same observation maps to multiple valid action sequences; averaging them is imprecise. ACT therefore trains as a **conditional variational autoencoder (CVAE)** that models the distribution of action sequences conditioned on the current state.
+
+- The **encoder** (used only during training) takes the proprioceptive state (joint angles, no images, for speed) and the ground-truth action chunk, and outputs the mean and variance of a latent style variable $z$ (a diagonal Gaussian). The model explains demonstration variability through $z$ instead of forcing the decoder to average.
+- The **decoder** takes $z$ and the full observation (images + proprioception) and outputs the predicted action sequence. At test time there are no ground-truth actions, so the encoder is discarded.
+
+The objective maximises the log-likelihood of demonstration chunks:
+
+$$
+\min_{\theta} \; -\sum_{(s_t,\, a_{t:t+k}) \in \mathcal{D}} \log \pi_\theta(a_{t:t+k} \mid s_t)
+$$
+
+The CVAE is implemented with transformers. The encoder is BERT-like — input tokens are `[CLS]`, the current joint positions, and the target action sequence — and its `[CLS]` output predicts the mean and variance of $z$. The decoder uses ResNet-18 image encoders, a transformer encoder, and a transformer decoder: each image is encoded, proprioception and $z$ are added, the encoder fuses across modalities, and the decoder (with fixed positional embeddings, one per chunk step) cross-attends to the encoder outputs to generate the sequence. Training uses an L1 reconstruction loss on absolute joint positions.

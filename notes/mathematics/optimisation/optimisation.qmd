@@ -1,0 +1,8 @@
+---
+title: Optimisation
+description: Choosing a variable to minimise or maximise an objective subject to constraints.
+categories:
+- Optimisation
+---
+
+**Optimisation** is choosing a variable $x$ to minimise or maximise an objective $f(x)$ while satisfying constraints.

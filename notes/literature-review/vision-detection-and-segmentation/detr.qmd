@@ -1,0 +1,53 @@
+---
+title: 'DETR: End-to-End Object Detection with Transformers'
+description: Paper notes on DETR — object detection as direct set prediction with
+  bipartite matching, no anchors or NMS.
+categories:
+- Vision · Detection & Segmentation
+---
+
+Paper: [arXiv:2005.12872](https://arxiv.org/abs/2005.12872)
+
+## Objective
+
+- Sequence (e.g., machine translation): order matters.
+- Grids (e.g., CNN feature maps): position matters.
+- Sets: no inherent order, but still need a unique correspondence between predicted and true elements.
+
+Traditional detectors use anchors / proposals to impose artificial structure, and these require NMS to collapse duplicates. DETR instead predicts a *set* of objects, where each element has a class label and bounding box directly. Suppose the model outputs $N$ predictions $\hat{y} = \{ \hat{y}_{1}, \dots, \hat{y}_{N} \}$, and the ground truth has $M \leq N$ objects $y = \{ y_{1}, \dots, y_{M} \} \cup \{ \varnothing, \dots, \varnothing \}$. Each prediction is assigned to either a true object or a special "no object" slot. Since order does not matter, DETR uses bipartite matching (the Hungarian algorithm) to find the best permutation, guaranteeing a one-to-one mapping — so no duplicate detections.
+
+DETR's loss (the Hungarian loss) has a matching stage and a loss-computation stage:
+
+- **Matching stage** — assign each predicted box to exactly one ground-truth box, or $\varnothing$ if unused, via the Hungarian algorithm (optimal bipartite matching).
+- **Loss-computation stage** — after assignment, compute:
+  - Classification loss: cross-entropy for class labels, with $\varnothing$ = "no object".
+  - Box regression loss: L1 distance + generalised IoU loss.
+
+## Hungarian Matching Algorithm
+
+Given an $N \times N$ cost matrix:
+
+1. Subtract the minimum entry from each row.
+2. Subtract the minimum entry from each column.
+3. Find the minimum number of lines that cross out all zeros in the table.
+4. If $N$ lines are used, a zero-cost assignment exists.
+5. If not, find the minimum entry among those not crossed out.
+6. Subtract it from all uncrossed entries, and add it to entries crossed by two lines.
+7. Repeat until a zero-cost assignment is found.
+
+## Architecture
+
+![DETR architecture overview](/images/notes/detr-1.png)
+
+![DETR transformer encoder–decoder detail](/images/notes/detr-2.png)
+
+DETR = CNN backbone + transformer encoder–decoder + prediction heads.
+
+- **Backbone** — ResNet-50 or ResNet-101, producing a feature map.
+- **Transformer encoder** — encodes global context (every pixel attends to every other) across multiple layers of multi-head self-attention + feed-forward networks, outputting a sequence of contextualised embeddings.
+- **Transformer decoder** — $N$ learned object queries (each a learned embedding representing a slot for an object) pass through multiple layers:
+  - Self-attention: queries interact with each other to avoid duplicates.
+  - Cross-attention: queries attend to the encoder's output features.
+
+  It outputs $N$ embeddings, each intended to predict one object.
+- **Prediction heads (FFNs)** — predict the bounding box; a linear classifier head with softmax predicts the object class (or "no object", $\varnothing$).

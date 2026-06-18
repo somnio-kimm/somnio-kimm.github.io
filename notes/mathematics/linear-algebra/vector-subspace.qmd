@@ -1,0 +1,23 @@
+---
+title: Vector Subspace
+description: Subsets closed under the vector-space operations, and the basic subspace
+  theorems.
+categories:
+- Linear Algebra
+---
+
+A **vector subspace** of $V$ is a subset $W \subseteq V$ that is closed under the operations of $V$:
+
+1. $\mathbf{0} \in W$
+2. $\mathbf{v} + \mathbf{w} \in W$ for all $\mathbf{v}, \mathbf{w} \in W$
+3. $a\mathbf{v} \in W$ for all $a \in F$ and $\mathbf{v} \in W$
+
+**Example.** $C(\mathbb{R}) = \{\text{continuous } \mathbb{R} \to \mathbb{R}\} \subseteq \mathbb{R}^{\mathbb{R}}$ is a subspace: the zero function is continuous, and sums and scalar multiples of continuous functions are continuous.
+
+**Theorem.** If $W \subseteq V$ is a subspace, then $W$ — with the operations restricted from $V$ — is itself a vector space. The commutativity, associativity, and scalar axioms are inherited from $V$; $\mathbf{0} \in W$ supplies the identity, and $-\mathbf{v} = (-1)\mathbf{v} \in W$ supplies inverses.
+
+**Corollary.** For any $V$, both the zero subspace $\{\mathbf{0}\}$ and $V$ itself are subspaces.
+
+**Subspaces of $\mathbb{R}^2$.** There are only three types: the zero subspace $\{\mathbf{0}\}$, a line through the origin, and all of $\mathbb{R}^2$.
+
+**Theorem.** An arbitrary intersection of subspaces is a subspace: if $W_i \subseteq V$ are subspaces for $i \in I$, then $\bigcap_{i \in I} W_i$ contains $\mathbf{0}$ and is closed under addition and scalar multiplication (since each $W_i$ is), so it is a subspace.

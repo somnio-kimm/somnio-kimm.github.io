@@ -1,0 +1,45 @@
+---
+title: 'π0.5: A Vision-Language-Action Model with Open-World Generalisation'
+description: A hierarchical VLA that jointly predicts a high-level subtask and a low-level
+  action chunk, co-trained on heterogeneous data with hybrid discrete+continuous actions.
+categories:
+- Robot Learning (VLA)
+---
+
+Paper: [arXiv:2504.16054](https://arxiv.org/abs/2504.16054)
+
+![π0.5: hierarchical high-level subtask + low-level action prediction in one transformer](/images/notes/pi05-1.png)
+
+π0.5 learns a joint distribution $\pi_{\theta}(\mathbf{a}_{t:t+H}, \hat{\ell} \mid \mathbf{o}_{t}, \ell)$ over a predicted **text output** $\hat{\ell}$ (e.g. a subtask "pick up the plate", or a VQA answer) and a **continuous action chunk** $\mathbf{a}_{t:t+H}$, conditioned on the observation $\mathbf{o}_{t}$ and high-level instruction $\ell$. It splits inference into two levels:
+
+- **High-level policy** $\pi_{\theta}(\hat{\ell} \mid \mathbf{o}_{t}, \ell)$ — predicts the next subtask/text given the scene and prompt.
+- **Low-level policy** $\pi_{\theta}(\mathbf{a}_{t:t+H} \mid \mathbf{o}_{t}, \hat{\ell})$ — predicts the action sequence conditioned only on the inferred subtask $\hat{\ell}$ (not the original prompt).
+
+Both are one shared transformer over multimodal tokens $x_{1:N}$, where each $x_i$ is a text token, an image patch, or an action token (proprioceptive state is discretised into text tokens). A routing function $\rho$ decides which encoder/expert weights to use: image patches → vision encoder; text → embedding matrix; actions → linear projection + a separate action expert. Outputs split into text logits $y^{\ell}_{1:M}$ and action outputs $y^{a}_{1:H}$.
+
+**Why hybrid discrete + continuous actions:**
+
+| Representation | Pros | Cons |
+|---|---|---|
+| **Discrete (FAST)** | Scales well — billions of examples via cross-entropy / next-token prediction | Slow autoregressive inference; not smooth (quantisation) |
+| **Continuous (flow matching)** | Fast, parallelisable ODE inference; smooth control | Slower, less stable training at massive scale |
+
+π0.5 trains on **both** to get the best of each. The loss is
+
+$$
+\mathbb{E}_{\mathcal{D}, \tau, \omega}\Big[ H\big(x_{1:M}, f^{\ell}_{\theta}(\mathbf{o}_{t}, \ell)\big) + \alpha\, \big\| \omega - \mathbf{a}_{t:t+H} - f^{a}_{\theta}(\mathbf{a}^{\tau,\omega}_{t:t+H}, \mathbf{o}_{t}, \ell) \big\|^{2} \Big]
+$$
+
+with the noisy interpolation $\mathbf{a}^{\tau,\omega}_{t:t+H} = \tau\,\mathbf{a}_{t:t+H} + (1-\tau)\omega$, $\omega \sim \mathcal{N}(0, I)$, and target field $u = \omega - \mathbf{a}_{t:t+H}$. During pre-training $\alpha = 0$ (discrete tokens only); during post-training $\alpha > 0$ (continuous too). Discrete and continuous tokens use **separate attention masks**, so information doesn't leak across representations.
+
+**Co-training** mixes heterogeneous sources: diverse mobile-manipulator data (MM), multi-environment / cross-embodiment robot data (ME/CE), high-level subtask prediction (HL), multimodal web data (WD: captioning, VQA, localisation), and verbal instruction data (VI).
+
+**π0 vs. π0.5:**
+
+| Aspect | π0 | π0.5 |
+|---|---|---|
+| Action modelling | Continuous only (flow matching) | Hybrid: discrete (FAST) + continuous |
+| Objective | $\mathcal{L}_\tau(\theta) = \mathbb{E}\|v_\theta - u\|^2$ | CE + α·flow |
+| Training schedule | Single-stage | Two-stage (token pretrain → flow posttrain) |
+| Attention | Shared across all tokens | Separated via attention mask |
+| Inference | Flow denoising only | Text decode + flow denoising (~10 steps) |

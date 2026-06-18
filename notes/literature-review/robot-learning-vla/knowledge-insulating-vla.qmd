@@ -1,0 +1,52 @@
+---
+title: 'Knowledge Insulating Vision-Language-Action Models: Train Fast, Run Fast,
+  Generalise Better'
+description: Train a VLA with both a discrete (FAST) and a continuous (flow-matching)
+  action path, insulating the VLM backbone from the action expert's gradients.
+categories:
+- Robot Learning (VLA)
+---
+
+![Knowledge insulation: FAST discrete path as representation learner, flow-matching expert as controller](/images/notes/knowledge-insulation-1.png)
+
+Discrete models are slow at inference; continuous models are slow to train and prone to forgetting their language knowledge. **Knowledge insulation** combines the best of both: an autoregressive FAST model as a representation learner, and a flow-matching expert as the final controller.
+
+## Training
+
+The model predicts the same action in two formats simultaneously:
+
+$$
+\begin{alignat*}{2}
+\mathcal{L}_{\text{AR-VLA}}(\theta) &= \mathbb{E}_{(x,y) \sim \mathcal{D}}\big[-\log p_\theta(y_{1:n} \mid x_{1:n})\big] = \mathbb{E}_{(x,y)\sim\mathcal{D}}\Big[-\sum_{j=1}^{n-1} M_j \log p_\theta(y_{j+1} \mid x_{1:j})\Big] \\
+\mathcal{L}_{\text{FLOW-VLA}}(\theta) &= \mathbb{E}_{\mathcal{D},\tau,\omega}\big[\, \| \omega - a_{1:H} - f^a(a_{1:H}^{\tau,\omega}) \|^2 \,\big] \\
+\mathcal{L}_{\text{CO-VLA}}(\theta) &= \mathbb{E}_{\mathcal{D},\tau,\omega}\Big[-\sum_{j=1}^{n-1} M_j^\ell \log p_\theta(\hat{\ell}_{j+1} \mid x_{1:j}) + \alpha\, M^{\text{act}} \| \omega - a_{1:H} - f_\theta^a(a_{1:H}^{\tau,\omega}) \|^2 \Big]
+\end{alignat*}
+$$
+
+- **Discrete path (FAST):** predict actions as discrete tokens via the FAST tokeniser, optimised by next-token cross-entropy.
+- **Continuous path (flow matching):** an action-expert module predicts the continuous flow for the same chunk, optimised by a flow-matching loss.
+
+Training a continuous expert from scratch is hard (noisy, slow-converging gradients); additionally requiring FAST-token prediction makes the VLM backbone quickly learn rich, structured action representations.
+
+## Knowledge insulation
+
+To stop the noisy, untrained action expert from damaging the VLM's pre-trained knowledge, **insulation blocks the flow-matching gradients from reaching the backbone** — the backbone learns only from the FAST discrete loss and general VLM data. Tokens are partitioned into **backbone tokens** $X_b$ (image patches, language, state) and **action-expert tokens** $X_a$ (noisy continuous action inputs). The attention probability matrix is block-triangular:
+
+$$
+P = \mathrm{softmax}\!\big(Q(X)K(X)^\top + A\big) = \begin{pmatrix} P_{bb} & 0 \\ P_{ab} & P_{aa} \end{pmatrix} = \mathrm{softmax}\begin{pmatrix} Q_b(X_b)K_b(X_b)^\top & -\infty \\ Q_a(X_a)\,\mathrm{sg}(K_b(X_b)^\top) & Q_a(X_a)K_a(X_a)^\top \end{pmatrix}
+$$
+
+where $P_{bb}, P_{aa}$ are backbone/expert self-attention, $P_{ab}$ is the expert attending to the backbone, and $P_{ba} = 0$ blocks the backbone from attending to the expert. The backbone key $K_b$ is wrapped in a stop-gradient $\mathrm{sg}(\cdot)$, so the expert's gradients stop at the expert's weights. The backbone values are likewise stop-gradiented when read by the expert:
+
+$$
+E_a = P_{ab}\,\mathrm{sg}(V_b(X_b)) + P_{aa} V_a(X_a)
+$$
+
+## Inference
+
+At test time the model ignores the discrete FAST tokens and uses the action expert to generate a continuous chunk in one flow-integration pass — faster and more precise.
+
+## Pros & cons
+
+- **Pros:** inference speed (the flow expert bypasses sequential token decoding); superior language following (the insulated backbone retains its instruction understanding).
+- **Cons:** higher training memory (two action heads); architectural complexity (custom blocked-attention mask + stop-gradient).

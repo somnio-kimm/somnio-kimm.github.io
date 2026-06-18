@@ -1,0 +1,14 @@
+---
+title: Bootstrapping
+description: 'The nonparametric bootstrap: approximating a statistic''s sampling distribution
+  by resampling the empirical distribution with replacement.'
+categories:
+- Foundations
+---
+
+- **Parametric:** assume the data come from a distribution with a specific functional form, described by a finite number of parameters — e.g. $X_{1}, \dots, X_{n} \sim \mathcal{N}(\mu, \sigma^{2})$ is fully characterised by $\mu$ and $\sigma$.
+- **Nonparametric:** do not assume a specific finite-dimensional distributional form for the population.
+
+Bootstrapping is a nonparametric resampling method for approximating the sampling distribution of a statistic by repeatedly drawing samples, with replacement, from the empirical distribution of the observed data.
+
+Suppose the observed sample is $X_{1}, \dots, X_{n} \sim F$, where $F$ is an unknown population distribution, and the parameter of interest is estimated by a statistic $\hat{\theta} = t(X_{1}, \dots, X_{n})$. Because the true sampling distribution of $\hat{\theta}$ is unknown, the bootstrap replaces $F$ with the empirical distribution $\hat{F}_{n}$, which assigns mass $\tfrac{1}{n}$ to each observed data point. One then draws bootstrap samples $X_{1}^{*}, \dots, X_{n}^{*} \sim \hat{F}_{n}$ independently with replacement, and computes the corresponding bootstrap replicate $\hat{\theta}^{*} = t(X_{1}^{*}, \dots, X_{n}^{*})$. The conditional distribution of $\hat{\theta}^{*}$ given the observed data is used as an approximation to the sampling distribution of $\hat{\theta}$.

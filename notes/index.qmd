@@ -1,0 +1,14 @@
+---
+title: "Notes"
+subtitle: "A wiki of deep-learning, reinforcement-learning, and the papers I read."
+listing:
+  contents: "**/*.qmd"
+  type: grid
+  sort: "title"
+  categories: true
+  filter-ui: true
+  sort-ui: true
+  fields: [title, description, categories]
+---
+
+Browse by area in the sidebar, or filter the full set below.

@@ -1,0 +1,73 @@
+---
+title: Markov Decision Process
+description: The MDP formalism — agent, environment, policy, transition dynamics,
+  returns, and the state/action value functions.
+categories:
+- Foundations
+---
+
+![Agent–environment interaction loop in a Markov decision process](/images/notes/markov-decision-process-1.png)
+
+A **Markov decision process (MDP)** formalises the interaction between an agent and its environment.
+
+## Agent
+
+The learner or decision-maker; everything inside the agent is assumed known and controllable.
+
+**Policy $\pi(a \mid s)$** — a rule that determines which action the agent selects in each state:
+
+$$
+\pi(a \mid s) = P(A_{t} = a \mid S_{t} = s)
+$$
+
+- Deterministic: $a = f(s)$
+- Stochastic: probabilities over actions
+
+## Environment
+
+Everything outside the agent that it interacts with — only partially controllable, and possibly unknown.
+
+**Transition probability $p(s', r \mid s, a)$** — the probability that action $a$ in state $s$ leads to $s', r$:
+
+$$
+p(s', r \mid s, a) = P(S_{t+1}=s', R_t=r \mid S_{t}=s, A_{t}=a)
+$$
+
+- Model-based: learn or use $p(s', r \mid s, a)$
+- Model-free: learn directly from experience
+
+## Core quantities
+
+- **State $s$** — the information available to the agent when making a decision.
+- **Action $a$** — a choice made by the agent.
+- **Reward $R_{t}$** — a signal used to evaluate the agent's action.
+- **Trajectory $\tau = (s_{0}, a_{0}, r_{0}, s_{1}, a_{1}, r_{1}, \dots)$** — one full episode.
+- **Return $G_{t}$** — the total future reward the agent tries to maximise:
+
+$$
+G_{t} = R_{t+1} + \gamma R_{t+2} + \gamma^{2} R_{t+3} + \dots = R_{t+1} + \gamma G_{t+1}
+$$
+
+The discount $\gamma$ comes from uncertainty about the future, a preference for immediate reward, and mathematical convergence.
+
+## Value functions
+
+**State value** $v_{\pi}(s) = \mathbb{E}_{\pi}[G_{t} \mid S_{t} = s]$ — the expected return from a state under policy $\pi$:
+
+1. Start at state $S_{t} = s$.
+2. Repeatedly sample actions $a \sim \pi(\cdot \mid s)$ and next states $s' \sim p(\cdot \mid s, a)$.
+3. Produce a random future trajectory.
+4. Average the return over that randomness.
+
+**Action value** $q_{\pi}(s, a) = \mathbb{E}[G_{t} \mid S_{t} = s, A_{t} = a]$ — the expected return from taking a specific action in a state and then following $\pi$:
+
+1. Start at $S_{t} = s$, $A_{t} = a$.
+2. Repeatedly sample $s' \sim p(\cdot \mid s, a)$ and $a_{t+1} \sim \pi(\cdot \mid s')$.
+3. Produce a random future trajectory.
+4. Average the return over that randomness.
+
+**Advantage** $A_{\pi}(s, a) = q_{\pi}(s, a) - v_{\pi}(s)$ — reduces variance in learning by removing broad state-level noise and focusing on the relative usefulness of an action.
+
+## Summary
+
+An MDP formally describes how (1) states change over time, (2) actions influence those transitions, (3) rewards are produced, and (4) future outcomes depend on the current state and action. A finite MDP has a finite number of states, actions, and rewards.
