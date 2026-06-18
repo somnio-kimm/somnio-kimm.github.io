@@ -32,11 +32,19 @@
   .page__content img { max-width: 100%; height: auto; }
   .page__content figure { margin: 1.5em auto; }
   .page__content figcaption { font-size: 0.8em; text-align: center; opacity: 0.8; }
+  /* Notes wiki sidebar: collapsible tree with a clear group -> subgroup -> note indentation staircase. */
   .nav__list summary { cursor: pointer; font-weight: bold; }
   .nav__list details { margin-bottom: 0.35em; }
-  .nav__subgroup > summary { font-weight: normal; opacity: 0.85; margin-left: 0.4em; }
-  .nav__subgroup ul { margin-left: 0.4em; }
-  @media (min-width: 64em) { .nav__notes { max-height: calc(100vh - 3em); overflow-y: auto; } }
+  .nav__notes ul { margin: 0; padding: 0; list-style: none; }
+  .nav__notes > ul > li > details > summary { margin-left: 0; }                 /* level 1: group */
+  .nav__subgroup { margin-left: 1em; padding-left: 0.55em; border-left: 1px solid rgba(128, 128, 128, 0.3); }
+  .nav__subgroup > summary { font-weight: normal; opacity: 0.85; }              /* level 2: subgroup */
+  .nav__subgroup > ul { margin-left: 0.9em; }                                   /* level 3: notes */
+  .nav__subgroup > ul > li > a { display: block; padding: 0.1em 0; }
+  /* Keep the whole sidebar within the viewport so its bottom isn't hidden under the footer. */
+  @media (min-width: 925px) {
+    .sidebar.sticky { height: calc(100vh - 4em); overflow-y: auto; overscroll-behavior: contain; }
+  }
 </style>
 
 <!-- LaTeX via MathJax v3 (no ES6 polyfill needed; previous polyfill line removed). -->
