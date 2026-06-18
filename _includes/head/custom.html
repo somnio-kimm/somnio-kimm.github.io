@@ -41,9 +41,20 @@
   .nav__subgroup > summary { font-weight: normal; opacity: 0.85; }              /* level 2: subgroup */
   .nav__subgroup > ul { margin-left: 0.9em; }                                   /* level 3: notes */
   .nav__subgroup > ul > li > a { display: block; padding: 0.1em 0; }
-  /* Keep the whole sidebar within the viewport so its bottom isn't hidden under the footer. */
+  /* Sidebar: use sticky (not the theme's position:fixed) so a tall sidebar stays in flow and
+     the footer is pushed below it instead of painting over its bottom. Bounded to the viewport
+     and internally scrollable so every item is reachable. */
   @media (min-width: 925px) {
-    .sidebar.sticky { height: calc(100vh - 4em); overflow-y: auto; overscroll-behavior: contain; }
+    .sidebar.sticky {
+      position: -webkit-sticky;
+      position: sticky;
+      top: 70px;                       /* sit just below the fixed 70px masthead */
+      height: auto;
+      max-height: calc(100vh - 80px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-top: 0;
+    }
   }
 </style>
 
