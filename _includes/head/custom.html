@@ -34,6 +34,9 @@
   .page__content figcaption { font-size: 0.8em; text-align: center; opacity: 0.8; }
   .nav__list summary { cursor: pointer; font-weight: bold; }
   .nav__list details { margin-bottom: 0.35em; }
+  .nav__subgroup > summary { font-weight: normal; opacity: 0.85; margin-left: 0.4em; }
+  .nav__subgroup ul { margin-left: 0.4em; }
+  @media (min-width: 64em) { .nav__notes { max-height: calc(100vh - 3em); overflow-y: auto; } }
 </style>
 
 <!-- LaTeX via MathJax v3 (no ES6 polyfill needed; previous polyfill line removed). -->

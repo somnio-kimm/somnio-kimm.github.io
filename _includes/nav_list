@@ -1,48 +1,66 @@
 {% include base_path %}
-{% assign navigation = site.data.navigation[include.nav] %}
 
-<nav class="nav__list">
-  {% if page.sidebar.title %}<header><h4 class="nav__title" style="padding: 0;">{{ page.sidebar.title }}</h4></header>{% endif %}
-  <ul>
-    {% for nav in navigation %}
-      <li>
-        {% if nav.children != null %}
-          {% comment %}collapsible group; open it if the current page is one of its children{% endcomment %}
-          {% assign group_active = false %}
-          {% for child in nav.children %}
-            {% if child.url == page.url %}{% assign group_active = true %}{% endif %}
-          {% endfor %}
-          <details{% if group_active %} open{% endif %}>
-            <summary class="nav__sub-title">{{ nav.title }}</summary>
-            <ul>
-              {% for child in nav.children %}
-                {% if child.url contains "://" %}
-                  {% assign domain = "" %}
-                {% else %}
-                  {% assign domain = base_path %}
+{% if include.nav == "notes" %}
+  {% comment %}Dynamic 3-level collapsible wiki nav: group -> subgroup -> notes.
+     Collapsed by default; the path to the current note is auto-opened.{% endcomment %}
+  {% assign groups = "Mathematics,Deep Learning,Reinforcement Learning,Literature Review" | split: "," %}
+  {% assign suborder = "Linear Algebra,Optimisation,Transformers & Attention,Glossary,Foundations,Policy Optimization,Imitation Learning,Vision · Backbones,Vision · Detection & Segmentation,Vision · Transformers,Language,Multimodal,Efficient Sequence,Robot Learning (VLA)" | split: "," %}
+  <nav class="nav__list nav__notes">
+    <ul>
+      {% for g in groups %}
+        {% assign gnotes = site.notes | where: "category", g %}
+        {% if gnotes.size > 0 %}
+          {% assign gactive = false %}
+          {% for n in gnotes %}{% if n.url == page.url %}{% assign gactive = true %}{% endif %}{% endfor %}
+          <li>
+            <details{% if gactive %} open{% endif %}>
+              <summary class="nav__sub-title">{{ g }}</summary>
+              {% for sub in suborder %}
+                {% assign snotes = gnotes | where: "subcategory", sub | sort: "title" %}
+                {% if snotes.size > 0 %}
+                  {% assign sactive = false %}
+                  {% for n in snotes %}{% if n.url == page.url %}{% assign sactive = true %}{% endif %}{% endfor %}
+                  <details class="nav__subgroup"{% if sactive %} open{% endif %}>
+                    <summary>{{ sub }}</summary>
+                    <ul>
+                      {% for n in snotes %}
+                        <li><a href="{{ base_path }}{{ n.url }}"{% if n.url == page.url %} class="active"{% endif %}>{{ n.title }}</a></li>
+                      {% endfor %}
+                    </ul>
+                  </details>
                 {% endif %}
-                {% if child.url == page.url %}
-                  {% assign active = "active" %}
-                {% else %}
-                  {% assign active = "" %}
-                {% endif %}
-                <li><a href="{{ domain }}{{ child.url }}" class="{{ active }}">{{ child.title }}</a></li>
               {% endfor %}
-            </ul>
-          </details>
-        {% else %}
+            </details>
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </nav>
+
+{% else %}
+  {% assign navigation = site.data.navigation[include.nav] %}
+  <nav class="nav__list">
+    {% if page.sidebar.title %}<header><h4 class="nav__title" style="padding: 0;">{{ page.sidebar.title }}</h4></header>{% endif %}
+    <ul>
+      {% for nav in navigation %}
+        <li>
           {% if nav.url %}
-            {% if nav.url contains "://" %}
-              {% assign domain = "" %}
-            {% else %}
-              {% assign domain = base_path %}
-            {% endif %}
+            {% if nav.url contains "://" %}{% assign domain = "" %}{% else %}{% assign domain = base_path %}{% endif %}
             <a href="{{ domain }}{{ nav.url }}"><span class="nav__sub-title">{{ nav.title }}</span></a>
           {% else %}
             <span class="nav__sub-title">{{ nav.title }}</span>
           {% endif %}
-        {% endif %}
-      </li>
-    {% endfor %}
-  </ul>
-</nav>
+          {% if nav.children != null %}
+            <ul>
+              {% for child in nav.children %}
+                {% if child.url contains "://" %}{% assign domain = "" %}{% else %}{% assign domain = base_path %}{% endif %}
+                {% if child.url == page.url %}{% assign active = "active" %}{% else %}{% assign active = "" %}{% endif %}
+                <li><a href="{{ domain }}{{ child.url }}" class="{{ active }}">{{ child.title }}</a></li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </nav>
+{% endif %}
