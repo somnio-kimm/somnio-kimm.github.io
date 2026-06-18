@@ -28,3 +28,106 @@ main:
     
   # - title: "Guide"
   #   url: /markdown/
+
+# Sidebar navigation for the /notes wiki (auto-generated)
+notes:
+  - title: "Mathematics"
+    url: /notes/mathematics/
+    children:
+      - title: "(Reduced) Row Echelon Form"
+        url: /notes/mathematics/row-echelon-form/
+      - title: "Augmented Matrix"
+        url: /notes/mathematics/augmented-matrix/
+      - title: "Coefficient Matrix"
+        url: /notes/mathematics/coefficient-matrix/
+      - title: "Column Space"
+        url: /notes/mathematics/column-space/
+      - title: "Convex Optimisation"
+        url: /notes/mathematics/convex-optimisation/
+      - title: "Elementary Row Operation"
+        url: /notes/mathematics/elementary-row-operation/
+      - title: "Gaussian Elimination"
+        url: /notes/mathematics/gaussian-elimination/
+      - title: "Linear Combination"
+        url: /notes/mathematics/linear-combination/
+      - title: "Linear Dependence"
+        url: /notes/mathematics/linear-dependence/
+      - title: "Linear Map"
+        url: /notes/mathematics/linear-map/
+      - title: "Matrix"
+        url: /notes/mathematics/matrix/
+      - title: "Optimisation"
+        url: /notes/mathematics/optimisation/
+      - title: "Span"
+        url: /notes/mathematics/span/
+      - title: "Vector"
+        url: /notes/mathematics/vector/
+      - title: "Vector Space"
+        url: /notes/mathematics/vector-space/
+      - title: "Vector Subspace"
+        url: /notes/mathematics/vector-subspace/
+  - title: "Deep Learning"
+    url: /notes/deep-learning/
+    children:
+      - title: "Attention"
+        url: /notes/deep-learning/attention/
+      - title: "Information Flow"
+        url: /notes/deep-learning/information-flow/
+      - title: "Jargon"
+        url: /notes/deep-learning/jargon/
+  - title: "Reinforcement Learning"
+    url: /notes/reinforcement-learning/
+    children:
+      - title: "Behaviour Cloning"
+        url: /notes/reinforcement-learning/behaviour-cloning/
+      - title: "Bellman Equation"
+        url: /notes/reinforcement-learning/bellman-equation/
+      - title: "Bootstrapping"
+        url: /notes/reinforcement-learning/bootstrapping/
+      - title: "Dataset Aggregation (DAgger)"
+        url: /notes/reinforcement-learning/dataset-aggregation-dagger/
+      - title: "k-armed Bandit Problem"
+        url: /notes/reinforcement-learning/k-armed-bandit-problem/
+      - title: "Markov Decision Process"
+        url: /notes/reinforcement-learning/markov-decision-process/
+      - title: "Policy Gradients"
+        url: /notes/reinforcement-learning/policy-gradients/
+      - title: "Policy Improvement Theorem"
+        url: /notes/reinforcement-learning/policy-improvement-theorem/
+      - title: "Probability of a Trajectory"
+        url: /notes/reinforcement-learning/probability-of-trajectory/
+      - title: "Randomness in Reinforcement Learning"
+        url: /notes/reinforcement-learning/randomness-in-rl/
+      - title: "Reinforcement Learning Terms"
+        url: /notes/reinforcement-learning/rl-terms/
+      - title: "Surrogate Objective"
+        url: /notes/reinforcement-learning/surrogate-objective/
+  - title: "Literature Review"
+    url: /notes/literature-review/
+    children:
+      - title: "ACT: Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware"
+        url: /notes/literature-review/act/
+      - title: "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding"
+        url: /notes/literature-review/bert/
+      - title: "CLIP: Learning Transferable Visual Models from Natural Language Supervision"
+        url: /notes/literature-review/clip/
+      - title: "DETR: End-to-End Object Detection with Transformers"
+        url: /notes/literature-review/detr/
+      - title: "Diffusion Policy: Visuomotor Policy Learning via Action Diffusion"
+        url: /notes/literature-review/diffusion-policy/
+      - title: "DINO: Emerging Properties in Self-Supervised Vision Transformers"
+        url: /notes/literature-review/dino/
+      - title: "FAST: Efficient Action Tokenisation for Vision-Language-Action Models"
+        url: /notes/literature-review/fast/
+      - title: "Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks"
+        url: /notes/literature-review/faster-r-cnn/
+      - title: "Knowledge Insulating Vision-Language-Action Models: Train Fast, Run Fast, Generalise Better"
+        url: /notes/literature-review/knowledge-insulating-vla/
+      - title: "PaliGemma: A Versatile 3B VLM for Transfer"
+        url: /notes/literature-review/paligemma/
+      - title: "R-CNN: Rich Feature Hierarchies for Accurate Object Detection and Semantic Segmentation"
+        url: /notes/literature-review/r-cnn/
+      - title: "ViT: An Image is Worth 16×16 Words"
+        url: /notes/literature-review/vit/
+      - title: "YOLO: Unified, Real-Time Object Detection"
+        url: /notes/literature-review/yolo/

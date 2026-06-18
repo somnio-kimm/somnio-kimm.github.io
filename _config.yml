@@ -258,6 +258,8 @@ defaults:
       toc_sticky: true
       share: false
       comments: false
+      sidebar:
+        nav: "notes"
   # _pages
   - scope:
       path: ""
