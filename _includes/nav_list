@@ -6,39 +6,41 @@
   <ul>
     {% for nav in navigation %}
       <li>
-        {% if nav.url %}
-          {% comment %}internal/external URL check{% endcomment %}
-          {% if nav.url contains "://" %}
-            {% assign domain = "" %}
-          {% else %}
-            {% assign domain = base_path %}
-          {% endif %}
-
-          <a href="{{ domain }}{{ nav.url }}"><span class="nav__sub-title">{{ nav.title }}</span></a>
-        {% else %}
-          <span class="nav__sub-title">{{ nav.title }}</span>
-        {% endif %}
-
         {% if nav.children != null %}
-        <ul>
+          {% comment %}collapsible group; open it if the current page is one of its children{% endcomment %}
+          {% assign group_active = false %}
           {% for child in nav.children %}
-            {% comment %}internal/external URL check{% endcomment %}
-            {% if child.url contains "://" %}
+            {% if child.url == page.url %}{% assign group_active = true %}{% endif %}
+          {% endfor %}
+          <details{% if group_active %} open{% endif %}>
+            <summary class="nav__sub-title">{{ nav.title }}</summary>
+            <ul>
+              {% for child in nav.children %}
+                {% if child.url contains "://" %}
+                  {% assign domain = "" %}
+                {% else %}
+                  {% assign domain = base_path %}
+                {% endif %}
+                {% if child.url == page.url %}
+                  {% assign active = "active" %}
+                {% else %}
+                  {% assign active = "" %}
+                {% endif %}
+                <li><a href="{{ domain }}{{ child.url }}" class="{{ active }}">{{ child.title }}</a></li>
+              {% endfor %}
+            </ul>
+          </details>
+        {% else %}
+          {% if nav.url %}
+            {% if nav.url contains "://" %}
               {% assign domain = "" %}
             {% else %}
               {% assign domain = base_path %}
             {% endif %}
-
-            {% comment %}set "active" class on current page{% endcomment %}
-            {% if child.url == page.url %}
-              {% assign active = "active" %}
-            {% else %}
-              {% assign active = "" %}
-            {% endif %}
-
-            <li><a href="{{ domain }}{{ child.url }}" class="{{ active }}">{{ child.title }}</a></li>
-          {% endfor %}
-        </ul>
+            <a href="{{ domain }}{{ nav.url }}"><span class="nav__sub-title">{{ nav.title }}</span></a>
+          {% else %}
+            <span class="nav__sub-title">{{ nav.title }}</span>
+          {% endif %}
         {% endif %}
       </li>
     {% endfor %}

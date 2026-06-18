@@ -32,6 +32,8 @@
   .page__content img { max-width: 100%; height: auto; }
   .page__content figure { margin: 1.5em auto; }
   .page__content figcaption { font-size: 0.8em; text-align: center; opacity: 0.8; }
+  .nav__list summary { cursor: pointer; font-weight: bold; }
+  .nav__list details { margin-bottom: 0.35em; }
 </style>
 
 <!-- LaTeX via MathJax v3 (no ES6 polyfill needed; previous polyfill line removed). -->
@@ -66,11 +68,11 @@
   var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'default', securityLevel: 'strict' });
   document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('div.language-mermaid').forEach(function (el) {
+    document.querySelectorAll('code.language-mermaid, div.language-mermaid').forEach(function (el) {
       var pre = document.createElement('pre');
       pre.className = 'mermaid';
       pre.textContent = el.textContent;
-      el.replaceWith(pre);
+      (el.closest('div.language-mermaid') || el.closest('pre') || el).replaceWith(pre);
     });
     mermaid.run({ querySelector: 'pre.mermaid' });
   });
