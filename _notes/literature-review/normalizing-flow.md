@@ -1,0 +1,43 @@
+---
+title: "Normalizing Flows: Variational Inference with Normalizing Flows"
+category: "Literature Review"
+subcategory: "Generative Models"
+excerpt: "Map a simple base distribution to data through a composition of invertible maps; the change-of-variables formula gives exact log-likelihoods."
+tags:
+  - ML
+  - DL
+  - Generative Models
+  - Normalizing Flows
+  - Paper Notes
+---
+
+## Objective
+
+A normalising flow learns an **invertible** transformation between a simple, tractable base distribution (e.g. $\mathcal{N}(0,I)$) and a complex data distribution. Let $f_\theta:\mathbb{R}^d\to\mathbb{R}^d$ be a bijection with $x = f_\theta(z)$ and $z = f_\theta^{-1}(x)$. Because $f_\theta$ is invertible and differentiable, the **change-of-variables** formula gives *exact* data log-likelihoods:
+
+$$
+p_X(x) = p_Z\big(f_\theta^{-1}(x)\big)\,\Big|\det \tfrac{\partial f_\theta^{-1}(x)}{\partial x}\Big| = p_Z(z)\,\Big|\det \tfrac{\partial f_\theta(z)}{\partial z}\Big|^{-1}.
+$$
+
+This yields a tractable maximum-likelihood objective — no adversarial training, no approximate posterior. Unlike diffusion (many noising/denoising steps) or flow matching (a continuous velocity field), a standard normalising flow commits to explicit, finite-depth invertible maps and computes log-likelihoods exactly.
+
+## Derivation
+
+Taking logs,
+
+$$
+\log p_X(x) = \log p_Z\big(f_\theta^{-1}(x)\big) - \log\Big|\det J_{f_\theta}\big(f_\theta^{-1}(x)\big)\Big|,
+$$
+
+so the training objective is $\max_\theta \mathbb{E}\big[\log p_X(x)\big]$. In practice $f_\theta = f_K \circ f_{K-1} \circ \cdots \circ f_1$ is a composition of $K$ simple bijections:
+
+$$
+\log p_X(x) = \log p_Z(z_0) - \sum_{k=1}^{K}\log\Big|\det J_{f_k}(z_{k-1})\Big|.
+$$
+
+Computing $d\times d$ Jacobian determinants is expensive, so the maps are designed so that the resulting Jacobian has special structure (e.g. **triangular**), making the determinant cheap.
+
+## References
+
+- [arXiv:1505.05770](https://arxiv.org/abs/1505.05770)
+- [Video — Ari Seff](https://www.youtube.com/watch?v=i7LjDvsLWCg)
