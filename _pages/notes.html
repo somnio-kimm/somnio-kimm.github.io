@@ -1,0 +1,21 @@
+---
+layout: archive
+title: "Notes"
+permalink: /notes/
+author_profile: true
+---
+
+{% include base_path %}
+
+<p>A growing wiki of my study notes — mathematics, deep learning, reinforcement learning, and paper summaries, migrated from my Notion. Browse by group:</p>
+
+{% assign groups = "Mathematics,/notes/mathematics/|Deep Learning,/notes/deep-learning/|Reinforcement Learning,/notes/reinforcement-learning/|Literature Review,/notes/literature-review/" | split: "|" %}
+<ul>
+{% for g in groups %}
+  {% assign p = g | split: "," %}
+  {% assign cnt = site.notes | where: "category", p[0] | size %}
+  {% if cnt > 0 %}
+  <li><a href="{{ base_path }}{{ p[1] }}"><strong>{{ p[0] }}</strong></a> &middot; {{ cnt }} note{% if cnt != 1 %}s{% endif %}</li>
+  {% endif %}
+{% endfor %}
+</ul>

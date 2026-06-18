@@ -1,0 +1,37 @@
+---
+title: "Span"
+category: "Mathematics"
+subcategory: "Linear Algebra"
+excerpt: "The set of all linear combinations of a subset — the smallest subspace containing it."
+tags:
+  - Math
+  - Linear Algebra
+---
+
+For a vector space $V$ and a subset $A \subseteq V$, the **span** of $A$ is the set of all linear combinations of vectors from $A$:
+
+$$
+\operatorname{span}(A) = \left\{ \sum_{i=1}^{n} \alpha_i v_i \;\middle|\; v_i \in A,\ \alpha_i \in \mathbb{R},\ n \in \mathbb{N} \right\}
+$$
+
+A set $A$ **spans** (generates) $V$ if $\operatorname{span}(A) = V$.
+
+**Examples.**
+
+- $\operatorname{span}(\{(1,0,0), (0,1,0), (0,0,1)\}) = \mathbb{R}^3$ — all linear combinations of the standard basis vectors.
+- $\operatorname{span}(\{v\}) = \{ av \mid a \in \mathbb{R} \}$ — a line through the origin in the direction of $v$.
+- $\operatorname{span}(\{(1,1)\}) = \{ (x, x) \mid x \in \mathbb{R} \}$ — the line $y = x$ in $\mathbb{R}^2$.
+- $\operatorname{span}(\varnothing) = \{\mathbf{0}\}$ — the span of the empty set is the zero vector.
+- $\operatorname{span}(\{1, x, x^2, \dots\})$ — all polynomial functions over $\mathbb{R}$.
+
+**Theorem.** For a vector space $V$ and $A \subseteq V$, $\operatorname{span}(A)$ is the smallest subspace of $V$ such that (1) it is a subspace, (2) $A \subseteq \operatorname{span}(A)$, and (3) for any subspace $W \subseteq V$ with $A \subseteq W$, $\operatorname{span}(A) \subseteq W$.
+
+**Proof.** For any $v \in A$, $v = 1 \cdot v \in \operatorname{span}(A)$, and $\mathbf{0} \in \operatorname{span}(A)$ as the empty combination. If $v = \sum a_i v_i$ and $w = \sum b_j w_j$ with $v_i, w_j \in A$, then $v + w$ is again a linear combination of vectors in $A$, so $v + w \in \operatorname{span}(A)$; likewise $bv = \sum (b a_i) v_i \in \operatorname{span}(A)$, so it is closed under addition and scalar multiplication. Finally, if $W \subseteq V$ is a subspace with $A \subseteq W$, then any $v = \sum a_i v_i \in \operatorname{span}(A)$ has all $v_i \in W$; since $W$ is closed under linear combinations, $v \in W$, so $\operatorname{span}(A) \subseteq W$.
+
+**Example.** Show $A = \{ (a + b,\ a - b,\ b - a) \mid a, b \in \mathbb{R} \}$ is a subspace of $\mathbb{R}^3$. It is non-empty since $\mathbf{0} = (0,0,0) \in A$. For $\mathbf{v} = (a+b, a-b, b-a)$ and $\mathbf{w} = (c+d, c-d, d-c)$,
+
+$$
+\mathbf{v} + \mathbf{w} = \big((a+c) + (b+d),\ (a+c) - (b+d),\ (b+d) - (a+c)\big) \in A
+$$
+
+and $c\mathbf{v} = (ca + cb,\ ca - cb,\ cb - ca) \in A$, so $A$ is closed under addition and scalar multiplication.

@@ -1,0 +1,67 @@
+---
+title: "Diffusion Policy: Visuomotor Policy Learning via Action Diffusion"
+category: "Literature Review"
+subcategory: "Robot Learning (VLA)"
+excerpt: "Generating action sequences by denoising — modelling the action-score gradient for multimodality, sequence consistency, and stable training."
+tags:
+  - ML
+  - DL
+  - Robotics
+  - Imitation Learning
+  - Paper Notes
+---
+
+Paper: [arXiv:2303.04137](https://arxiv.org/abs/2303.04137)
+
+## Introduction
+
+Imitation learning must handle multimodal action distributions, temporal correlation, and high precision. Diffusion Policy starts from random noise actions and iteratively denoises them into a coherent sequence, inferring the action-score gradient $\nabla_A \log p(A \mid O)$. This yields multimodality, sequence consistency, and stable training, and produces closed-loop action *sequences* (a whole trajectory, leveraging diffusion's strength with high-dimensional outputs).
+
+Rather than modelling the joint $p(A, O)$ (which re-encodes the observation at every denoising step), it models $p(A \mid O)$, extracting the observation once per step. A CNN tends to act as a low-pass filter that over-smooths high-frequency actions; a transformer-based diffusion model uses causal self-attention across action steps to preserve sharp temporal dependencies.
+
+## Formulation
+
+**DDPM.** Each denoising step is a Stochastic Langevin Dynamics update: move actions toward higher likelihood, then add a little noise. Starting from Gaussian noise $\mathbf{x}^{k}$, $K$ iterations produce $\mathbf{x}^{k}, \mathbf{x}^{k-1}, \dots, \mathbf{x}^{0}$ with decreasing noise:
+
+$$
+\mathbf{x}^{k-1} = \alpha\big(\mathbf{x}^{k} - \gamma\,\epsilon_{\theta}(\mathbf{x}^{k}, k) + \mathcal{N}(0, \sigma^{2} I)\big)
+$$
+
+where $\alpha, \gamma, \sigma$ are schedule terms and $\epsilon_{\theta}$ predicts the noise to remove.
+
+**Training.** From a clean sample, pick a random noise level $k$ and have the network predict the added noise, minimising
+
+$$
+\mathcal{L} = \mathrm{MSE}\big(\epsilon^{k},\, \epsilon_{\theta}(\mathbf{x}^{0} + \epsilon^{k}, k)\big)
+$$
+
+which minimises the variational lower bound and lets the network denoise from any corruption level.
+
+**Visuomotor use.** Denoising is conditioned on the observation. Combined with receding-horizon control: at step $t$, take the latest $T_o$ observation steps, predict $T_p$ action steps, execute $T_a$ of them, and re-plan — balancing long-horizon consistency with reactivity.
+
+## Key design decisions
+
+- **Architecture.** Either a 1-D temporal **CNN** conditioned via FiLM, or a **time-series diffusion transformer** that feeds noisy action tokens $A_t^{k}$ (with a sinusoidal embedding for the denoising step $k$) into decoder blocks and conditions on MLP-encoded observations $O_t$; causal self-attention preserves sharp changes and avoids CNN over-smoothing.
+- **Visual encoder.** ResNet-18 with **spatial softmax pooling** (preserves location, unlike global average pooling) and **GroupNorm** (stable under EMA, unlike BatchNorm).
+- **Noise schedule.** A square-cosine schedule (slow decay early, fast late) suits actions that mix smooth low-frequency trends with sharp high-frequency changes.
+- **Inference.** Decouple the number of denoising steps at training (≈1000) from inference, for real-time control.
+
+## Intriguing properties
+
+**Multimodality.** Behaviour cloning with MSE averages modes (e.g. grasp-left vs grasp-right → reach in between). Diffusion keeps stochasticity throughout — random initialisation plus per-step Gaussian perturbations:
+
+$$
+A_t^{k-1} = A_t^{k} - \gamma\,\nabla_A \log p(A \mid O) + \mathcal{N}(0, \sigma^{2} I)
+$$
+
+where the gradient pulls toward high-likelihood modes and the noise enables exploration across basins. Multimodality is stronger under **position control** (many valid absolute positions achieve the same task), which also suffers less from compounding error than velocity control.
+
+**Action-sequence prediction.** Sampling each step independently can flip between modes step to step; diffusion chooses a mode at the *trajectory* level by shaping whole-trajectory noise into a coherent sequence. Sequence prediction is also more robust to idle actions than single-step policies.
+
+**Training stability.** Implicit BC represents the policy as an energy-based model $p_\theta(\mathbf{a} \mid \mathbf{o}) = \frac{e^{-E_\theta(\mathbf{o}, \mathbf{a})}}{Z(\mathbf{o}, \theta)}$ with an intractable $Z$, trained by an InfoNCE-style contrastive loss whose negatives cause loss spikes. Diffusion instead learns the score:
+
+$$
+\nabla_a \log p(a \mid o) = -\nabla_a E_\theta(o, a) - \nabla_a \log Z(o, \theta)
+$$
+
+and since $Z$ does not depend on $a$, $\nabla_a \log Z = 0$, so $\nabla_a \log p(a \mid o) \approx -\epsilon_\theta(\mathbf{a}, \mathbf{o})$ — no normalisation constant and no negative sampling required.

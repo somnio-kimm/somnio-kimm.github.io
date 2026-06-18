@@ -11,15 +11,11 @@ tags:
   AUTHORING CHEAT-SHEET (delete this comment block in real posts)
 
   MATH (LaTeX via MathJax):
-    • Write ALL math with $$ ... $$ — works both inline and as a display block.
-      Inline:  the loss $$\mathcal{L}(\theta)$$ is minimised   <- stays in the text line
-      Display: put $$ ... $$ in its own paragraph (blank line above and below).
-    • Inside $$ ... $$ kramdown does NOT run Markdown on the content, so write NORMAL
-      LaTeX: single backslashes, plain \\ for row breaks, _ subscripts, * etc. all safe.
-    • Do NOT use single $...$ (collides with prices / shell $VARs) and do NOT use the
-      old \[ ... \] / \( ... \) double-backslash hack — $$ is cleaner and more robust.
-    • Bare \begin{align}...\end{align} also works (processEnvironments is on), but
-      wrapping it in $$ ... $$ is the safest and most consistent.
+    • INLINE math = SINGLE dollars: the loss $\mathcal{L}(\theta)$ stays in the text line.
+    • DISPLAY math = $$ ... $$ on their OWN lines (blank line above/below) → centered block.
+    • Inside a $$ ... $$ block write NORMAL LaTeX: single backslashes, \\ for row breaks,
+      _ subscripts, \begin{align}...\end{align}, etc.
+    • $ now delimits inline math, so write a literal dollar as \$ in prose.
 
   DIAGRAMS (Mermaid): just write a ```mermaid fenced code block (see example below).
 
@@ -28,7 +24,7 @@ tags:
 
 ## 1. Inline and display math
 
-The attention weights are a softmax over scaled dot products, $$\alpha_{ij}$$, so each
+The attention weights are a softmax over scaled dot products, $\alpha_{ij}$, so each
 token attends to every other token. The full operation is:
 
 $$

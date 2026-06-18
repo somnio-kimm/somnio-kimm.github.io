@@ -1,0 +1,68 @@
+---
+title: "Vector Space"
+category: "Mathematics"
+subcategory: "Linear Algebra"
+excerpt: "The eight vector-space axioms, and the basic uniqueness and cancellation results that follow."
+tags:
+  - Math
+  - Linear Algebra
+---
+
+A **vector space** $V$ over a field $F$ is a set $V$ with two operations:
+
+- **Vector addition** — $V \times V \to V$, $(\mathbf{x}, \mathbf{y}) \mapsto \mathbf{x} + \mathbf{y}$
+- **Scalar multiplication** — $F \times V \to V$, $(a, \mathbf{x}) \mapsto a\mathbf{x}$
+
+satisfying the eight axioms:
+
+1. **Commutativity:** $\mathbf{x} + \mathbf{y} = \mathbf{y} + \mathbf{x}$
+2. **Associativity:** $(\mathbf{x} + \mathbf{y}) + \mathbf{z} = \mathbf{x} + (\mathbf{y} + \mathbf{z})$
+3. **Additive identity:** $\exists\, \mathbf{0} \in V$ such that $\mathbf{x} + \mathbf{0} = \mathbf{x}$
+4. **Additive inverse:** $\forall \mathbf{x} \in V,\ \exists\, -\mathbf{x} \in V$ such that $\mathbf{x} + (-\mathbf{x}) = \mathbf{0}$
+5. **Scalar identity:** $1 \cdot \mathbf{x} = \mathbf{x}$
+6. $a(b\mathbf{v}) = (ab)\mathbf{v}$
+7. $a(\mathbf{x} + \mathbf{y}) = a\mathbf{x} + a\mathbf{y}$
+8. $(a + b)\mathbf{x} = a\mathbf{x} + b\mathbf{x}$
+
+**Proposition.** The additive identity $\mathbf{0} \in V$ is unique.
+
+$$
+\begin{aligned}
+\text{Let } \mathbf{v} &= \mathbf{v} + \mathbf{0} = \mathbf{v} + \mathbf{0}' . \\
+\mathbf{0} &= (-\mathbf{v}) + \mathbf{v} = (-\mathbf{v}) + (\mathbf{v} + \mathbf{0}') = (-\mathbf{v} + \mathbf{v}) + \mathbf{0}' = \mathbf{0} + \mathbf{0}' = \mathbf{0}'
+\end{aligned}
+$$
+
+**Proposition.** The additive inverse $-\mathbf{v} \in V$ is unique.
+
+$$
+\begin{aligned}
+\text{Let } \mathbf{0} &= \mathbf{v} + (-\mathbf{v}) = \mathbf{v} + \mathbf{w} . \\
+-\mathbf{v} &= -\mathbf{v} + \mathbf{0} = -\mathbf{v} + (\mathbf{v} + \mathbf{w}) = (-\mathbf{v} + \mathbf{v}) + \mathbf{w} = \mathbf{0} + \mathbf{w} = \mathbf{w}
+\end{aligned}
+$$
+
+**Proposition (cancellation law).** For all $\mathbf{u}, \mathbf{v}, \mathbf{w} \in V$, if $\mathbf{u} + \mathbf{v} = \mathbf{u} + \mathbf{w}$ then $\mathbf{v} = \mathbf{w}$.
+
+$$
+\begin{aligned}
+\mathbf{v} &= \mathbf{0} + \mathbf{v} = (-\mathbf{u} + \mathbf{u}) + \mathbf{v} = -\mathbf{u} + (\mathbf{u} + \mathbf{v}) \\
+&= -\mathbf{u} + (\mathbf{u} + \mathbf{w}) = (-\mathbf{u} + \mathbf{u}) + \mathbf{w} = \mathbf{0} + \mathbf{w} = \mathbf{w}
+\end{aligned}
+$$
+
+**Proposition.** $0 \cdot \mathbf{v} = \mathbf{0}$.
+
+$$
+0 \cdot \mathbf{v} = (0 + 0) \cdot \mathbf{v} = 0 \cdot \mathbf{v} + 0 \cdot \mathbf{v} \;\iff\; 0 \cdot \mathbf{v} = \mathbf{0}
+$$
+
+**Proposition.** $-\mathbf{v} = (-1) \cdot \mathbf{v}$.
+
+$$
+\begin{aligned}
+\mathbf{v} + (-1)\cdot\mathbf{v} &= 1\cdot\mathbf{v} + (-1)\cdot\mathbf{v} = (1 + (-1))\cdot\mathbf{v} = 0\cdot\mathbf{v} = \mathbf{0}
+\end{aligned}
+$$
+
+**Further properties.** If $a \cdot \mathbf{v} = a \cdot \mathbf{w}$ and $a \neq 0$, then $\mathbf{v} = \mathbf{w}$. And $\mathbb{R}^{+}$ is **not** a vector space: taking $c = -1 \in \mathbb{R}$ and $1 \in \mathbb{R}^{+}$, $(-1) \cdot 1 = -1 \notin \mathbb{R}^{+}$, so it is not closed under scalar multiplication.

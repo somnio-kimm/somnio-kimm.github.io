@@ -1,0 +1,23 @@
+---
+title: "Coefficient Matrix"
+category: "Mathematics"
+subcategory: "Linear Algebra"
+excerpt: "Collecting a linear system's coefficients into a matrix, and the column space it defines."
+tags:
+  - Math
+  - Linear Algebra
+---
+
+The **coefficient matrix** of a linear system collects its coefficients:
+
+$$
+\begin{cases} a_{11}x_1 + \cdots + a_{1n}x_n = b_1 \\ \vdots \\ a_{m1}x_1 + \cdots + a_{mn}x_n = b_m \end{cases}
+\;\Rightarrow\;
+A = \begin{pmatrix} a_{11} & \cdots & a_{1n} \\ \vdots & \ddots & \vdots \\ a_{m1} & \cdots & a_{mn} \end{pmatrix} = (\mathbf{a}_1, \dots, \mathbf{a}_n)
+$$
+
+The augmented matrix is then $(A \mid \mathbf{b})$, and the column space is
+
+$$
+\operatorname{Col}(A) = \{ \mathbf{b} \mid x_1\mathbf{a}_1 + \cdots + x_n\mathbf{a}_n = \mathbf{b} \text{ has a solution} \}
+$$
