@@ -11,7 +11,7 @@ tags:
   - Paper Notes
 ---
 
-![Knowledge insulation: FAST discrete path as representation learner, flow-matching expert as controller](/images/notes/ki-vla-1.png)
+![Knowledge insulation: FAST discrete path as representation learner, flow-matching expert as controller](/images/notes/knowledge-insulation-1.png)
 
 Discrete models are slow at inference; continuous models are slow to train and prone to forgetting their language knowledge. **Knowledge insulation** combines the best of both: an autoregressive FAST model as a representation learner, and a flow-matching expert as the final controller.
 
@@ -45,8 +45,6 @@ where $P_{bb}, P_{aa}$ are backbone/expert self-attention, $P_{ab}$ is the exper
 $$
 E_a = P_{ab}\,\mathrm{sg}(V_b(X_b)) + P_{aa} V_a(X_a)
 $$
-
-![Knowledge insulation: block-triangular attention with stop-gradient on the backbone](/images/notes/ki-vla-2.png)
 
 ## Inference
 

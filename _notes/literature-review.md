@@ -9,7 +9,7 @@ toc_sticky: true
 
 Summaries and notes on the papers I read, grouped by area.
 
-{% assign suborder = "Vision · Backbones|Vision · Detection & Segmentation|Vision · Transformers|Language|Multimodal|Efficient Sequence|Robot Learning (VLA)" | split: "|" %}
+{% assign suborder = "Vision · Backbones|Vision · Detection & Segmentation|Vision · Transformers|Language|Multimodal|Generative Models|Efficient Sequence|Training & Compression|Robot Learning (VLA)" | split: "|" %}
 {% for sub in suborder %}
   {% assign items = site.notes | where: "category", "Literature Review" | where: "subcategory", sub | sort: "title" %}
   {% if items.size > 0 %}

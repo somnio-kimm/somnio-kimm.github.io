@@ -4,7 +4,7 @@
   {% comment %}Dynamic 3-level collapsible wiki nav: group -> subgroup -> notes.
      Collapsed by default; the path to the current note is auto-opened.{% endcomment %}
   {% assign groups = "Mathematics,Deep Learning,Reinforcement Learning,Literature Review" | split: "," %}
-  {% assign suborder = "Linear Algebra,Optimisation,Transformers & Attention,Glossary,Foundations,Policy Optimization,Imitation Learning,Vision · Backbones,Vision · Detection & Segmentation,Vision · Transformers,Language,Multimodal,Efficient Sequence,Robot Learning (VLA)" | split: "," %}
+  {% assign suborder = "Linear Algebra,Optimisation,Transformers & Attention,Glossary,Foundations,Policy Optimization,Imitation Learning,Vision · Backbones,Vision · Detection & Segmentation,Vision · Transformers,Language,Multimodal,Generative Models,Efficient Sequence,Training & Compression,Robot Learning (VLA)" | split: "," %}
   <nav class="nav__list nav__notes">
     <ul>
       {% for g in groups %}

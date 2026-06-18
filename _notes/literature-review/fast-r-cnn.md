@@ -1,0 +1,34 @@
+---
+title: "Fast R-CNN"
+category: "Literature Review"
+subcategory: "Vision · Detection & Segmentation"
+excerpt: "Share one CNN pass over the whole image, pool each region proposal with RoI pooling, and train detection + box regression jointly with a multi-task loss."
+tags:
+  - ML
+  - DL
+  - Computer Vision
+  - Object Detection
+  - Paper Notes
+---
+
+## Process
+
+R-CNN is slow because every proposal crop is run through the CNN separately. Fast R-CNN instead runs the **whole image** through the CNN once:
+
+1. The image passes through the CNN → a feature map.
+2. Region proposals are scaled to the feature map and cropped.
+3. **RoI pooling** resizes each variable-size region to a fixed size.
+4. Flatten → FC layers → class scores + box offsets.
+
+![RoI pooling](/images/notes/fast-r-cnn-1.png)
+
+**Mini-batch.** Sample $N$ images, then $R/N$ RoIs from each (sharing the conv features). RoIs are labelled by IoU with ground truth: foreground $\ge 0.5$; background $[0.1,0.5)$; ignored $<0.1$. Each mini-batch is 25% foreground / 75% background.
+
+**Multi-task loss.** $\mathcal{L} = \mathcal{L}_{\text{cls}} + \lambda\,\mathcal{L}_{\text{loc}}$ (cross-entropy + smooth-L1), training the CNN, classifier, and box regressor in a single loop. Scale invariance is handled either single-scale (fixed resize) or multi-scale (image pyramid).
+
+**Truncated SVD** speeds up the FC layers at inference: factorise $W\approx U\Sigma_t V^\top$ and replace one large FC layer with two smaller ones (weights $\Sigma_t V^\top$, then $U$).
+
+## References
+
+- [arXiv:1504.08083](https://arxiv.org/abs/1504.08083)
+- [Video](https://www.youtube.com/watch?v=5gAq6BZ87aA)

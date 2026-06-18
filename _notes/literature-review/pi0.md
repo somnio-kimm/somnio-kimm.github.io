@@ -15,7 +15,7 @@ Paper: [arXiv:2410.24164](https://arxiv.org/abs/2410.24164)
 
 ## The π0 model
 
-![π0: VLM expert + 300M action expert in one transformer, flow-matching action generation](/images/notes/pi0.png)
+![π0: VLM expert + 300M action expert in one transformer, flow-matching action generation](/images/notes/pi0-1.png)
 
 ```text
 Observation o_t  →  [ images | language | state ]
