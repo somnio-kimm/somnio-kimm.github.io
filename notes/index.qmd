@@ -1,6 +1,6 @@
 ---
 title: "Notes"
-subtitle: "A wiki of deep-learning, reinforcement-learning, and the papers I read."
+subtitle: "A review of papers I read."
 listing:
   contents: "**/*.qmd"
   type: grid
