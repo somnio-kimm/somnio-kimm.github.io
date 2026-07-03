@@ -50,8 +50,10 @@ website:
           text: "All notes"
         - section: "Literature Review"
           contents:
-            - notes/literature-review/act.qmd
-            - notes/literature-review/cfg.qmd
+            - section: "Generative Models"
+              contents: "notes/literature-review/generative-models/*.qmd"
+            - section: "Robotics"
+              contents: "notes/literature-review/robotics/*.qmd"
   page-footer:
     center: "© 2026 Soo Min Kimm · Built with [Quarto](https://quarto.org)"
 
