@@ -7,3 +7,44 @@ categories:
 
 Paper: [arXiv:2207.12598](https://arxiv.org/abs/2207.12598)
 
+## Problem 
+
+Generative models suffer from a fundamental trade-off: sampling diversity and sampling fidelity.
+If the model samples from the entire probability space, it is highly diverse but noisy at the same time. 
+To tackle this, researchers tried to narrow the model’s choice during the inference.
+
+
+## Past attempts
+
+- Low temperature sampling on discrete output distribution
+  After logits are produced from the final layer of the neural networks and fed to the soft max for the normalisation, every logit is divided by T to increase the final score. 
+  The probability distribution becomes sharper, i.e., only high probability terms are dominant. 
+
+- Truncation trick on continuous input latent space
+  When the vectors are mapped to a latent space, they form their own probability space with their own mean. 
+  Truncation trick is to cut off the outer probability space away from the mean.
+
+Above two methods are not suitable for multi-step models like diffusion.
+For each step, noise is dampened, and the network has lower variance than the true data distribution.
+Hence, the model goes to OOD. 
+
+- Classifier guidance
+  In order to guide the path of noisy states, external classifier is introduced.
+  During training, both the diffusion model, and a classifier are trained in separate paths.
+  Classifier here should be trained from scratch, as it should get noisy inputs rather than clean data.
+
+While this method works for diffusion models, there are some downsides especially due to training two separate models.
+One is that training two models and optimise them for the same goal is not simple.
+This usually ends up adversarially.
+Another is that classifier requires accurate labels and they are expensive. 
+
+## Proposed solution
+
+Instead of training two separate models, this paper suggests classifier-free guidance, which uses a single model.
+During the training, the model uses the conditioning dropout, which is randomly throwing away the condition (e.g., prompt) and swapping that part with the null token.
+At the inference, the single model is queried twice, with and without conditions dropped, and subtracts the outputs.
+In this way, the model is guided to the condition.
+
+## Limitations
+After all, querying the model twice leads to additional computation costs.
+The author also mentioned that guidance methods sacrifices sampling diversity over fidelity, and whether that is acceptable.
