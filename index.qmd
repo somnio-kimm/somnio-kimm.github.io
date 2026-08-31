@@ -23,7 +23,7 @@ about:
 
 ## What you'll find here
 
-- **[Notes](notes/index.qmd)** — deep dives into the papers I'm reading.
+- **[CV](cv.qmd)** — education, experience, projects, and skills.
 - **[Publications](publications.qmd)** — preprints and my M.S. thesis.
 - **[Talks](talks.qmd)** — seminar slides.
-- **[CV](cv.qmd)** — the full record.
+- **[Notes](notes/index.qmd)** — deep dives into the papers I'm reading.

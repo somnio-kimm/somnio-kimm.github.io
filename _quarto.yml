@@ -14,6 +14,7 @@ project:
 website:
   title: "Deep Chat of Perplexity"
   description: "Soo Min Kimm — research notes, publications, and talks."
+  favicon: images/favicon.svg
   site-url: "https://somnio-kimm.github.io"
   repo-url: "https://github.com/somnio-kimm/somnio-kimm.github.io"
   search:
@@ -25,12 +26,12 @@ website:
     left:
       - href: index.qmd
         text: Home
+      - href: cv.qmd
+        text: CV
       - href: publications.qmd
         text: Publications
       - href: talks.qmd
         text: Talks
-      - href: cv.qmd
-        text: CV
       - href: notes/index.qmd
         text: Notes
     right:
@@ -59,6 +60,7 @@ website:
 
 format:
   html:
+    include-in-header: _includes/favicon.html
     theme:
       light: [cosmo, styles.scss]
       dark: [darkly, styles.scss]
