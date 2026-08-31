@@ -1,6 +1,7 @@
 ---
 title: 'Classifier-Free Diffusion Guidance'
 description: "CFG"
+draft: true
 categories:
   - ML
   - AI
