@@ -1,8 +1,10 @@
 ---
 title: "Notes"
-subtitle: "A review of papers I read."
+subtitle: "Literature reviews and notes from topics I am studying."
 listing:
   contents: "**/*.qmd"
+  exclude:
+    listing-page: true
   type: grid
   sort: "title"
   categories: true
@@ -11,4 +13,9 @@ listing:
   fields: [title, description, categories]
 ---
 
-Browse by area in the sidebar, or filter the full set below.
+Choose a collection:
+
+- [Literature Review](literature-review/index.qmd) — papers I have read and broken down in my own words.
+- [Study Notes](study-notes/index.qmd) — notes from electrical engineering, machine learning, and mathematics.
+
+Or browse all individual notes below.

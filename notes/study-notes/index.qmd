@@ -1,0 +1,15 @@
+---
+title: "Study Notes"
+subtitle: "Notes from topics I am studying."
+listing-page: true
+listing:
+  contents: "**/*.qmd"
+  type: grid
+  sort: "title"
+  categories: true
+  filter-ui: true
+  sort-ui: true
+  fields: [title, description, categories]
+---
+
+Notes on electrical engineering, machine learning, and mathematics will appear here.

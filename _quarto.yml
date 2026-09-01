@@ -32,8 +32,14 @@ website:
         text: Publications
       - href: talks.qmd
         text: Talks
-      - href: notes/index.qmd
-        text: Notes
+      - text: Notes
+        menu:
+          - href: notes/index.qmd
+            text: All Notes
+          - href: notes/literature-review/index.qmd
+            text: Literature Review
+          - href: notes/study-notes/index.qmd
+            text: Study Notes
     right:
       - icon: github
         href: https://github.com/somnio-kimm
@@ -43,12 +49,12 @@ website:
         aria-label: LinkedIn
   sidebar:
     - id: notes
-      title: "Notes"
+      title: "Literature Review"
       style: floating
       collapse-level: 1
       contents:
-        - href: notes/index.qmd
-          text: "All notes"
+        - href: notes/literature-review/index.qmd
+          text: "All literature reviews"
         - section: "Literature Review"
           contents:
             - section: "Generative Models"

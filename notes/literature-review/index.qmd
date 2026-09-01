@@ -1,0 +1,15 @@
+---
+title: "Literature Review"
+subtitle: "Reviews of papers I have read."
+listing-page: true
+listing:
+  contents: "**/*.qmd"
+  type: grid
+  sort: "title"
+  categories: true
+  filter-ui: true
+  sort-ui: true
+  fields: [title, description, categories]
+---
+
+Browse by area in the sidebar, or filter the papers below.
