@@ -2,7 +2,6 @@
 title: 'Training-Time Action Conditioning for Efficient Real-Time Chunking'
 description: "TRTC"
 date-modified: 2026-09-01
-draft: true
 categories:
   - Robotics
   - ML

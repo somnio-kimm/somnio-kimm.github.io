@@ -34,8 +34,6 @@ website:
         text: Talks
       - text: Notes
         menu:
-          - href: notes/index.qmd
-            text: All Notes
           - href: notes/literature-review/index.qmd
             text: Literature Review
           - href: notes/study-notes/index.qmd
