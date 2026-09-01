@@ -1,7 +1,7 @@
 ---
 title: 'Real-Time Execution of Action Chunking Flow Policies'
 description: "IRTC"
-date-modified: 2026-08-31
+date-modified: 2026-09-01
 categories:
   - Robotics
   - ML
@@ -145,7 +145,63 @@ $$
 
 Because all mask weights are nonnegative, $\mathbf{W}^{1/2}$ is simply the diagonal matrix containing their square roots.
 If the old chunk is committed to going left but the estimated endpoint goes right, this loss becomes large.
-IRTC then computes the negative-gradient direction, which reduces the mismatch:
+
+To see how that endpoint error should change the current noisy chunk, define the Jacobian
+
+$$
+    \mathbf{J}_\tau
+    =
+    \frac{\partial\widehat{\mathbf{A}_t^1}}
+    {\partial\mathbf{A}_t^\tau}.
+$$
+
+After flattening both chunks, $\mathbf{J}_\tau\in\mathbb{R}^{HM\times HM}$.
+Its individual entries are
+
+$$
+    [\mathbf{J}_\tau]_{ij}
+    =
+    \frac{\partial[\widehat{\mathbf{A}_t^1}]_i}
+    {\partial[\mathbf{A}_t^\tau]_j}.
+$$
+
+The $(i,j)$ entry asks a simple question: if I slightly change coordinate $j$ of the current noisy chunk, how much will coordinate $i$ of the estimated clean chunk change?
+
+At first glance, this may look like $\partial\mathbf{A}/\partial\mathbf{A}$, which would just be the identity matrix.
+However, the numerator is $\widehat{\mathbf{A}_t^1}$ rather than $\mathbf{A}_t^\tau$.
+It depends on the current sample both directly and through the velocity predicted by the policy, so
+
+$$
+    \mathbf{J}_\tau
+    =
+    \mathbf{I}
+    +
+    (1-\tau)
+    \frac{\partial
+    \mathbf{v}_{\pi}(\mathbf{A}_t^\tau,\mathbf{o}_t,\tau)}
+    {\partial\mathbf{A}_t^\tau}.
+$$
+
+The second term is the important part.
+Since the action model mixes information across timesteps and action dimensions, changing one coordinate of the noisy chunk can affect many coordinates of the final chunk.
+
+Applying the chain rule to the consistency loss gives
+
+$$
+    \nabla_{\mathbf{A}_t^\tau}
+    \mathcal{L}
+    =
+    \mathbf{J}_\tau^{\!\top}
+    \mathbf{W}
+    \left(
+    \widehat{\mathbf{A}_t^1}-\mathbf{Y}
+    \right).
+$$
+
+The weighted residual $\mathbf{W}(\widehat{\mathbf{A}_t^1}-\mathbf{Y})$ says which coordinates of the estimated endpoint are wrong and by how much.
+Multiplying by $\mathbf{J}_\tau^\top$ carries that endpoint error backward to the coordinates of the current noisy chunk that caused it.
+
+IRTC uses the negative-gradient direction because it reduces the mismatch:
 
 $$
     \mathbf{g}_\tau
@@ -153,14 +209,14 @@ $$
     -\nabla_{\mathbf{A}_t^\tau}
     \mathcal{L}(\mathbf{A}_t^\tau)
     =
-    \left(\frac{\partial\widehat{\mathbf{A}_t^1}}
-    {\partial\mathbf{A}_t^\tau}\right)^{\!\top}
+    \mathbf{J}_\tau^{\!\top}
     \mathbf{W}
     \left(\mathbf{Y}-\widehat{\mathbf{A}_t^1}\right).
 $$
 
 This vector–Jacobian product is computed by backpropagation.
-It tells us how to nudge the current noisy chunk so that its estimated clean endpoint agrees better with the old trajectory.
+The policy parameters stay fixed during this backward pass.
+It tells IRTC how to nudge the current noisy action sample, not how to update the model, so that its estimated clean endpoint agrees better with the old trajectory.
 
 The paper builds on pseudoinverse guidance ($\Pi$GDM).
 Its guided velocity can be written as
