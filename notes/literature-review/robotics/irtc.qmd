@@ -40,7 +40,7 @@ The robot can approach the ball from the left or the right, but it cannot safely
   This smooths the jump, but an average of valid actions is not necessarily a valid action.
   If one chunk goes left and another goes right, their average may send the robot straight toward the obstacle.
 
-![Failure modes of naive asynchronous execution and temporal ensemble when consecutive action chunks choose different valid trajectory modes.](../../../images/notes/irtc_2.png){#fig-2 fig-alt="A timeline of two action chunks choosing different paths around an obstacle; naive asynchronous execution jumps between the chunks while temporal ensemble averages them into a path through the obstacle" width="95%"}
+![Failure modes of naive asynchronous execution and temporal ensemble when consecutive action chunks choose different valid trajectory modes.](../../../images/notes/irtc-2.png){#fig-2 fig-alt="A timeline of two action chunks choosing different paths around an obstacle; naive asynchronous execution jumps between the chunks while temporal ensemble averages them into a path through the obstacle" width="95%"}
 
 ## Proposed Solution
 
@@ -75,7 +75,7 @@ The word *frozen* can be slightly misleading.
 IRTC does not first generate a complete trajectory and then overwrite its beginning.
 Instead, it guides every flow-integration step so that the final chunk grows around the actions that are already committed.
 
-![How IRTC divides the action horizon into frozen, softly guided, and free regions.](../../../images/notes/irtc_3.png){#fig-irtc-soft-mask fig-alt="The old chunk and new chunk overlap across a frozen region and a softly guided region before reaching a free future region" width="100%"}
+![How IRTC divides the action horizon into frozen, softly guided, and free regions.](../../../images/notes/irtc-3.png){#fig-3 fig-alt="The old chunk and new chunk overlap across a frozen region and a softly guided region before reaching a free future region" width="100%"}
 
 Start with ordinary flow matching.
 Let each action have dimension $M$, so an action chunk is $\mathbf{A}_t \in \mathbb{R}^{H\times M}$.
