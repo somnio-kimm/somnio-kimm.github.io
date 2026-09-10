@@ -55,7 +55,7 @@ Direct squared-error action prediction learns a [conditional mean of actions](lo
 The diffusion objective instead conditions on the current noisy sample as well as the observation and noise level.
 These conditional averages are functions of different inputs and predict different quantities.
 [Flow matching](flow-matching.qmd) uses another local target, a velocity along a constructed probability path.
-[Generative sampling](generative-sampling.qmd) separates the learned field from the random draws and numerical updates used to generate an output.
+[Generative sampling](../robotics/generative-sampling.qmd) separates the learned field from the random draws and numerical updates used to generate an output.
 
 ## Read the model-specific derivation {#connections}
 

@@ -3,14 +3,17 @@ title: "Quantile normalization of physical coordinates"
 description: "Percentile-based affine scaling, inversion, out-of-range values, and the resulting weighting of errors."
 date-modified: 2026-09-10
 draft: false
+aliases:
+  - /notes/study-notes/machine-learning/quantile-normalization.html
 categories:
+  - Robotics
   - Machine Learning
   - Representations
 ---
 
 Quantile normalization here means an affine rescaling based on fixed percentiles of the training data.
 It changes the numerical coordinates used by a model, such as the coordinates of a robot action.
-Start with the [representation overview](representations.qmd); compare [activation normalization](normalization.qmd#what-to-check-when-reading-a-model) for transformations inside a network.
+Start with the [representation overview](../machine-learning/representations.qmd); compare [activation normalization](../machine-learning/normalization.qmd#what-to-check-when-reading-a-model) for transformations inside a network.
 
 ## Quantile scaling changes coordinates {#quantile-scaling}
 
@@ -34,7 +37,7 @@ A rank-based Gaussian transform instead applies an estimated cumulative distribu
 That nonlinear operation changes relative spacings between values.
 
 Different robot coordinates need separate statistics because their units and operating ranges differ.
-Scaling also changes the relative weight assigned by [squared loss](loss.qmd#mse): a fixed physical error receives a larger normalised penalty when its reference range is smaller.
+Scaling also changes the relative weight assigned by [squared loss](../machine-learning/loss.qmd#mse): a fixed physical error receives a larger normalised penalty when its reference range is smaller.
 Comparable numerical ranges do not establish comparable physical importance.
 
 ::: {.callout-note collapse="true" icon="false" title="Derivation: inversion and the weighting of errors"}
@@ -70,6 +73,6 @@ Inverting normalisation also does not undo unrelated transformations such as con
 
 ## Related Concepts
 
-[Tokenization](representations.qmd#state-bins) explains how a scaled state coordinate can subsequently become a discrete bin and then text IDs.
-The [loss overview](loss.qmd#loss-and-risk) explains why the numerical scale of residuals matters to an optimization objective.
+[Tokenization](../machine-learning/representations.qmd#state-bins) explains how a scaled state coordinate can subsequently become a discrete bin and then text IDs.
+The [loss overview](../machine-learning/loss.qmd#loss-and-risk) explains why the numerical scale of residuals matters to an optimization objective.
 [FAST](../../literature-review/action/fast.qmd) uses normalized action coordinates before its temporal transform and tokenization.

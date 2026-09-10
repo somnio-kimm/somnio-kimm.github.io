@@ -1,5 +1,5 @@
 ---
-title: "Multimodal Models"
+title: "Multimodality"
 description: "Models that connect images and language through shared representations and generation."
 listing-page: true
 listing:
@@ -8,6 +8,8 @@ listing:
   sort: "title"
   fields: [title, description]
 draft: false
+aliases:
+  - /notes/literature-review/multimodal/index.html
 ---
 
 These reviews examine how models connect images and language through shared representations and conditional generation.

@@ -24,6 +24,7 @@ Definitions and main results stay visible; expand a derivation or proof for the 
 |---|---|
 | [Mathematics](mathematics/index.qmd) | Probability, information, estimation, optimization, and matrix methods. |
 | [Machine Learning](machine-learning/index.qmd) | Models, representations, objectives, and learning procedures. |
+| [Robotics](robotics/index.qmd) | Robot policies, action coordinates, sampling, and feedback during execution. |
 | [Physics](physics/index.qmd) | Physical systems, circuits, electronics, signals, and control. |
 | [Computer Hardware](computer-hardware/index.qmd) | Digital logic, processors, memory, and computer architecture. |
 | [Computer Software](computer-software/index.qmd) | Programming, algorithms, systems, and computational operations. |

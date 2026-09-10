@@ -2,13 +2,9 @@
 title: "Physics"
 description: "Physical systems, circuits, electronics, signals, and control."
 listing-page: true
-listing:
-  contents: "*.qmd"
-  type: default
-  sort: "title"
-  fields: [title, description]
 draft: false
 ---
 
-These notes cover physical systems and their applications, including circuits, electronics, signals, and control.
+This section is reserved for notes on physical systems, circuits, electronics, signals, and control.
+The [Robotics notes](../robotics/index.qmd) cover robot policies and action execution.
 The [study-note index](../index.qmd) connects this subject with mathematics and computing.

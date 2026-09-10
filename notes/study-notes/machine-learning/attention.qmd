@@ -195,6 +195,6 @@ In [π0](../../literature-review/action/pi0.qmd) and [π0.5](../../literature-re
 
 [Stop-gradient](../computer-software/stop-gradient.qmd) controls where a loss can send derivatives while leaving a forward value readable.
 [KV caching](kv-cache.qmd) reuses keys and values when the mask and inputs keep their representations independent of newly added or changing inputs.
-[BERT](../../literature-review/language/bert.qmd) and [PaliGemma](../../literature-review/multimodal/paligemma.qmd) illustrate different bidirectional and causal access patterns.
+[BERT](../../literature-review/language/bert.qmd) and [PaliGemma](../../literature-review/multimodality/paligemma.qmd) illustrate different bidirectional and causal access patterns.
 [Visual tokens](representations.qmd#visual-tokens) and [text tokenization](representations.qmd#sentencepiece) explain how image and text inputs become vectors.
 [Generative action models](generative-models.qmd#questions) distinguishes parallel chunk prediction from iterative denoising and autoregressive token generation.

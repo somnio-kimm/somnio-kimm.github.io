@@ -62,4 +62,4 @@ The [expectations note](expectations.qmd) explains distribution-weighted average
 [A CVAE](../machine-learning/autoencoders.qmd#conditioning) distinguishes a latent prior from a posterior conditioned on an observed example.
 [Energy-based models](../machine-learning/energy-based-models.qmd) specify relative density and its score, while [Langevin dynamics](../machine-learning/energy-based-models.qmd#langevin-dynamics) uses the score in a sampling procedure.
 [Normalising flows](../../literature-review/theory/normalizing-flows.qmd) transform densities using a Jacobian determinant.
-[Policies and learning regimes](../machine-learning/policies.qmd) separates action selection, learning objectives, and data collection.
+[Policies and learning regimes](../robotics/policies.qmd) separates action selection, learning objectives, and data collection.

@@ -4,9 +4,10 @@ description: "Image–text contrastive learning, prompt-based zero-shot classifi
 date-modified: 2026-09-10
 draft: false
 aliases:
+  - /notes/literature-review/multimodal/clip.html
   - /notes/literature-review/vision/clip.html
 categories:
-  - Multimodal Models
+  - Multimodality
   - Representation Learning
 ---
 

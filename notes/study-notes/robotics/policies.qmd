@@ -3,7 +3,10 @@ title: 'Policies and learning regimes'
 description: "Action selection, imitation and reinforcement learning, and the different meanings of online and offline."
 date-modified: 2026-09-10
 draft: false
+aliases:
+  - /notes/study-notes/machine-learning/policies.html
 categories:
+  - Robotics
   - Machine Learning
 ---
 
@@ -35,7 +38,7 @@ Value-based methods estimate returns to support action selection, policy-based m
 Rewards do not guarantee good behaviour if they omit something important or cannot be reliably optimised.
 
 In policy papers, an “explicit policy” often directly outputs action parameters, while an “implicit policy” can score candidate actions with an energy and use a separate optimisation or sampling step.
-These terms describe a policy interface; they should not silently replace the [generative-model density terminology](generative-models.qmd#generative-models).
+These terms describe a policy interface; they should not silently replace the [generative-model density terminology](../machine-learning/generative-models.qmd#generative-models).
 [Diffusion Policy](../../literature-review/action/diffusion-policy.qmd) compares these formulations in its motivation.
 
 ## What is online or offline? {#online-and-offline}
@@ -46,7 +49,7 @@ An offline computation can still enforce causal masks and avoid future informati
 
 In RL, offline learning means learning from a fixed dataset without collecting new transitions during training; online learning includes interaction to obtain new experience.
 “Online inference” and “online parameter learning” are separate claims.
-The [state-space note](state-space-models.qmd) shows how one model can support both batch sequence evaluation and incremental inference.
+The [state-space note](../machine-learning/state-space-models.qmd) shows how one model can support both batch sequence evaluation and incremental inference.
 
 ## Read the claim precisely {#questions}
 
@@ -58,11 +61,11 @@ The [state-space note](state-space-models.qmd) shows how one model can support b
 | Do parameters change during use? | Online parameter learning versus inference with fixed parameters. |
 
 A system can answer these questions differently without contradiction.
-Use [policies and reinforcement learning](policies.qmd) for the learning objective and [attention](attention.qmd#projections) for causal masking.
+Use [policies and reinforcement learning](policies.qmd) for the learning objective and [attention](../machine-learning/attention.qmd#projections) for causal masking.
 
 ## Connections {#connections}
 
-[Action horizons](../physics/action-horizons.qmd) explains how predictions become commands and feedback.
-[Distribution shift](distribution-shift.qmd) explains why a cloned policy can visit observations absent from expert demonstrations.
-[Generative action models](generative-models.qmd#questions) compares point, token, latent-variable, diffusion, and flow outputs.
-[Attention](attention.qmd#projections) defines causal masks, while [state-space models](state-space-models.qmd) connects batch and incremental sequence evaluation.
+[Action horizons](action-horizons.qmd) explains how predictions become commands and feedback.
+[Distribution shift](../machine-learning/distribution-shift.qmd) explains why a cloned policy can visit observations absent from expert demonstrations.
+[Generative action models](../machine-learning/generative-models.qmd#questions) compares point, token, latent-variable, diffusion, and flow outputs.
+[Attention](../machine-learning/attention.qmd#projections) defines causal masks, while [state-space models](../machine-learning/state-space-models.qmd) connects batch and incremental sequence evaluation.

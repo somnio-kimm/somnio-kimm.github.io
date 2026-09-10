@@ -95,5 +95,5 @@ Crop design, temperatures, teacher momentum, and architecture remain consequenti
 ## Connections
 
 [ViT](vit.qmd) supplies the patch-based backbone; DINO specifies a self-supervised objective and teacher update.
-[CLIP](../multimodal/clip.qmd) instead uses paired text to align images with language.
+[CLIP](../multimodality/clip.qmd) instead uses paired text to align images with language.
 The [cross-entropy note](../../study-notes/mathematics/entropy.qmd#cross-entropy) explains why DINO can train against a soft target distribution rather than a one-hot label.

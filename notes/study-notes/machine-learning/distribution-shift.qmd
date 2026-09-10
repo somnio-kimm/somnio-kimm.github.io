@@ -32,6 +32,6 @@ Batch normalisation standardises activations using batch statistics and then app
 
 ## Apply the distinction {#connections}
 
-[Behavioural cloning](policies.qmd#policies) learns from demonstrated observations and actions, while the deployed policy helps determine its future observations.
-[Action horizons and feedback](../physics/action-horizons.qmd) describe when the controller can respond to those observations.
+[Behavioural cloning](../robotics/policies.qmd#policies) learns from demonstrated observations and actions, while the deployed policy helps determine its future observations.
+[Action horizons and feedback](../robotics/action-horizons.qmd) describe when the controller can respond to those observations.
 [Conditional and marginal distributions](../mathematics/probability.qmd#conditional-and-marginal) provide the notation needed to state a particular shift assumption.

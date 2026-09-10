@@ -3,6 +3,8 @@ title: "Generative sampling and randomness"
 description: "Separate internal generative time, random inputs, deterministic computation, and repeated sampling."
 date-modified: 2026-09-10
 draft: false
+aliases:
+  - /notes/study-notes/machine-learning/generative-sampling.html
 categories:
   - Machine Learning
   - Generative Models
@@ -63,7 +65,7 @@ It also does not guarantee compatible chunks when the observation changes betwee
 ## Generation and execution are different stages {#execution}
 
 A noisy intermediate sample belongs to the generator's computation.
-Only a final prediction is considered for execution, and an [execution horizon](../physics/action-horizons.qmd#horizons) determines which commands are adopted before an update.
+Only a final prediction is considered for execution, and an [execution horizon](action-horizons.qmd#horizons) determines which commands are adopted before an update.
 Reusing noise can make a deterministic sampler repeatable, but it does not ensure compatible chunks as observations change.
-The [action-horizon note](../physics/action-horizons.qmd#execution) explains why switching between valid chunks requires its own mechanism.
-Compare the [diffusion](diffusion.qmd) and [flow-matching](flow-matching.qmd) training targets before interpreting a paper's sampler.
+The [action-horizon note](action-horizons.qmd#execution) explains why switching between valid chunks requires its own mechanism.
+Compare the [diffusion](../machine-learning/diffusion.qmd) and [flow-matching](../machine-learning/flow-matching.qmd) training targets before interpreting a paper's sampler.

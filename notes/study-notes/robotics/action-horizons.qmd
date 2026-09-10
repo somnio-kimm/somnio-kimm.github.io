@@ -3,9 +3,9 @@ title: "Action horizons and feedback"
 description: "Distinguish observed history, predicted windows, executed commands, and transitions between chunks."
 date-modified: 2026-09-10
 draft: false
+aliases:
+  - /notes/study-notes/physics/action-horizons.html
 categories:
-  - Physics
-  - Electrical Engineering
   - Machine Learning
   - Robotics
 ---
@@ -40,5 +40,5 @@ Two individually valid samples can choose incompatible strategies.
 Robot time orders the commands that affect the physical system.
 Diffusion indices and flow time order internal computations that generate a predicted chunk.
 An intermediate denoising state is not a command currently being executed.
-[Generative sampling](../machine-learning/generative-sampling.qmd#objects) defines those numerical objects.
+[Generative sampling](generative-sampling.qmd#objects) defines those numerical objects.
 For model-specific data flow, continue to [Diffusion Policy](../../literature-review/action/diffusion-policy.qmd), [π0](../../literature-review/action/pi0.qmd), or [π0.5](../../literature-review/action/pi05.qmd).

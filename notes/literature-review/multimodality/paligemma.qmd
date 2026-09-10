@@ -4,9 +4,10 @@ description: "SigLIP image features, Gemma text generation, prefix attention, an
 date-modified: 2026-09-10
 draft: false
 aliases:
+  - /notes/literature-review/multimodal/paligemma.html
   - /notes/literature-review/language/paligemma.html
 categories:
-  - Multimodal Models
+  - Multimodality
   - VLM
 ---
 

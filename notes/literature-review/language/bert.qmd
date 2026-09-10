@@ -50,4 +50,4 @@ BERT's default encoder is not a causal next-token generator, and `[CLS]` is a le
 
 The [attention note](../../study-notes/machine-learning/attention.qmd#generation-order) distinguishes bidirectional reads from causal generation.
 The [representation note](../../study-notes/machine-learning/representations.qmd#sentencepiece) distinguishes tokenizer algorithms, token IDs, and embedding vectors.
-[PaliGemma](../multimodal/paligemma.qmd) combines a bidirectional image-and-prompt prefix with a causally generated output suffix.
+[PaliGemma](../multimodality/paligemma.qmd) combines a bidirectional image-and-prompt prefix with a causally generated output suffix.

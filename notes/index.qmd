@@ -17,6 +17,6 @@ draft: false
 Choose a collection:
 
 - [Literature Review](literature-review/index.qmd) — papers I have read and broken down in my own words.
-- [Study Notes](study-notes/index.qmd) — notes from electrical engineering, machine learning, and mathematics.
+- [Study Notes](study-notes/index.qmd) — notes from mathematics, machine learning, robotics, physics, and computing.
 
 Or browse all individual notes below.

@@ -29,7 +29,7 @@ An end-to-end training objective connects inputs to task outputs through a share
 A modular system splits responsibilities into components; some modular systems are still trained jointly.
 Late fusion processes modalities separately before combining representations or scores.
 These properties should be established from the actual computation and gradient paths.
-[CLIP](../../literature-review/multimodal/clip.qmd), [DINO](../../literature-review/vision/dino.qmd), and [PaliGemma](../../literature-review/multimodal/paligemma.qmd) illustrate different representation and adaptation choices.
+[CLIP](../../literature-review/multimodality/clip.qmd), [DINO](../../literature-review/vision/dino.qmd), and [PaliGemma](../../literature-review/multimodality/paligemma.qmd) illustrate different representation and adaptation choices.
 
 ## Context and position in sequence representations {#sequence-terms}
 
@@ -42,7 +42,7 @@ Absolute positional representations can be learned or fixed; they are not always
 Relative position methods encode position differences or transform queries and keys so their scores depend on relative positions.
 A token's contextual representation incorporates information from the positions its model permits it to read.
 Diffusion time embeddings identify a noise level or generative step, distinct from the position of a word or robot command.
-See [attention](attention.qmd#projections), [representations](representations.qmd), and [generative time](generative-sampling.qmd#objects).
+See [attention](attention.qmd#projections), [representations](representations.qmd), and [generative time](../robotics/generative-sampling.qmd#objects).
 
 ## CLIP and SigLIP: what the visual encoder learned {#clip-and-siglip}
 
@@ -123,5 +123,5 @@ The [$\pi_{0.5}$](../../literature-review/action/pi05.qmd) and [knowledge insula
 [Input representations](representations.qmd) distinguishes token identifiers, embeddings, image patches, and numerical scaling.
 [Cross-entropy](../mathematics/entropy.qmd#cross-entropy) derives the binary and categorical loss forms used above.
 [Autoregression](generative-models.qmd#factorisation) describes output factorisation and generation order, separately from how features were learned.
-The [CLIP review](../../literature-review/multimodal/clip.qmd) develops zero-shot classification and transfer evidence; [DINO](../../literature-review/vision/dino.qmd) uses a student–teacher objective without paired text.
+The [CLIP review](../../literature-review/multimodality/clip.qmd) develops zero-shot classification and transfer evidence; [DINO](../../literature-review/vision/dino.qmd) uses a student–teacher objective without paired text.
 [Stop-gradient](../computer-software/stop-gradient.qmd) explains why an available target or context can have a blocked derivative path.

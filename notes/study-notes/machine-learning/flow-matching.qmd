@@ -128,7 +128,7 @@ Mode averaging by a point predictor and mode dropping by a generator are distinc
 
 ## Connect the field to a sampler {#connections}
 
-A [generative sampler](generative-sampling.qmd) integrates the predicted field from an initial noise draw.
+A [generative sampler](../robotics/generative-sampling.qmd) integrates the predicted field from an initial noise draw.
 [Direct MSE regression](loss.qmd#conditional-mean) instead predicts one final answer for an observation.
 The [flow-matching paper review](../../literature-review/theory/flow-matching.qmd) derives Gaussian conditional paths and the equality of conditional and marginal objective gradients.
 [π0](../../literature-review/action/pi0.qmd) applies flow matching to observation-conditioned robot actions.

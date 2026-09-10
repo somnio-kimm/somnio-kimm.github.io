@@ -6,8 +6,8 @@ Personal site of **Soo Min Kimm** — research notes, publications, and talks. B
 
 - `index.qmd` — homepage
 - `publications.qmd`, `talks.qmd`, `cv.qmd`
-- `notes/literature-review/` — paper reviews grouped into Action, Theory, Vision, Language, and Multimodal Models
-- `notes/study-notes/` — connected topic families under `mathematics/`, `machine-learning/`, `physics/`, `computer-hardware/`, and `computer-software/`; electrical engineering material lives directly in `physics/`
+- `notes/literature-review/` — paper reviews grouped into Action, Theory, Vision, Language, and Multimodality
+- `notes/study-notes/` — connected topic families under `mathematics/`, `machine-learning/`, `robotics/`, `physics/`, `computer-hardware/`, and `computer-software/`; electrical engineering material lives directly in `physics/`
 - `_quarto.yml` — site config, navbar, and subject sidebars; subject names link to overview pages, and arrows expand their notes
 - `styles.scss` — theme tweaks
 - `images/`, `files/` — note figures and talk slides

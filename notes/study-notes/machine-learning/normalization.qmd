@@ -10,7 +10,7 @@ categories:
 
 An activation normalization layer transforms intermediate numerical representations inside a network.
 The key questions are **which coordinates share statistics**, **whether the mean is subtracted**, and **whether training and inference use the same statistics**.
-This differs from [quantile scaling](quantile-normalization.qmd#quantile-scaling), which expresses physical input or output coordinates using fixed training-data reference values.
+This differs from [quantile scaling](../robotics/quantile-normalization.qmd#quantile-scaling), which expresses physical input or output coordinates using fixed training-data reference values.
 
 ## Comparing normalization methods {#what-to-check-when-reading-a-model}
 
@@ -27,7 +27,7 @@ The sections below give the equations for each method.
 The learned affine transformation means that normalized layer outputs need not retain zero mean or unit variance.
 Normalization also does not generally decorrelate features, make them Gaussian, or preserve information needed to invert the input from the output alone.
 Placement matters: [ViT](../../literature-review/vision/vit.qmd) normalizes before attention and its MLP, while [LLaMA](../../literature-review/language/llama.qmd) uses RMSNorm before its transformer sublayers.
-[PaliGemma](../../literature-review/multimodal/paligemma.qmd) motivates keeping these activation operations distinct from image encoding, text tokenization, and physical-coordinate scaling.
+[PaliGemma](../../literature-review/multimodality/paligemma.qmd) motivates keeping these activation operations distinct from image encoding, text tokenization, and physical-coordinate scaling.
 
 ## BatchNorm Uses Other Examples {#batchnorm}
 
@@ -100,7 +100,7 @@ Finite $\epsilon$ makes this scale invariance approximate.
 
 ## Connections {#connections}
 
-[Quantile normalization](quantile-normalization.qmd) uses fixed training-data references to express physical coordinates in a model's numerical range.
+[Quantile normalization](../robotics/quantile-normalization.qmd) uses fixed training-data references to express physical coordinates in a model's numerical range.
 [Attention](attention.qmd#projections) combines information from sequence positions; normalization changes the hidden vectors used within a transformer block.
 [Token embeddings](representations.qmd#embeddings) supplies the hidden-coordinate representation used in the LayerNorm example.
 [Representations](representations.qmd) connects hidden vectors to text, images, and physical inputs.

@@ -1,0 +1,28 @@
+---
+title: "Robotics"
+description: "Robot policies, action coordinates, sampling, and feedback during execution."
+listing-page: true
+listing:
+  contents: "*.qmd"
+  type: default
+  sort: "title"
+  fields: [title, description]
+draft: false
+---
+
+These notes connect policy learning, action representations, and generation to the commands a robot executes.
+Start with [policies and learning regimes](policies.qmd), then use [action horizons and feedback](action-horizons.qmd) to distinguish prediction from execution.
+
+## Supporting concepts
+
+| Topic | Connection to robotics |
+|---|---|
+| [Generative models](../machine-learning/generative-models.qmd) | Compare point, token, latent-variable, diffusion, and flow-based action outputs. |
+| [Diffusion](../machine-learning/diffusion.qmd) and [flow matching](../machine-learning/flow-matching.qmd) | Understand the targets used to learn action generators. |
+| [Autoencoders](../machine-learning/autoencoders.qmd) | Relate conditional latent variables to action-chunk reconstruction. |
+| [Attention](../machine-learning/attention.qmd) and [representations](../machine-learning/representations.qmd) | Distinguish action queries, observation features, physical coordinates, and token IDs. |
+| [Loss functions](../machine-learning/loss.qmd) and [distribution shift](../machine-learning/distribution-shift.qmd) | Understand action averaging and changes in observations induced by a deployed policy. |
+
+The [action literature reviews](../../literature-review/action/index.qmd) connect these concepts to specific robot-policy models and experiments.
+
+## Robotics notes

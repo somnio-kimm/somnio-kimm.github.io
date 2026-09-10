@@ -66,9 +66,9 @@ website:
         - section: "Language"
           href: notes/literature-review/language/index.qmd
           contents: "notes/literature-review/language/*.qmd"
-        - section: "Multimodal Models"
-          href: notes/literature-review/multimodal/index.qmd
-          contents: "notes/literature-review/multimodal/*.qmd"
+        - section: "Multimodality"
+          href: notes/literature-review/multimodality/index.qmd
+          contents: "notes/literature-review/multimodality/*.qmd"
     - id: study-notes
       title: "Study Notes"
       style: floating
@@ -82,9 +82,11 @@ website:
         - section: "Machine Learning"
           href: notes/study-notes/machine-learning/index.qmd
           contents: "notes/study-notes/machine-learning/*.qmd"
-        - section: "Physics"
+        - section: "Robotics"
+          href: notes/study-notes/robotics/index.qmd
+          contents: "notes/study-notes/robotics/*.qmd"
+        - text: "Physics"
           href: notes/study-notes/physics/index.qmd
-          contents: "notes/study-notes/physics/*.qmd"
         - href: notes/study-notes/computer-hardware/index.qmd
           text: "Computer Hardware"
         - section: "Computer Software"

@@ -15,7 +15,7 @@ An ID, an embedding vector, and a physical coordinate have different roles even 
 
 | Transformation | Input | Output |
 |---|---|---|
-| [Quantile normalization](quantile-normalization.qmd) | Physical coordinate | Scaled continuous number |
+| [Quantile normalization](../robotics/quantile-normalization.qmd) | Physical coordinate | Scaled continuous number |
 | [Text tokenization](representations.qmd#sentencepiece) | String | Discrete vocabulary IDs |
 | [Embedding lookup](representations.qmd#embeddings) | Vocabulary ID | Learned vector |
 | [Visual encoding](representations.qmd#visual-tokens) | Image patches | Continuous feature vectors |
@@ -74,15 +74,15 @@ Its [pretraining discussion](representation-learning.qmd#representation-pretrain
 
 ## Paper Connections {#paper-connections}
 
-[PaliGemma](../../literature-review/multimodal/paligemma.qmd) combines projected visual vectors with embedded text.
+[PaliGemma](../../literature-review/multimodality/paligemma.qmd) combines projected visual vectors with embedded text.
 [FAST](../../literature-review/action/fast.qmd) converts continuous action trajectories into discrete targets.
 [π0.5](../../literature-review/action/pi05.qmd) shows why a physical state coordinate, its quantized bin, and the text IDs representing that bin must be distinguished.
 
 ## Connections {#connections}
 
-[Quantile normalization](quantile-normalization.qmd) develops continuous coordinate scaling and its inverse.
+[Quantile normalization](../robotics/quantile-normalization.qmd) develops continuous coordinate scaling and its inverse.
 [Attention](attention.qmd#projections) updates representations using permitted positions; [activation normalization](normalization.qmd#what-to-check-when-reading-a-model) transforms their internal statistics.
 [Representation learning](representation-learning.qmd) explains training and adapting the encoders that produce these vectors.
 [Cross-entropy](../mathematics/entropy.qmd#cross-entropy) evaluates predicted distributions over discrete targets.
 The [ViT review](../../literature-review/vision/vit.qmd) gives the patch projection and transformer architecture.
-[FAST](../../literature-review/action/fast.qmd) tokenizes temporal action trajectories, while [PaliGemma](../../literature-review/multimodal/paligemma.qmd) and [π0](../../literature-review/action/pi0.qmd) use visual features to condition other outputs.
+[FAST](../../literature-review/action/fast.qmd) tokenizes temporal action trajectories, while [PaliGemma](../../literature-review/multimodality/paligemma.qmd) and [π0](../../literature-review/action/pi0.qmd) use visual features to condition other outputs.

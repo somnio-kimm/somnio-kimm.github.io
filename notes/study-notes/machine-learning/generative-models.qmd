@@ -88,8 +88,8 @@ The output variable and the numbers used to parameterise its distribution have d
 | How are sequence elements predicted and generated? | [Autoregression](generative-models.qmd#factorisation). |
 | What does a noise-prediction model learn? | [Diffusion](diffusion.qmd). |
 | What is a generated velocity, and why can local averages preserve modes? | [Flow matching](flow-matching.qmd). |
-| How can deterministic computation produce different samples? | [Generative sampling](generative-sampling.qmd). |
-| Which proposed commands are executed before replanning? | [Action horizons and feedback](../physics/action-horizons.qmd). |
+| How can deterministic computation produce different samples? | [Generative sampling](../robotics/generative-sampling.qmd). |
+| Which proposed commands are executed before replanning? | [Action horizons and feedback](../robotics/action-horizons.qmd). |
 
 ## Connect a concept to a policy {#papers}
 
@@ -102,6 +102,6 @@ The output variable and the numbers used to parameterise its distribution have d
 
 [Autoencoders](autoencoders.qmd) develops latent-variable models and conditional reconstruction.
 [Diffusion](diffusion.qmd) learns noise predictions, while [flow matching](flow-matching.qmd) learns velocities.
-[Generative sampling](generative-sampling.qmd) explains randomness and deterministic computation.
+[Generative sampling](../robotics/generative-sampling.qmd) explains randomness and deterministic computation.
 [Energy-based models](energy-based-models.qmd) connects relative density, scores, and Langevin sampling.
-[Action horizons](../physics/action-horizons.qmd) explains when the generated commands are executed.
+[Action horizons](../robotics/action-horizons.qmd) explains when the generated commands are executed.

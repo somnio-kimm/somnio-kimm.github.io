@@ -24,6 +24,6 @@ Each review separates the problem, mechanism, experimental evidence, and limitat
 | [Theory](theory/index.qmd) | Generative modeling, learning objectives, and sequence modeling. |
 | [Vision](vision/index.qmd) | Visual representations, image models, and object detection. |
 | [Language](language/index.qmd) | Language representations, pretraining, and language-model architectures. |
-| [Multimodal Models](multimodal/index.qmd) | Models that connect images and language through shared representations and generation. |
+| [Multimodality](multimodality/index.qmd) | Models that connect images and language through shared representations and generation. |
 
 Browse a subject above, or use the filters below to find a paper.
