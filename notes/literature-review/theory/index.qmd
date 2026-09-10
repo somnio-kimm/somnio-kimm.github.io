@@ -1,0 +1,13 @@
+---
+title: "Theory"
+description: "Generative modeling, learning objectives, and sequence modeling."
+listing-page: true
+listing:
+  contents: "*.qmd"
+  type: default
+  sort: "title"
+  fields: [title, description]
+draft: false
+---
+
+These reviews examine the objectives and mechanisms behind generative models, knowledge distillation, and sequence models.

@@ -1,0 +1,13 @@
+---
+title: "Action"
+description: "Robot policies, action representations, and real-time execution."
+listing-page: true
+listing:
+  contents: "*.qmd"
+  type: default
+  sort: "title"
+  fields: [title, description]
+draft: false
+---
+
+These reviews examine how robot policies learn, represent actions, and execute them under real-time constraints.

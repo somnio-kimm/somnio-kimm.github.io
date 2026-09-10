@@ -1,0 +1,13 @@
+---
+title: "Multimodal Models"
+description: "Models that connect images and language through shared representations and generation."
+listing-page: true
+listing:
+  contents: "*.qmd"
+  type: default
+  sort: "title"
+  fields: [title, description]
+draft: false
+---
+
+These reviews examine how models connect images and language through shared representations and conditional generation.

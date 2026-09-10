@@ -5,6 +5,7 @@ listing-page: true
 listing:
   contents:
     - "**/*.qmd"
+    - "!**/index.qmd"
     - "!template.qmd"
   type: grid
   sort: "title"
@@ -15,5 +16,14 @@ listing:
 draft: false
 ---
 
-Browse by area in the sidebar, or filter the papers below.
 Each review separates the problem, mechanism, experimental evidence, and limitations, with links to the underlying study notes.
+
+| Subject | Scope |
+|---|---|
+| [Action](action/index.qmd) | Robot policies, action representations, and real-time execution. |
+| [Theory](theory/index.qmd) | Generative modeling, learning objectives, and sequence modeling. |
+| [Vision](vision/index.qmd) | Visual representations, image models, and object detection. |
+| [Language](language/index.qmd) | Language representations, pretraining, and language-model architectures. |
+| [Multimodal Models](multimodal/index.qmd) | Models that connect images and language through shared representations and generation. |
+
+Browse a subject above, or use the filters below to find a paper.

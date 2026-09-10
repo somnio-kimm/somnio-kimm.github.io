@@ -54,18 +54,21 @@ website:
       contents:
         - href: notes/literature-review/index.qmd
           text: "All literature reviews"
-        - section: "Literature Review"
-          contents:
-            - section: "Action"
-              contents: "notes/literature-review/action/*.qmd"
-            - section: "Theory"
-              contents: "notes/literature-review/theory/*.qmd"
-            - section: "Vision"
-              contents: "notes/literature-review/vision/*.qmd"
-            - section: "Language"
-              contents: "notes/literature-review/language/*.qmd"
-            - section: "Multimodal Models"
-              contents: "notes/literature-review/multimodal/*.qmd"
+        - section: "Action"
+          href: notes/literature-review/action/index.qmd
+          contents: "notes/literature-review/action/*.qmd"
+        - section: "Theory"
+          href: notes/literature-review/theory/index.qmd
+          contents: "notes/literature-review/theory/*.qmd"
+        - section: "Vision"
+          href: notes/literature-review/vision/index.qmd
+          contents: "notes/literature-review/vision/*.qmd"
+        - section: "Language"
+          href: notes/literature-review/language/index.qmd
+          contents: "notes/literature-review/language/*.qmd"
+        - section: "Multimodal Models"
+          href: notes/literature-review/multimodal/index.qmd
+          contents: "notes/literature-review/multimodal/*.qmd"
     - id: study-notes
       title: "Study Notes"
       style: floating
@@ -73,16 +76,20 @@ website:
       contents:
         - href: notes/study-notes/index.qmd
           text: "All study notes"
-        - href: notes/study-notes/mathematics/index.qmd
-          text: "Mathematics"
-        - href: notes/study-notes/machine-learning/index.qmd
-          text: "Machine Learning"
-        - href: notes/study-notes/physics/index.qmd
-          text: "Physics"
+        - section: "Mathematics"
+          href: notes/study-notes/mathematics/index.qmd
+          contents: "notes/study-notes/mathematics/*.qmd"
+        - section: "Machine Learning"
+          href: notes/study-notes/machine-learning/index.qmd
+          contents: "notes/study-notes/machine-learning/*.qmd"
+        - section: "Physics"
+          href: notes/study-notes/physics/index.qmd
+          contents: "notes/study-notes/physics/*.qmd"
         - href: notes/study-notes/computer-hardware/index.qmd
           text: "Computer Hardware"
-        - href: notes/study-notes/computer-software/index.qmd
-          text: "Computer Software"
+        - section: "Computer Software"
+          href: notes/study-notes/computer-software/index.qmd
+          contents: "notes/study-notes/computer-software/*.qmd"
   page-footer:
     center: "© 2026 Soo Min Kimm · Built with [Quarto](https://quarto.org)"
 
