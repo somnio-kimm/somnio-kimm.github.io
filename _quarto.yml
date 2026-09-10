@@ -54,8 +54,6 @@ website:
       contents:
         - href: notes/literature-review/index.qmd
           text: "All literature reviews"
-        - href: notes/literature-review/library.qmd
-          text: "Reading library"
         - section: "Literature Review"
           contents:
             - section: "Action"
@@ -64,8 +62,10 @@ website:
               contents: "notes/literature-review/theory/*.qmd"
             - section: "Vision"
               contents: "notes/literature-review/vision/*.qmd"
-            - section: "Language and VLMs"
+            - section: "Language"
               contents: "notes/literature-review/language/*.qmd"
+            - section: "Multimodal Models"
+              contents: "notes/literature-review/multimodal/*.qmd"
     - id: study-notes
       title: "Study Notes"
       style: floating

@@ -37,7 +37,7 @@ The cache is maintained separately for each layer, as explained in the [Transfor
 
 A fixed image/text prefix can also be cached across action-generation steps when the attention structure makes its representations independent of the changing action tokens.
 Changing an observation or another prefix input requires recomputing the affected prefix.
-See [PaliGemma](../../literature-review/language/paligemma.qmd), [π0](../../literature-review/action/pi0.qmd), and [Mamba's recurrent alternative](../../literature-review/theory/mamba.qmd).
+See [PaliGemma](../../literature-review/multimodal/paligemma.qmd), [π0](../../literature-review/action/pi0.qmd), and [Mamba's recurrent alternative](../../literature-review/theory/mamba.qmd).
 
 ## Related Concepts
 

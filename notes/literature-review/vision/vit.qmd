@@ -77,5 +77,5 @@ For standard dense attention, doubling both image dimensions at fixed patch size
 ## Connections
 
 [DINO](dino.qmd) changes how a ViT representation is trained, using a moving teacher and multiple crops.
-[CLIP](clip.qmd) can use a ViT image encoder while learning alignment with text.
-[PaliGemma](../language/paligemma.qmd) supplies a sequence of visual features to a language model, rather than using only a class token for classification.
+[CLIP](../multimodal/clip.qmd) can use a ViT image encoder while learning alignment with text.
+[PaliGemma](../multimodal/paligemma.qmd) supplies a sequence of visual features to a language model, rather than using only a class token for classification.

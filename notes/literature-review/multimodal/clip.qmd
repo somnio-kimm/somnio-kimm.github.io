@@ -3,9 +3,10 @@ title: 'CLIP: Learning Visual Representations from Language'
 description: "Image–text contrastive learning, prompt-based zero-shot classification, and the limits of transfer."
 date-modified: 2026-09-10
 draft: false
+aliases:
+  - /notes/literature-review/vision/clip.html
 categories:
-  - Vision
-  - Language
+  - Multimodal Models
   - Representation Learning
 ---
 
@@ -67,7 +68,7 @@ See the paper's [Figure 3 pseudocode](https://arxiv.org/pdf/2103.00020#page=5) a
 :::
 
 The paper trains both encoders from scratch on WIT, a collected dataset of 400 million image–text pairs.
-Its models include modified ResNets and [ViTs](vit.qmd), specifically ViT-B/32, ViT-B/16, and ViT-L/14, with an additional higher-resolution L/14 variant.
+Its models include modified ResNets and [ViTs](../vision/vit.qmd), specifically ViT-B/32, ViT-B/16, and ViT-L/14, with an additional higher-resolution L/14 variant.
 The text encoder is a transformer; the original training recipe uses large batches, Adam with decoupled weight decay, cosine learning-rate decay, and 32 epochs. [Sections 2.2–2.5](https://arxiv.org/pdf/2103.00020#page=3).
 
 ## Zero-shot Classification
@@ -94,6 +95,6 @@ Similarity scores are relative to the chosen candidate set and should not automa
 
 ## Connections
 
-[DINO](dino.qmd) learns visual features without paired text, whereas CLIP's cross-modal supervision supports description-based retrieval and classification.
-[PaliGemma](../language/paligemma.qmd) starts with a SigLIP image encoder and adds a generative language model.
+[DINO](../vision/dino.qmd) learns visual features without paired text, whereas CLIP's cross-modal supervision supports description-based retrieval and classification.
+[PaliGemma](paligemma.qmd) starts with a SigLIP image encoder and adds a generative language model.
 The [representation note](../../study-notes/machine-learning/representation-learning.qmd#clip-and-siglip) compares CLIP's batch softmax with SigLIP's pairwise sigmoid loss.
