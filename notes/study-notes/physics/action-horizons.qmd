@@ -1,0 +1,44 @@
+---
+title: "Action horizons and feedback"
+description: "Distinguish observed history, predicted windows, executed commands, and transitions between chunks."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Physics
+  - Electrical Engineering
+  - Machine Learning
+  - Robotics
+---
+
+An action chunk contains several proposed commands, but a controller need not execute the entire chunk before obtaining a new prediction.
+Prediction, execution, and feedback therefore have separate time scales.
+
+## Horizon and feedback definitions {#horizons}
+
+An observation horizon counts past observations provided to the policy.
+A prediction horizon counts action positions in a predicted window; depending on its alignment, that window can include positions associated with observation history.
+An execution horizon counts commands applied before switching to an updated plan.
+In an asynchronous controller, the next result may be computed before the controller adopts it.
+A training horizon is the segment length used in training, and an effective horizon concerns how far dependencies or rewards materially affect learning or behaviour.
+These need not be the same number.
+
+An open-loop segment executes a precomputed sequence without using new task observations to replan that segment.
+A closed-loop policy updates decisions from feedback.
+An action-chunk policy can be closed-loop across chunks while executing several commands open-loop within each chunk.
+Its low-level motor controller may still use fast feedback throughout.
+See [ACT](../../literature-review/action/act.qmd), [Diffusion Policy](../../literature-review/action/diffusion-policy.qmd), and [IRTC](../../literature-review/action/irtc.qmd#execution-timeline).
+
+## From a valid chunk to continuous execution {#execution}
+
+Generating a plausible chunk and switching safely between chunks are separate problems.
+Two individually valid samples can choose incompatible strategies.
+[ACT](../../literature-review/action/act.qmd) combines overlapping predictions through temporal ensembling.
+[IRTC](../../literature-review/action/irtc.qmd) instead guides new generation using the previous chunk, with different weights for committed and overlapping future actions.
+
+## Keep the clocks separate {#time}
+
+Robot time orders the commands that affect the physical system.
+Diffusion indices and flow time order internal computations that generate a predicted chunk.
+An intermediate denoising state is not a command currently being executed.
+[Generative sampling](../machine-learning/generative-sampling.qmd#objects) defines those numerical objects.
+For model-specific data flow, continue to [Diffusion Policy](../../literature-review/action/diffusion-policy.qmd), [π0](../../literature-review/action/pi0.qmd), or [π0.5](../../literature-review/action/pi05.qmd).

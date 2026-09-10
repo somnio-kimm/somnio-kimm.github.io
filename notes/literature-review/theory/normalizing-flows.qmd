@@ -1,0 +1,135 @@
+---
+title: 'Variational Inference with Normalizing Flows'
+description: "How invertible transformations enrich a latent distribution, and why density changes use an inverse Jacobian."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+  - Generative Models
+  - Variational Inference
+---
+
+Paper: Rezende and Mohamed (2015), [Variational Inference with Normalizing Flows](https://arxiv.org/abs/1505.05770).
+A normalizing flow transforms a simple distribution through invertible maps while accounting for the change in probability density.
+This paper uses that mechanism to construct more expressive approximate posteriors for variational inference.
+
+## Problem
+
+A tractable approximate posterior, such as a diagonal Gaussian in a [VAE](vae.qmd), can fail to represent correlations, asymmetry, or multiple regions of high posterior density.
+Increasing the flexibility of the encoder network does not remove the restrictions of its output distribution family.
+The desired distribution must remain easy to sample and evaluate so that it can still enter the variational objective. [Paper, §§1–2](https://arxiv.org/pdf/1505.05770#page=1).
+
+## Previous attempts
+
+Mean-field variational inference gains tractability by restricting the posterior family.
+More elaborate inference procedures can improve the approximation but add computational cost or require specialised estimators.
+Normalizing flows instead start from a tractable base density and compose transformations whose effect on density can be computed. [Paper, §§2–3](https://arxiv.org/pdf/1505.05770#page=2).
+
+## Proposed solution
+
+First consider a generative map $x=f(z)$, where $z\sim p_0$ and $f$ is a differentiable bijection with a nonsingular Jacobian.
+The model density is
+
+$$
+  p_\theta(x)
+  =p_0(f^{-1}(x))\left|\det J_{f^{-1}}(x)\right|.
+$$
+
+At $x=f(z)$, this is equivalently
+
+$$
+  p_\theta(f(z))
+  =\frac{p_0(z)}{|\det J_f(z)|}.
+$$
+
+Expanding a small region spreads its probability mass over more volume, so the density decreases.
+For the scalar example $x=2z$, the density is $p_\theta(x)=p_0(x/2)/2$.
+The forward determinant divides density; the inverse determinant multiplies it. [Paper, Eq. (5)](https://arxiv.org/pdf/1505.05770#page=4).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: preserve probability while changing volume"}
+
+Corresponding infinitesimal regions must have equal probability:
+
+$$
+  p_\theta(x)\,dx=p_0(z)\,dz.
+$$
+
+The local volume transformation is $dx=|\det J_f(z)|\,dz$.
+Substitution gives the denominator in the forward-map formula.
+Differentiating $f^{-1}(f(z))=z$ gives
+
+$$
+  J_{f^{-1}}(f(z))J_f(z)=I.
+$$
+
+Taking determinants proves that the two absolute determinants are reciprocals.
+If the named map instead runs from data to latent space, its determinant appears with the opposite sign in the log-density formula because the map direction has changed.
+
+:::
+
+For a composition $z_k=f_k(z_{k-1})$ starting from $z_0\sim q_0$, the transformed density satisfies
+
+$$
+  \begin{aligned}
+  \log q_K(z_K)&=\log q_0(z_0)\\
+  &\quad-\sum_{k=1}^{K}\log|\det J_{f_k}(z_{k-1})|.
+  \end{aligned}
+$$
+
+The paper applies this chain to an approximate posterior $q_K(z_K\mid x)$.
+Its base distribution and transformation parameters may depend on the observed example $x$ through an inference network. [Paper, Eqs. (6)–(8) and §4](https://arxiv.org/pdf/1505.05770#page=4).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: insert the flow posterior into the ELBO"}
+
+Write $d_k=\log|\det J_{f_k}(z_{k-1})|$, with conditioning on $x$ implicit.
+Changing the expectation from the transformed variable to its base sample gives
+
+$$
+  \begin{aligned}
+  B(x)=\mathbb E_{q_0}\bigg[
+  &\log p_\theta(x,z_K)-\log q_0(z_0)\\
+  &+\sum_{k=1}^{K}d_k\bigg].
+  \end{aligned}
+$$
+
+The determinant sum has a plus sign here because the ELBO subtracts $\log q_K$.
+That sign does not contradict the minus sign in the transformed-density formula.
+The generative model still evaluates its joint density at the final latent sample $z_K$.
+
+:::
+
+One concrete construction is the planar transformation
+
+$$
+  f(z)=z+u\,h(w^\top z+b).
+$$
+
+Its Jacobian is a rank-one update of the identity, giving
+
+$$
+  \det J_f(z)=1+u^\top\psi(z),
+$$
+
+$$
+  \psi(z)=h'(w^\top z+b)w.
+$$
+
+The determinant can therefore be evaluated in linear time in the latent dimension, while additional parameter constraints ensure invertibility. [Paper, §4 and Appendix A](https://arxiv.org/pdf/1505.05770#page=5).
+
+## Evidence
+
+The paper visualises increasingly expressive transformed densities on synthetic target distributions and evaluates flow posteriors in deep latent Gaussian models.
+These experiments investigate the benefit of posterior flexibility within the chosen models, rather than establishing that every invertible architecture is efficient for every task. [Paper, §6](https://arxiv.org/pdf/1505.05770#page=6).
+
+## Limitations
+
+Invertibility alone does not guarantee cheap density evaluation: the needed map direction and Jacobian determinant must also be tractable.
+For variational inference, the sampled base variable is already known, so evaluating the posterior at that transformed sample can avoid solving an inverse problem.
+This differs from evaluating a standalone flow density at an arbitrary supplied observation.
+The model density is the density induced by the learned map, not automatically the unknown data density.
+
+## Connections
+
+[Flow matching](flow-matching.qmd) trains continuous normalizing flows by regressing velocity fields.
+Finite compositions and continuous flows belong to a connected family; flow matching is a training method, not a claim that continuous models cease to be normalizing flows.
+[Score-based models](score-based-models.qmd) provide a probability-flow ODE that creates another connection between diffusion and continuous density transformations.

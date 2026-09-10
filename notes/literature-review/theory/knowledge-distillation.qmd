@@ -1,0 +1,102 @@
+---
+title: 'Distilling the Knowledge in a Neural Network'
+description: "Teacher soft targets, temperature, the T-squared loss factor, and the high-temperature logit-matching limit."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+  - Representation Learning
+---
+
+Paper: [Hinton, Vinyals, and Dean (2015), arXiv:1503.02531](https://arxiv.org/abs/1503.02531).
+
+## Problem
+
+A large model or ensemble can be useful during training but expensive to deploy.
+Distillation trains another model to reproduce the teacher's output behaviour on a transfer dataset.
+The transferred object is a function expressed through its predictions, not necessarily a copy of its architecture or weights.
+
+## Previous Attempts
+
+Training only against hard labels tells the student which class is correct, but discards the teacher's relative preferences among alternative classes.
+Those probabilities can reveal which classes the teacher finds similar.
+They can also carry teacher errors, so their usefulness is an empirical question.
+
+## Proposed Solution
+
+Let $v_i$ and $z_i$ be teacher and student logits for class $i$.
+At temperature $T>0$, define
+
+$$
+  p_i^{(T)}=\frac{e^{v_i/T}}{\sum_j e^{v_j/T}},\qquad
+  q_i^{(T)}=\frac{e^{z_i/T}}{\sum_j e^{z_j/T}}.
+$$
+
+For fixed logits, $T>1$ produces a softer distribution and $T<1$ a sharper one.
+The teacher targets are held fixed while training the student.
+The soft-target objective is $L_{\mathrm{soft}}=H(p^{(T)},q^{(T)})$.
+When labels $y$ are available, a common expression of the paper's combined objective is
+
+$$
+  L=\alpha T^2L_{\mathrm{soft}}
+  +(1-\alpha)H(y,q^{(1)}),
+$$
+
+where $0\leq\alpha\leq1$ controls the relative contribution.
+The temperature-one branch and the temperature-$T$ branch use the same student logits.
+Ordinary deployment returns to $T=1$.
+The teacher can supply targets on an unlabelled transfer set; the hard-label term requires labels.
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: the gradient, T-squared scaling, and logit matching"}
+
+Since $\partial\ln q_j^{(T)}/\partial z_i=(\delta_{ij}-q_i^{(T)})/T$,
+
+$$
+  \frac{\partial L_{\mathrm{soft}}}{\partial z_i}
+  =\frac{q_i^{(T)}-p_i^{(T)}}{T}.
+$$
+
+Softmax is unchanged by adding the same scalar to every logit.
+Centre teacher and student logits separately so $\sum_i v_i=\sum_i z_i=0$.
+For $K$ classes and $T$ much larger than their magnitudes, expand $e^{z_i/T}\approx1+z_i/T$ to obtain
+
+$$
+  q_i^{(T)}\approx\frac1K+\frac{z_i}{KT},\qquad
+  p_i^{(T)}\approx\frac1K+\frac{v_i}{KT}.
+$$
+
+Therefore,
+
+$$
+  \frac{\partial L_{\mathrm{soft}}}{\partial z_i}
+  \approx\frac{z_i-v_i}{KT^2}.
+$$
+
+Multiplication by $T^2$ compensates for this approximate scaling when mixing soft and hard supervision.
+In this limit, the scaled gradient matches that of $\frac1{2K}\sum_i(z_i-v_i)^2$ on centred logits.
+The equivalence is an asymptotic statement with assumptions, not exact equality of all distillation losses at arbitrary temperature.
+See Section 2.1, Equations 2–4.
+
+:::
+
+For fixed teacher probabilities, replacing soft cross-entropy by $D_{\mathrm{KL}}(p^{(T)}\Vert q^{(T)})$ removes a constant teacher entropy and leaves student gradients unchanged.
+The [probability note](../../study-notes/mathematics/entropy.qmd#kl-divergence) derives this identity.
+
+## Evidence
+
+In the MNIST experiment, the reported large teacher made 67 test errors, the smaller hard-label baseline 146, and the distilled smaller model 74 under the stated setup.
+This supports knowledge transfer in that experiment; it does not show that every student inherits the teacher's generalisation.
+Section 4 studies acoustic models, and Section 5 explores specialists that focus on confusing subsets of classes.
+Specialists also predict a combined class for categories outside their subset, allowing their outputs to be combined with a generalist model.
+
+## Limitations
+
+Student capacity, transfer-data coverage, temperature, and teacher quality affect the result.
+Soft targets can propagate a teacher's systematic errors.
+The paper's missing-class MNIST experiments include class-bias adjustments selected using test performance, so those adjusted numbers should not be read as an untouched test-set evaluation.
+
+## Connections
+
+[Cross-entropy](../../study-notes/mathematics/entropy.qmd#cross-entropy) supplies the loss and softmax definitions.
+[DINO](../vision/dino.qmd) uses a moving teacher in self-supervised learning, which differs from this fixed pretrained teacher setup.
+[Knowledge insulation](../action/knowledge-insulation.qmd) controls gradient paths into a pretrained backbone; its name does not mean that it uses this distillation objective.

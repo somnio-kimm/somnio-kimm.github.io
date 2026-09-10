@@ -1,0 +1,64 @@
+---
+title: "Diffusion and noise prediction"
+description: "Explain the noisy input, sampled training target, conditional mean, and iterative generation."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+  - Generative Models
+  - Robotics
+---
+
+Noise-prediction diffusion learns how corruption relates to clean examples and uses a sampler to generate from noise.
+Here $A$ is a demonstrated action chunk, $o$ is its observation condition, and $k$ indexes the amount of corruption.
+
+## What noise prediction learns {#diffusion}
+
+For one common noise-prediction formulation, training constructs
+
+$$
+  A_k=\sqrt{\bar\alpha_k}\,A
+  +\sqrt{1-\bar\alpha_k}\,\epsilon,
+$$
+
+where $\epsilon\sim\mathcal N(0,I)$ and the fixed schedule $\bar\alpha_k$ decreases as corruption increases.
+The network receives $(A_k,o,k)$ and predicts $\hat\epsilon=\epsilon_\theta(A_k,o,k)$.
+Its simplified training objective is
+
+$$
+  L_{\mathrm{noise}}
+  =\mathbb E[\|\hat\epsilon-\epsilon\|^2].
+$$
+
+Here, the known sampled noise supplies supervision.
+The clean demonstration constructs the corrupted training input; it is not a required inference input.
+This is the noise-prediction formulation of [DDPM, Sections 3.2 and 3.4](https://arxiv.org/abs/2006.11239), with observation conditioning added for a policy.
+
+The ideal squared-error predictor is
+
+$$
+  \epsilon^*(A_k,o,k)
+  =\mathbb E[\epsilon\mid A_k,o,k].
+$$
+
+It is still a conditional average.
+Its conditioning includes the location of the current noisy sample, so it defines a field across noisy action space instead of one final answer for an observation.
+
+At inference, a sampler starts with noise and repeatedly uses the trained network to update the sample.
+A scheduler supplies the update coefficients and, for a stochastic sampler, any additional random noise.
+There is no stored clean target being subtracted at inference.
+Only the final clean prediction is eligible for execution, as detailed in [Diffusion Policy](../../literature-review/action/diffusion-policy.qmd).
+
+## Compare the targets {#targets}
+
+Direct squared-error action prediction learns a [conditional mean of actions](loss.qmd#conditional-mean).
+The diffusion objective instead conditions on the current noisy sample as well as the observation and noise level.
+These conditional averages are functions of different inputs and predict different quantities.
+[Flow matching](flow-matching.qmd) uses another local target, a velocity along a constructed probability path.
+[Generative sampling](generative-sampling.qmd) separates the learned field from the random draws and numerical updates used to generate an output.
+
+## Read the model-specific derivation {#connections}
+
+The [DDPM review](../../literature-review/theory/ddpm.qmd) derives the forward Gaussian chain, posterior, variational bound, and simplified MSE objective.
+The [score-based model review](../../literature-review/theory/score-based-models.qmd) relates noise prediction to log-density gradients.
+[Diffusion Policy](../../literature-review/action/diffusion-policy.qmd) explains observation conditioning, prediction windows, and robot execution.

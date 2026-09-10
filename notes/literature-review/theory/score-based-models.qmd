@@ -1,0 +1,206 @@
+---
+title: 'Score-Based Generative Modeling through SDEs'
+description: "What a score predicts, how denoising estimates it, and how reverse SDEs and probability-flow ODEs generate samples."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+  - Generative Models
+  - Diffusion
+---
+
+Paper: Song et al. (2020), [Score-Based Generative Modeling through Stochastic Differential Equations](https://arxiv.org/abs/2011.13456), published at ICLR 2021.
+The paper unifies several score-based and diffusion models through a forward stochastic differential equation and its reverse-time counterpart.
+The learned object is the gradient of the noisy-data log-density at each time.
+
+## Problem
+
+For a differentiable density $p_t(x)$, its score is the vector
+
+$$
+  s_t(x)=\nabla_x\log p_t(x).
+$$
+
+It points locally toward increasing log-density and has the same dimension as $x$.
+This is a derivative with respect to the sample, not a scalar quality score or a gradient with respect to network parameters.
+For $p_\theta(x)=e^{-E_\theta(x)}/Z_\theta$, the normalising constant disappears under this derivative, giving $s_\theta(x)=-\nabla_x E_\theta(x)$. [Hyvärinen (2005), §2](https://www.jmlr.org/papers/volume6/hyvarinen05a/hyvarinen05a.pdf#page=2).
+The [probability study](../../study-notes/machine-learning/energy-based-models.qmd#energy-and-score) develops the energy and sampling connection.
+
+The data density and its score are unknown, so training needs an objective that can be estimated from examples.
+Sampling additionally needs a procedure that converts the learned local directions into a distribution of complete outputs.
+
+## Previous attempts
+
+Classical score matching fits a model score by minimising its squared distance from the data score.
+Integration by parts removes the unknown data score from the objective, under suitable differentiability, integrability, and boundary conditions.
+For a model field $s_\theta$, the resulting trainable expression is
+
+$$
+  \mathbb E_{x\sim p}\left[
+  \tfrac12\|s_\theta(x)\|^2
+  +\nabla_x\cdot s_\theta(x)\right].
+$$
+
+The divergence is the sum of coordinate derivatives, $\sum_i\partial s_{\theta,i}/\partial x_i$.
+The omitted term is independent of the model parameters. [Hyvärinen, Theorem 1](https://www.jmlr.org/papers/volume6/hyvarinen05a/hyvarinen05a.pdf#page=3).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: remove the unknown data score"}
+
+Let $s=\nabla\log p$ and start from the Fisher-divergence objective
+
+$$
+  J=\tfrac12\mathbb E_p\|s_\theta-s\|^2.
+$$
+
+The cross term satisfies
+
+$$
+  \mathbb E_p[s_\theta\cdot s]
+  =\int s_\theta(x)\cdot\nabla p(x)\,dx.
+$$
+
+If the boundary contribution vanishes, coordinatewise integration by parts gives
+
+$$
+  \int s_\theta\cdot\nabla p\,dx
+  =-\int p\,\nabla\cdot s_\theta\,dx.
+$$
+
+Expanding the square therefore yields
+
+$$
+  J=\mathbb E_p\left[
+  \tfrac12\|s_\theta\|^2+\nabla\cdot s_\theta
+  \right]+C,
+$$
+
+where $C=\tfrac12\mathbb E_p\|s\|^2$ is independent of $\theta$.
+The plus sign on the divergence comes from subtracting the cross term and then integrating it by parts.
+The identity is not valid without the required boundary and regularity assumptions.
+
+:::
+
+Denoising score matching instead uses the known conditional score of an artificial corruption process.
+Training over multiple noise scales helps define useful scores away from the original data manifold, while [DDPM](ddpm.qmd) provides a discrete Gaussian noising construction.
+Song et al. express these approaches in a common continuous-time framework. [Paper, §§2–3](https://arxiv.org/pdf/2011.13456#page=2).
+
+## Proposed solution
+
+In this note, forward time runs from data at $t=0$ toward noise at $t=T$.
+For a scalar diffusion coefficient $g(t)$, define
+
+$$
+  dx=f(x,t)\,dt+g(t)\,dW_t.
+$$
+
+The drift $f$ determines systematic motion, and $dW_t$ is a Brownian increment with covariance $dt\,I$ in forward time.
+The coefficient $g$ controls the instantaneous noise scale; $g^2$ controls its variance rate.
+Under the reversal conditions used in the paper, the reverse-time SDE is
+
+$$
+  \begin{aligned}
+  dx={}&[f(x,t)-g(t)^2s_t(x)]\,dt\\
+  &+g(t)\,d\bar W_t.
+  \end{aligned}
+$$
+
+This equation is integrated from $T$ down to $0$, so $dt$ is negative and $\bar W$ denotes reverse-time Brownian motion.
+The displayed sign must be interpreted together with that time direction. [Paper, §§3.1–3.2, Eqs. (5)–(6)](https://arxiv.org/pdf/2011.13456#page=4).
+
+For Gaussian perturbations of the form $x_t=a_t x_0+\sigma_t\epsilon$, the conditional score is available exactly:
+
+$$
+  \begin{aligned}
+  \nabla_{x_t}\log p(x_t\mid x_0)
+  &=-\frac{x_t-a_t x_0}{\sigma_t^2}\\
+  &=-\frac{\epsilon}{\sigma_t}.
+  \end{aligned}
+$$
+
+A denoising objective regresses $s_\theta(x_t,t)$ against this target, with a chosen time weighting.
+At the squared-error optimum, the network learns its conditional average given the noisy state, which is the marginal score $s_t(x_t)$. [Paper, §3.3, Eq. (7)](https://arxiv.org/pdf/2011.13456#page=4).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: denoising, marginal scores, and a conditional mean"}
+
+Let $r_t(x,x_0)=\nabla_x\log p_t(x\mid x_0)$ denote the known conditional score.
+Differentiating the noisy marginal density under its integral gives
+
+$$
+  s_t(x)=\int r_t(x,x_0)
+  \frac{p_t(x\mid x_0)p_0(x_0)}{p_t(x)}\,dx_0.
+$$
+
+The fraction is the posterior density of the clean example given the noisy state, so this integral equals $\mathbb E[r_t(x,x_0)\mid x]$.
+
+For additive Gaussian noise $x=x_0+\sigma\epsilon$, substitution gives
+
+$$
+  s(x)=\frac{\mathbb E[x_0\mid x]-x}{\sigma^2}.
+$$
+
+Rearranging yields the Gaussian conditional-mean identity often called Tweedie's formula:
+
+$$
+  \mathbb E[x_0\mid x]=x+\sigma^2s(x).
+$$
+
+For the scaled corruption $x_t=a_t x_0+\sigma_t\epsilon$, the corresponding result is
+
+$$
+  a_t\mathbb E[x_0\mid x_t]
+  =x_t+\sigma_t^2s_t(x_t).
+$$
+
+These are conditional means under the specified corruption model, not exact recovery of the particular clean example that happened to produce a noisy input.
+The derivation requires differentiating the mixture density under the integral and uses the Gaussian conditional score above.
+
+:::
+
+## Variance-preserving and variance-exploding processes
+
+The variance-preserving SDE associated with the continuous DDPM limit is
+
+$$
+  dx=-\tfrac12\beta(t)x\,dt+\sqrt{\beta(t)}\,dW_t.
+$$
+
+Writing $a_t=\exp[-\tfrac12\int_0^t\beta(s)\,ds]$, its conditional law has mean $a_t x_0$ and covariance $(1-a_t^2)I$.
+If the initial marginal covariance is $I$, it remains $I$; the name does not assert that every arbitrary initial data covariance is unchanged.
+The variance-exploding family has zero drift and increasing added covariance:
+
+$$
+  dx=g(t)\,dW_t,
+  \qquad v_t=\int_0^t g(s)^2\,ds.
+$$
+
+Here $v_t$ is the added variance and $\sqrt{v_t}$ is its standard deviation. [Paper, §3.4 and Appendix B](https://arxiv.org/pdf/2011.13456#page=5).
+
+## Two sampling routes
+
+The reverse SDE produces stochastic trajectories, and predictor-corrector sampling combines a numerical prediction step with score-based corrections.
+The corresponding probability-flow ODE is
+
+$$
+  \frac{dx}{dt}=f(x,t)-\tfrac12g(t)^2s_t(x).
+$$
+
+With exact scores and the relevant regularity assumptions, it shares the forward SDE's time-indexed marginal densities.
+It does not share the same random trajectories or all joint distributions across time.
+The ODE is deterministic for a fixed starting sample, while drawing a new terminal noise sample still produces a new output. [Paper, §§4.2–4.3, Eq. (13)](https://arxiv.org/pdf/2011.13456#page=7).
+
+## Evidence
+
+The paper evaluates alternative SDEs, predictor-corrector samplers, probability-flow likelihoods, and conditional image generation.
+The experiments demonstrate that a learned score can support several sampling procedures and inverse-problem constructions within the tested image settings. [Paper, §§4–5](https://arxiv.org/pdf/2011.13456#page=5).
+
+## Limitations
+
+Finite neural approximations and numerical solvers introduce errors, so exact SDE–ODE marginal equivalence does not guarantee identical practical samples or scores.
+Score estimation at very small noise levels can be difficult, and sampling still requires repeated field evaluations.
+The simple reverse formulas above assume $g$ depends only on time; more general state-dependent diffusion requires the additional terms given in the paper's appendix.
+
+## Connections
+
+[Classifier-free guidance](cfg.qmd) combines conditional and unconditional score estimates during sampling.
+[Flow matching](flow-matching.qmd) directly learns velocities for chosen probability paths, while [normalizing flows](normalizing-flows.qmd) explain the density changes of invertible transformations.
+The [generative action study](../../study-notes/machine-learning/generative-models.qmd#questions) distinguishes stochastic denoising from deterministic generation conditioned on an initial noise draw.

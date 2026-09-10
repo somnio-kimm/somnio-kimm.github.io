@@ -1,13 +1,16 @@
 ---
 title: 'Real-Time Execution of Action Chunking Flow Policies'
 description: "IRTC"
-date-modified: 2026-09-01
+date-modified: 2026-09-10
 categories:
   - Robotics
   - ML
+draft: false
 ---
 
 Paper: [arXiv:2506.07339](https://arxiv.org/abs/2506.07339)
+
+The [generative action models note](../../study-notes/machine-learning/generative-models.qmd#questions) defines noisy samples, clean predictions, and flow time before they enter this algorithm.
 
 ## Problem
 
@@ -20,7 +23,6 @@ While the robot executes the current chunk, the policy generates the next one in
 The catch is that robot actions are often multimodal: there may be several valid ways to complete the same task.
 This is useful, but it creates a problem at chunk boundaries.
 Two consecutive chunks can choose different modes even when each chunk is valid on its own.
-This is **mode switching between chunks**, not mode collapse.
 
 ## Previous Attempts
 
@@ -155,6 +157,8 @@ $$
     {\partial\mathbf{A}_t^\tau}.
 $$
 
+::: {.callout-note collapse="true" icon="false" title="Derivation: the endpoint Jacobian and consistency gradient"}
+
 After flattening both chunks, $\mathbf{J}_\tau\in\mathbb{R}^{HM\times HM}$.
 Its individual entries are
 
@@ -201,17 +205,18 @@ $$
 The weighted residual $\mathbf{W}(\widehat{\mathbf{A}_t^1}-\mathbf{Y})$ says which coordinates of the estimated endpoint are wrong and by how much.
 Multiplying by $\mathbf{J}_\tau^\top$ carries that endpoint error backward to the coordinates of the current noisy chunk that caused it.
 
-IRTC uses the negative-gradient direction because it reduces the mismatch:
+:::
+
+The negative gradient gives a local descent direction for the differentiable consistency loss when its gradient is nonzero:
 
 $$
+    \begin{aligned}
     \mathbf{g}_\tau
-    =
-    -\nabla_{\mathbf{A}_t^\tau}
-    \mathcal{L}(\mathbf{A}_t^\tau)
-    =
-    \mathbf{J}_\tau^{\!\top}
-    \mathbf{W}
-    \left(\mathbf{Y}-\widehat{\mathbf{A}_t^1}\right).
+    &=-\nabla_{\mathbf{A}_t^\tau}
+    \mathcal{L}(\mathbf{A}_t^\tau)\\
+    &=\mathbf{J}_\tau^{\!\top}\mathbf W
+    \left(\mathbf Y-\widehat{\mathbf A_t^1}\right).
+    \end{aligned}
 $$
 
 This vector–Jacobian product is computed by backpropagation.
@@ -219,28 +224,23 @@ The policy parameters stay fixed during this backward pass.
 It tells IRTC how to nudge the current noisy action sample, not how to update the model, so that its estimated clean endpoint agrees better with the old trajectory.
 
 The paper builds on pseudoinverse guidance ($\Pi$GDM).
-Its guided velocity can be written as
+Suppressing the shared arguments $(\mathbf A_t^\tau,\mathbf o_t,\tau)$, its guided velocity is
 
 $$
-    \begin{aligned}
-        \mathbf{v}_{\Pi\mathrm{GDM}}
-        (\mathbf{A}_t^\tau,\mathbf{o}_t,\tau)
-        &=
-        \mathbf{v}_{\pi}
-        (\mathbf{A}_t^\tau,\mathbf{o}_t,\tau)
-        +
-        \alpha_\tau\mathbf{g}_\tau,\\[4pt]
-        \alpha_\tau
-        &=
-        \min\!\left(
-        \beta,
-        \frac{1-\tau}{\tau r_\tau^2}
-        \right),
-        \qquad
-        r_\tau^2
-        =
-        \frac{(1-\tau)^2}{\tau^2+(1-\tau)^2}.
-    \end{aligned}
+    \mathbf v_{\Pi\mathrm{GDM}}
+    =\mathbf v_\pi+\alpha_\tau\mathbf g_\tau.
+$$
+
+For $0<\tau<1$, the scale is
+
+$$
+    \alpha_\tau
+    =\min\!\left(\beta,\frac{1-\tau}{\tau r_\tau^2}\right),
+$$
+
+$$
+    r_\tau^2
+    =\frac{(1-\tau)^2}{\tau^2+(1-\tau)^2}.
 $$
 
 Here, $\beta$ clips the guidance strength.
@@ -263,13 +263,15 @@ $$
         0,
         & i\geq H-s,
     \end{cases}
-    \qquad
-    c_i
-    =
-    \frac{H-s-i}{H-s-d+1},
-    \qquad
-    i\in\{0,\ldots,H-1\}.
 $$
+
+The coefficient and index range are
+
+$$
+    c_i=\frac{H-s-i}{H-s-d+1},
+$$
+
+with $i\in\{0,\ldots,H-1\}$.
 
 The mask has three regions: **frozen, revisable, and free**.
 The first $d$ actions get full weight because they will be executed before inference finishes.
@@ -280,6 +282,74 @@ During flow integration, $\mathbf{A}_t^\tau$ and $\widehat{\mathbf{A}_t^1}$ are 
 Only the completed chunk $\mathbf{A}_t^1$ becomes available to the controller.
 An intermediate sample therefore does not need to be a physically valid trajectory by itself.
 The final chunk still has to stay near the policy's learned action distribution and remain compatible with the actions already in motion.
+
+## Which part of the chunk is being executed? {#execution-timeline}
+
+The guidance happens while the new chunk is being generated.
+For IRTC, the new internal chunk starts from Gaussian noise; the previous actions enter the endpoint-guidance calculation through $\mathbf Y$.
+This differs from TRTC's explicitly clean prefix inside the model input.
+One inference cycle proceeds in this order:
+
+1. Receive the new observation while the previous chunk continues to execute.
+2. Initialise the candidate chunk with noise.
+3. At each flow step, estimate its clean endpoint, compare the overlap with $\mathbf Y$, compute the guidance, and update the candidate using the guided velocity.
+4. Deliver the completed chunk to the controller and begin executing its still-relevant actions.
+
+There is no need to apply the soft guidance after the completed result becomes available: it has already shaped that result during step 3. [Section 3.3, Algorithm 1](https://arxiv.org/abs/2506.07339).
+
+Measure the new chunk's index $i$ from the observation that starts its inference.
+The previous chunk supplies commands while inference runs.
+When the new chunk becomes available after $d$ control steps, the controller starts from its still-relevant index $d$; it does not re-execute the elapsed prefix.
+
+For example, take $H=50$, $s=10$, and $d=5$, using the overlap convention above.
+The previous chunk has $H-s=40$ actions available from the start of new inference.
+
+| New-chunk indices | Count | Role |
+|---|---|---|
+| $0\leq i<5$ | $d=5$ | The previous chunk supplies these commands before the new result is ready. |
+| $5\leq i<40$ | $H-s-d=35$ | Both chunks cover these future times; soft guidance encourages continuity. |
+| $40\leq i<50$ | $s=10$ | Only the new chunk covers these times; guidance weights are zero. |
+
+Thus $H-s-d$ is the length of the revisable overlap, not the starting index of zero padding.
+The target's zero-padded region starts at index $H-s$.
+Those zeros are ignored by the mask; they are not instructions to stop the robot. [Section 3.2 and Figure 3](https://arxiv.org/abs/2506.07339).
+
+## Why guidance compares an estimated endpoint {#endpoint-guidance}
+
+$\mathbf A_t^\tau$ is the current internal noisy sample.
+$\widehat{\mathbf A_t^1}$ is an estimate of where that sample will finish, computed from the current policy velocity.
+$\mathbf Y$ comes from the previous planned chunk, and supplies values against which the overlapping endpoint can be compared.
+The previous plan is a continuity target, not a new ground-truth demonstration.
+
+The endpoint residual identifies a desired change in clean-action coordinates.
+The Jacobian maps that error to a change in the current noisy coordinates.
+Adding the residual directly would ignore the sensitivity of the estimated endpoint to those current coordinates.
+
+::: {.callout-note collapse="true" icon="false" title="Worked example: the residual and gradient differ"}
+
+Let a scalar internal sample be $x$, an estimated endpoint be $f(x)=2x$, and its target be $y$.
+The consistency loss is
+
+$$
+  L(x)=\frac12(2x-y)^2.
+$$
+
+The endpoint residual is $y-2x$, but the negative gradient is
+
+$$
+  -L'(x)=2(y-2x).
+$$
+
+The extra factor is the endpoint sensitivity $f'(x)=2$.
+For a vector-valued endpoint, the corresponding operation uses the transpose Jacobian.
+Neither formula guarantees that an arbitrary finite update decreases the loss; step size and approximation error still matter.
+
+:::
+
+The method guides intermediate generation rather than averaging two completed action chunks.
+That distinction explains why it can encourage continuity without explicitly choosing a midpoint between two strategies.
+It is not a proof that every generated trajectory is collision-free.
+The paper itself reports imperfect hard-prefix matching and motivates the extra soft overlap guidance in Section 3.2.
 
 ## Limitations
 
@@ -296,3 +366,9 @@ A few practical failure cases are also easy to imagine:
 
 The clipping value $\beta$ helps with the first problem, but it cannot remove the basic trade-off.
 IRTC has to preserve continuity with the old chunk without stopping the policy from reacting to new information.
+
+## Connections
+
+[ACT](act.qmd#temporal-ensembling-uses-a-common-target-time) explains temporal ensembling of predictions for the same execution time.
+[Flow matching](../../study-notes/machine-learning/flow-matching.qmd#flow-matching) explains how a target velocity is available during training but predicted during inference.
+[TRTC](trtc.qmd) trains a policy to condition on a clean committed prefix, avoiding IRTC's extra guidance backward pass.

@@ -1,0 +1,114 @@
+---
+title: 'VAE: Auto-Encoding Variational Bayes'
+description: "How a learned approximate posterior and reparameterised samples make latent-variable likelihood training practical."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+  - Generative Models
+  - Variational Inference
+---
+
+Paper: Kingma and Welling (2013), [Auto-Encoding Variational Bayes](https://arxiv.org/abs/1312.6114).
+The central contribution is a practical stochastic gradient estimator for variational learning with continuous latent variables, together with an amortised inference network.
+The [VAE study note](../../study-notes/machine-learning/autoencoders.qmd#vae) develops the encoder, decoder, CVAE, Gaussian KL, and implementation details.
+
+## Problem
+
+A latent-variable model generates an observation $x$ by first drawing an unobserved code $z$ and then drawing $x$ conditional on that code.
+Its joint and marginal densities are
+
+$$
+  p_\theta(x,z)=p(z)p_\theta(x\mid z),
+$$
+
+$$
+  p_\theta(x)=\int p(z)p_\theta(x\mid z)\,dz.
+$$
+
+The prior $p(z)$ is a chosen component of the model, often a standard Gaussian.
+The decoder network parameterises $p_\theta(x\mid z)$, and the integral sums the contributions of all possible latent explanations.
+With a nonlinear decoder, both this marginal likelihood and the model posterior $p_\theta(z\mid x)$ are generally intractable. [Paper, §2.1](https://arxiv.org/pdf/1312.6114#page=3).
+
+The posterior is exact relative to the specified model; calling it the true posterior does not imply that the model equals the real data-generating process.
+Likewise, a continuous density value is not the probability of observing one exact point.
+Latent variables can provide a compact representation, but lower dimension is not a defining mathematical requirement of a VAE.
+
+## Previous attempts
+
+An ordinary autoencoder learns a deterministic code and a reconstruction map, but its reconstruction objective alone does not provide a prior for generating new examples.
+Variational inference instead introduces a tractable distribution $q_\phi(z\mid x)$ to approximate the posterior and optimise a likelihood lower bound.
+The difficulty is efficiently differentiating the expectation when the sampling distribution itself depends on learned parameters.
+The paper addresses this difficulty with a reparameterised estimator and a recognition network that shares inference parameters across examples. [Paper, §§1–2](https://arxiv.org/pdf/1312.6114#page=2).
+
+## Proposed solution
+
+The encoder outputs a distribution over latent vectors, while the decoder outputs a distribution over observations.
+For a fixed observation, define the evidence lower bound $B$ by
+
+$$
+  \begin{aligned}
+  B(x)&=\mathbb E_{q_\phi(z\mid x)}
+  [\log p_\theta(x\mid z)]\\
+  &\quad-D_{\mathrm{KL}}(q_\phi(z\mid x)\Vert p(z)).
+  \end{aligned}
+$$
+
+Training maximises this bound, or equivalently minimises reconstruction negative log-likelihood plus latent KL.
+The KL to the prior belongs inside the objective; the KL to the model posterior measures the remaining variational gap. [Paper, Eqs. (1)–(3)](https://arxiv.org/pdf/1312.6114#page=3).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: distinguish the two KL terms"}
+
+Write $q_x=q_\phi(z\mid x)$ and use Bayes' rule inside the posterior KL:
+
+$$
+  \begin{aligned}
+  D_{\mathrm{KL}}(q_x\Vert p_\theta(z\mid x))
+  &=\mathbb E_{q_x}\left[
+  \log\frac{q_x(z)}{p_\theta(x,z)}\right]\\
+  &\quad+\log p_\theta(x).
+  \end{aligned}
+$$
+
+Rearranging gives the exact gap identity
+
+$$
+  \log p_\theta(x)-B(x)
+  =D_{\mathrm{KL}}(q_x\Vert p_\theta(z\mid x)).
+$$
+
+Factoring the joint density inside $B$ produces the reconstruction expectation and the KL to the prior.
+Nonnegativity of the posterior KL gives the lower bound, assuming the distributions have the required support and finite expectations.
+
+:::
+
+For a diagonal Gaussian encoder, the reparameterisation is
+
+$$
+  z=\mu_\phi(x)+\sigma_\phi(x)\odot\epsilon,
+  \qquad\epsilon\sim\mathcal N(0,I).
+$$
+
+Noise is sampled from a fixed distribution, and the resulting latent vector is a differentiable function of the encoder outputs.
+Monte Carlo averages of the reconstruction term and, when available, an analytic KL yield the stochastic gradient variational Bayes estimator. [Paper, §§2.3–2.4](https://arxiv.org/pdf/1312.6114#page=3).
+
+At generation time, sample $z$ from the prior and use the decoder; an encoder requiring an observed $x$ is unnecessary for unconditional generation.
+This differs from reconstruction, where the encoder conditions on a supplied example.
+
+## Evidence
+
+The paper evaluates latent-variable models on MNIST and Frey Face data and compares variational bounds and learning behaviour with alternative inference methods.
+Its experiments support the practicality of stochastic gradient variational learning in the tested models, while latent-space visualisations illustrate learned generative structure. [Paper, §4](https://arxiv.org/pdf/1312.6114#page=5).
+
+## Limitations
+
+A diagonal Gaussian posterior can be too restrictive, and the ELBO remains separated from the log-likelihood when the approximate posterior is inaccurate.
+The reconstruction likelihood is a modelling choice: Bernoulli, Gaussian, and Laplace decoders imply different reconstruction losses.
+A KL penalty does not guarantee interpretable coordinates or that every prior sample decodes well.
+The next inference question is therefore how to obtain a richer posterior without losing tractable sampling and density evaluation, which motivates [normalizing flows](normalizing-flows.qmd).
+
+## Connections
+
+[ACT](../action/act.qmd) uses a CVAE for demonstrated action chunks, with a weighted KL term and a specific choice of zero latent code at deployment.
+[DDPM](ddpm.qmd) also admits a variational bound, but its latent variables form a scheduled corruption chain rather than one learned encoder code.
+[GANs](gan.qmd) learn a sampling map through an adversarial objective, illustrating that generative learning does not always mean directly maximising a tractable likelihood.

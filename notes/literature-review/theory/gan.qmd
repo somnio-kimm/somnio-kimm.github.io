@@ -1,0 +1,151 @@
+---
+title: 'GAN: Generative Adversarial Nets'
+description: "Learn an implicit generator through a discriminator, and separate the ideal minimax result from practical training."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+  - Generative Models
+  - Adversarial Learning
+---
+
+Paper: Goodfellow et al. (2014), [Generative Adversarial Nets](https://arxiv.org/abs/1406.2661).
+A GAN learns a generator by training it against a discriminator that distinguishes data examples from generated samples.
+The generator defines a distribution through its samples, without requiring an explicitly evaluated data likelihood.
+
+## Problem
+
+Let $z\sim p_z$ be an easy-to-sample random input and let $x=G_\theta(z)$ be a generated example.
+These outputs have an induced distribution $p_g$, even when its density is unavailable in closed form.
+The task is to make that distribution resemble the data distribution $p_{\mathrm{data}}$ using only samples and differentiable networks. [Paper, §§1–3](https://arxiv.org/pdf/1406.2661#page=1).
+
+## Previous attempts
+
+Likelihood-based latent-variable models can require difficult marginalisation or approximate inference.
+Some undirected models require sampling procedures during training to handle normalising constants.
+The original GAN framework instead obtains its training signal from a learned discriminator and samples through a forward pass of the generator. [Paper, §§1–2](https://arxiv.org/pdf/1406.2661#page=1).
+
+## Proposed solution
+
+The discriminator outputs $D_\psi(x)\in[0,1]$, interpreted as the probability that its input came from the data source rather than the generator under the training mixture.
+Define the two parts of the value function as
+
+$$
+  V_{\mathrm{real}}=\mathbb E_{x\sim p_{\mathrm{data}}}\log D_\psi(x),
+$$
+
+$$
+  V_{\mathrm{fake}}=\mathbb E_{z\sim p_z}
+  \log(1-D_\psi(G_\theta(z))).
+$$
+
+The original minimax objective is
+
+$$
+  \min_\theta\max_\psi
+  \left(V_{\mathrm{real}}+V_{\mathrm{fake}}\right).
+$$
+
+The discriminator maximises correct source classification, while the generator minimises the value obtained on its own samples.
+Training alternates parameter updates instead of solving an entire inner optimisation to completion at every iteration. [Paper, Eq. (1) and Algorithm 1](https://arxiv.org/pdf/1406.2661#page=3).
+
+For the discriminator, minimising the negative value function is binary cross-entropy with real labels one and fake labels zero.
+For the generator, the original minimax loss can have weak gradients when the discriminator strongly rejects generated examples.
+The paper therefore also proposes the non-saturating generator loss
+
+$$
+  L_G^{\mathrm{NS}}
+  =-\mathbb E_{z\sim p_z}\log D_\psi(G_\theta(z)).
+$$
+
+This is a changed generator objective with the same desired equilibrium, not an algebraic rearrangement of the minimax loss. [Paper, §3](https://arxiv.org/pdf/1406.2661#page=3).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: why the alternative gives a stronger early gradient"}
+
+Let $a$ be the discriminator logit for one generated sample and $D=\operatorname{sigmoid}(a)$.
+For the minimax generator term,
+
+$$
+  \frac{d}{da}\log(1-D)=-D.
+$$
+
+For the non-saturating term,
+
+$$
+  \frac{d}{da}[-\log D]=D-1.
+$$
+
+When $D$ is near zero, the first derivative is near zero but the second is near minus one.
+These are derivatives with respect to the discriminator logit; the full generator gradient also contains the derivatives of the discriminator and generator maps.
+
+:::
+
+## Evidence and the ideal optimum
+
+For a fixed generator and an unrestricted discriminator, the optimal discriminator is
+
+$$
+  D^*(x)=\frac{p_{\mathrm{data}}(x)}
+  {p_{\mathrm{data}}(x)+p_g(x)}.
+$$
+
+Substituting it into the minimax value gives
+
+$$
+  V(D^*,G)=-\log4
+  +2D_{\mathrm{JS}}(p_{\mathrm{data}}\Vert p_g).
+$$
+
+The global minimum therefore occurs at $p_g=p_{\mathrm{data}}$, where $D^*=1/2$ on their support.
+This is an ideal distribution-space result under the paper's assumptions, rather than a guarantee that finite neural networks trained by alternating gradients converge. [Paper, Proposition 1 and Theorem 1](https://arxiv.org/pdf/1406.2661#page=4).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: optimal discriminator and Jensen–Shannon divergence"}
+
+At a fixed point, let $a=p_{\mathrm{data}}(x)$ and $b=p_g(x)$.
+Maximising the discriminator value reduces to maximising
+
+$$
+  h(D)=a\log D+b\log(1-D).
+$$
+
+For $a,b>0$, differentiation gives
+
+$$
+  h'(D)=\frac aD-\frac b{1-D}=0,
+  \qquad D^*=\frac a{a+b}.
+$$
+
+The minus sign arises from differentiating $\log(1-D)$, and $h''(D)<0$ confirms a maximum.
+Boundary cases with one density zero use the corresponding endpoint value of $D$.
+Set $M=(p_{\mathrm{data}}+p_g)/2$ and substitute the optimum:
+
+$$
+  \begin{aligned}
+  V(D^*,G)={}&-\log4\\
+  &+D_{\mathrm{KL}}(p_{\mathrm{data}}\Vert M)\\
+  &+D_{\mathrm{KL}}(p_g\Vert M).
+  \end{aligned}
+$$
+
+By definition, half the sum of those two KL terms is the Jensen–Shannon divergence.
+The resulting divergence identity applies to the original minimax value with an optimal discriminator; it does not make every practical non-saturating update exact Jensen–Shannon descent.
+
+:::
+
+The paper also evaluates generated samples on MNIST, Toronto Face Database, and CIFAR-10.
+Its reported likelihood comparisons use Parzen-window estimates, which the authors explicitly identify as having limitations. [Paper, §5](https://arxiv.org/pdf/1406.2661#page=6).
+
+## Limitations
+
+The generator and discriminator must remain sufficiently coordinated for their gradient signals to be useful.
+A generator can map many inputs to a limited set of outputs, producing poor coverage of the data distribution.
+The original framework does not provide a tractable data density or an inference network mapping each observation back to a latent code. [Paper, §6](https://arxiv.org/pdf/1406.2661#page=7).
+Fast feedforward sampling and difficult training are separate properties; neither establishes a universal ranking against other model families.
+
+## Connections
+
+[VAE](vae.qmd) trains a latent-variable model with a variational likelihood bound, whereas [normalizing flows](normalizing-flows.qmd) track densities through invertible maps.
+[DDPM](ddpm.qmd) and [flow matching](flow-matching.qmd) generate through repeated denoising or numerical integration.
+These are overlapping choices about model representation, training objective, and sampler, rather than one exhaustive partition by neural architecture.
+The [model terminology note](../../study-notes/machine-learning/generative-models.qmd#generative-models) compares these classification axes.
+The [cross-entropy study](../../study-notes/mathematics/entropy.qmd#cross-entropy) explains the discriminator's supervised classification loss.

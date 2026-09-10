@@ -1,0 +1,38 @@
+---
+title: "Object detection metrics"
+description: "Interpret IoU, precision, recall, and average precision under a specified matching protocol."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+  - Computer Vision
+---
+
+A detection result must identify both where an object is and which class it belongs to.
+Its evaluation depends on matching predicted detections to reference objects under a stated protocol.
+
+## Overlap, matching, and average precision {#detection-metrics}
+
+Intersection over union compares a predicted box $B$ with a reference $G$:
+
+$$
+  \operatorname{IoU}(B,G)=\frac{|B\cap G|}{|B\cup G|}.
+$$
+
+Precision and recall depend on which detections are matched to references:
+
+$$
+  \begin{aligned}
+  \operatorname{Precision}&=\frac{TP}{TP+FP},\\
+  \operatorname{Recall}&=\frac{TP}{TP+FN}.
+  \end{aligned}
+$$
+
+For one class, average precision summarises a precision–recall curve under a specified interpolation and matching protocol.
+Mean AP averages over classes and, in some benchmarks, additional IoU thresholds.
+VOC-style AP at IoU $0.5$ and COCO AP averaged over thresholds $0.50$ through $0.95$ are different metrics.
+Do not compare numbers without their protocol; see the [COCO evaluation specification](https://cocodataset.org/#detection-eval).
+
+Two-stage detectors first propose regions and then classify and refine them, as in [Faster R-CNN](../../literature-review/vision/faster-r-cnn.qmd).
+One-stage detectors produce detection predictions without that separate region-proposal stage, as in [YOLO](../../literature-review/vision/yolo.qmd) and [SSD](../../literature-review/vision/ssd.qmd).
+[DETR](../../literature-review/vision/detr.qmd) adds a set-prediction and matching perspective.

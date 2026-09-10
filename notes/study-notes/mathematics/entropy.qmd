@@ -1,0 +1,319 @@
+---
+title: "Entropy, cross-entropy, and divergence"
+description: "Information measures, binary and categorical losses, logit-to-probability maps, and Gaussian KL in one connected account."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Mathematics
+  - Probability
+---
+
+Entropy measures expected self-information; cross-entropy evaluates a proposed distribution on target outcomes; KL divergence compares the two.
+Their shared probability notation also explains classification losses, probability maps, and a Gaussian latent-distribution penalty.
+Read [probability](probability.qmd) for random variables and distributions, and [expectations](expectations.qmd) for the averages used below.
+
+## Entropy and self-information {#entropy}
+
+Let $p(x)$ be the probability mass function of a discrete random variable $X$.
+Use natural logarithms, so information is measured in nats.
+For a discrete outcome with positive probability, its self-information is $-\ln p(x)$.
+Entropy is the expected self-information under the same distribution:
+
+$$
+  H(p)=-\sum_xp(x)\ln p(x).
+$$
+
+The convention $0\ln0=0$ uses a limit.
+For continuous densities, the analogous differential entropy can be negative and depends on the coordinate system.
+
+## Cross-entropy {#cross-entropy}
+
+For a discrete target distribution $p$ and predicted distribution $q$, cross-entropy is
+
+$$
+  \begin{aligned}
+  H(p,q)&=-\sum_xp(x)\ln q(x)\\
+  &=-\mathbb E_p[\ln q(X)].
+  \end{aligned}
+$$
+
+Natural logarithms measure the result in nats.
+The negative sign belongs in both expressions.
+If $p(x)>0$ but $q(x)=0$, the loss is infinite; zero target masses contribute zero by convention.
+Cross-entropy is not a distance: even $H(p,p)$ is generally positive because it equals the target's [entropy](entropy.qmd#entropy).
+[KL divergence](entropy.qmd#kl-divergence) measures its excess over that entropy.
+
+## KL divergence {#kl-divergence}
+
+Let $p$ and $q$ be probability mass functions on the same discrete outcome space, and use natural logarithms.
+KL divergence measures the excess cross-entropy over the entropy of the source distribution:
+
+$$
+  D_{\mathrm{KL}}(p\Vert q)
+  =\sum_xp(x)\ln\frac{p(x)}{q(x)}.
+$$
+
+For finite quantities,
+
+$$
+  H(p,q)=H(p)+D_{\mathrm{KL}}(p\Vert q).
+$$
+
+The convention $0\ln0=0$ uses a limit.
+If $p(x)>0$ but $q(x)=0$, the corresponding cross-entropy and KL divergence are infinite.
+KL is nonnegative and asymmetric; it does not satisfy all the properties of a metric.
+For continuous densities, KL uses an integral.
+The terms $H(p)$ and $H(p,q)$ are the entropy and cross-entropy defined above.
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: the entropy identity and nonnegative KL"}
+
+Subtract the entropy from the cross-entropy:
+
+$$
+  \begin{aligned}
+  H(p,q)-H(p)
+  &=\sum_xp(x)\bigl(\ln p(x)-\ln q(x)\bigr)\\
+  &=D_{\mathrm{KL}}(p\Vert q).
+  \end{aligned}
+$$
+
+Assume $q>0$ wherever $p>0$.
+Since $-\ln$ is convex, [Jensen's inequality](expectations.qmd#jensen) gives
+
+$$
+  \begin{aligned}
+  D_{\mathrm{KL}}(p\Vert q)
+  &=\mathbb E_p\!\left[-\ln\frac{q(X)}{p(X)}\right]\\
+  &\geq-\ln\!\left(\sum_{x:p(x)>0}q(x)\right)\\
+  &\geq0.
+  \end{aligned}
+$$
+
+Equality requires $p=q$ as distributions.
+This derivation concerns finite discrete distributions; analogous continuous statements require the relevant measures and integrability conditions.
+
+:::
+
+## Binary logits and sigmoid {#sigmoid}
+
+For classification, switch notation: $y$ denotes a target label, while $p$ denotes a predicted class probability rather than the source distribution used above.
+
+A binary classifier can produce an unrestricted real-valued score $z$, called a logit, and convert it into a probability:
+
+$$
+  z\;\longrightarrow\;p.
+$$
+
+The sigmoid function maps a real score $z$ to a number between zero and one:
+
+$$
+  p=\sigma(z)=\frac{1}{1+\exp(-z)}.
+$$
+
+Here, $\exp$ is the exponential function.
+Increasing $z$ increases $p$; at $z=0$, $p=0.5$.
+We interpret $p$ as the predicted probability of class $1$.
+
+## The sigmoid derivative {#sigmoid-derivative}
+
+The derivative is
+
+$$
+  \sigma'(z)=\sigma(z)(1-\sigma(z)).
+$$
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: differentiating sigmoid"}
+
+With $p=\sigma(z)$,
+
+$$
+  \frac{dp}{dz}
+  =\frac{\exp(-z)}{(1+\exp(-z))^2}
+  =p(1-p).
+$$
+
+:::
+
+## Binary cross-entropy {#binary-cross-entropy}
+
+Let $y\in\{0,1\}$ be the observed target and $p\in(0,1)$ be the predicted probability of class $1$.
+The predicted probability of class $0$ is then $1-p$.
+Binary cross-entropy for one example is
+
+$$
+  \ell(p,y)=-\left[y\ln p+(1-y)\ln(1-p)\right],
+$$
+
+where $\ln$ is the natural logarithm.
+Because $y$ is either zero or one, it selects one term:
+
+$$
+  \ell(p,y)=
+  \begin{cases}
+    -\ln p,&y=1,\\
+    -\ln(1-p),&y=0.
+  \end{cases}
+$$
+
+In words, take the probability assigned to the observed class, then apply the negative logarithm.
+A higher probability for that class produces a lower loss.
+
+## The binary-logit gradient {#binary-logit-gradient}
+
+With the sigmoid probability $p=\sigma(z)$ and fixed target $y$, the loss is now a function of the logit $z$.
+For binary cross-entropy composed with sigmoid, the derivative with respect to this score is
+
+$$
+  \frac{d\ell}{dz}=p-y.
+$$
+
+This is the derivative with respect to $z$.
+A parameter derivative also includes how the score depends on that parameter.
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: the sigmoid and cross-entropy gradient"}
+
+Holding the target $y$ fixed, differentiate binary cross-entropy with respect to $p$:
+
+$$
+  \frac{\partial\ell}{\partial p}
+  =-\frac{y}{p}+\frac{1-y}{1-p}
+  =\frac{p-y}{p(1-p)}.
+$$
+
+The [sigmoid derivative](entropy.qmd#sigmoid-derivative) is $dp/dz=p(1-p)$.
+
+Applying the chain rule, the factors cancel:
+
+$$
+  \frac{d\ell}{dz}
+  =\frac{\partial\ell}{\partial p}\frac{dp}{dz}
+  =\frac{p-y}{p(1-p)}\,p(1-p)
+  =p-y.
+$$
+
+:::
+
+## Class logits and softmax {#softmax}
+
+For $K\geq2$ classes, softmax converts $K$ real logits into positive probabilities summing to one.
+
+A model can produce one unrestricted real score, or logit, for each class:
+
+$$
+  \mathbf z=(z_{\text{cat}},z_{\text{dog}},z_{\text{bird}}).
+$$
+
+These scores can be negative, exceed one, and need not sum to one.
+Softmax maps a vector of real scores to a probability vector:
+
+$$
+  p_k=\frac{\exp(z_k)}{\sum_{j=1}^{K}\exp(z_j)}.
+$$
+
+Here, $k$ identifies the class whose probability we are calculating, while $j$ runs over all classes in the denominator.
+Exponentiating each score produces positive weights while preserving their ordering.
+Dividing each weight by their sum makes the resulting probabilities sum to one.
+
+## Categorical and soft-target cross-entropy {#categorical-cross-entropy}
+
+For $K\geq2$ classes, let $\mathbf p=(p_1,\ldots,p_K)$ be predicted probabilities satisfying $p_k>0$ and $\sum_{k=1}^{K}p_k=1$.
+Let $\mathbf y=(y_1,\ldots,y_K)$ be a one-hot target: the observed class has entry $1$, and every other entry is $0$.
+Categorical cross-entropy for one example is
+
+$$
+  \ell(\mathbf p,\mathbf y)=-\sum_{k=1}^{K}y_k\ln p_k.
+$$
+
+The index $k$ runs over classes within one example.
+Because only the observed class has $y_k=1$, the formula reduces to
+
+$$
+  \ell=-\ln p_{\text{observed class}}.
+$$
+
+Softmax supplies these probabilities from the class scores.
+
+The target can also be a soft probability vector, with nonnegative entries summing to one, rather than a one-hot label.
+The same cross-entropy formula then averages negative log-probabilities over that target distribution.
+[Knowledge distillation](../../literature-review/theory/knowledge-distillation.qmd) uses a teacher's softened probabilities and derives the temperature-dependent gradient.
+
+## Discrete targets and continuous probability vectors {#discrete-targets}
+
+The type of a probability vector differs from the type of the random variable it describes.
+For a vocabulary of $K$ token IDs, the next token takes one value in $\{1,\ldots,K\}$, while the model assigns $K$ real-valued probabilities that sum to one.
+The real-valued entries do not make the token itself a continuous variable.
+Cross-entropy evaluates the probability assigned to the observed token.
+
+For example, a distribution assigning probabilities $(0.2,0.7,0.1)$ to three token IDs gives loss $-\ln(0.7)$ when the target is ID $2$.
+The numerical ordering of token IDs does not encode distance between their meanings.
+Predicting the number $2$ with squared error would impose a different task and geometry.
+
+For an autoregressive sequence, each position predicts a categorical distribution conditioned on the observation and preceding tokens.
+Training sums or averages the negative log-probabilities of the observed tokens.
+During ordinary generation, the model selects or samples one token and conditions the next prediction on that choice.
+The Transformer architecture alone does not require this generation order.
+
+[FAST](../../literature-review/action/fast.qmd) converts continuous action chunks into discrete token sequences for this kind of objective.
+[Diffusion Policy](../../literature-review/action/diffusion-policy.qmd) instead predicts continuous noise, and [flow matching](../machine-learning/flow-matching.qmd#flow-matching) predicts a continuous velocity.
+Their squared-error targets are different objects from the categorical target in cross-entropy.
+
+## Zero-one loss and accuracy {#zero-one-loss}
+
+Zero-one loss evaluates the predicted class itself.
+For a predicted class $\hat c$ and observed class $c$, it assigns
+
+$$
+  \ell_{0\text{–}1}(\hat c,c)=
+  \begin{cases}
+    0,&\hat c=c,\\
+    1,&\hat c\ne c.
+  \end{cases}
+$$
+
+Its average is the fraction of incorrect predictions, so accuracy is one minus that average.
+Zero-one loss is constant within regions where the predicted class stays the same.
+Small parameter changes within such a region leave its value unchanged, so its ordinary gradient there provides no direction for improvement.
+Cross-entropy can decrease as the probability assigned to the observed class increases, even before the predicted class changes.
+
+## KL for a diagonal Gaussian {#gaussian-kl}
+
+Let $q=\mathcal N(\mu,\operatorname{diag}(\sigma^2))$ with all $\sigma_j>0$, and let $p=\mathcal N(0,I)$.
+Write $K=D_{\mathrm{KL}}(q\Vert p)$.
+For $d$ latent coordinates, write the encoder covariance as $\operatorname{diag}(\sigma_1^2,\ldots,\sigma_d^2)$.
+Against a standard Gaussian prior, the KL term has a closed form:
+
+$$
+  K=\frac12\sum_{j=1}^{d}
+  \left(\mu_j^2+\sigma_j^2-1-\log\sigma_j^2\right).
+$$
+
+Each coordinate contributes zero when its mean is zero and its variance is one.
+For example, $q=\mathcal N(2,1)$ gives $K=2$ nats, while $q=\mathcal N(0,1)$ gives $K=0$.
+The penalty concerns an entire distribution, so zero KL does not mean that its samples all equal the prior mean. [VAE, Appendix B](https://arxiv.org/pdf/1312.6114#page=10).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: the diagonal Gaussian KL"}
+
+Start with $K=\mathbb E_q[\log q(z)-\log p(z)]$.
+For independent coordinates, the normalisation constants cancel and leave
+
+$$
+  K=\frac12\sum_j\mathbb E_q\left[
+  z_j^2-\frac{(z_j-\mu_j)^2}{\sigma_j^2}
+  -\log\sigma_j^2\right].
+$$
+
+Use $\mathbb E_q[z_j^2]=\mu_j^2+\sigma_j^2$ and $\mathbb E_q[(z_j-\mu_j)^2]=\sigma_j^2$ to obtain the visible formula.
+The KL in the ELBO is measured in nats because these logarithms are natural logarithms.
+
+:::
+
+Matching the standard Gaussian prior encourages means and variances toward zero and one, respectively.
+It does not force every sampled latent to be zero or guarantee named physical meanings for its coordinates.
+
+## Connections {#connections}
+
+[Likelihood and estimation](likelihood-and-estimation.qmd#classification) derives why classification likelihood gives a mean cross-entropy objective.
+[Loss](../machine-learning/loss.qmd#loss-and-risk) distinguishes an individual penalty from its dataset average, and [gradient descent](optimization.qmd#gradient-descent) explains why derivatives matter during optimisation.
+[The ELBO](elbo.qmd) uses a KL to the prior in its objective and a different KL to the posterior in its gap.
+[Reparameterisation](reparameterization.qmd) distinguishes the Gaussian variance from the standard deviation used when sampling.
+[Knowledge distillation](../../literature-review/theory/knowledge-distillation.qmd) modifies class probabilities with a temperature and trains against teacher soft targets.

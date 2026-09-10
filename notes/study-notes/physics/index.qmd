@@ -1,0 +1,14 @@
+---
+title: "Physics"
+description: "Physical systems, circuits, electronics, signals, and control."
+listing-page: true
+listing:
+  contents: "*.qmd"
+  type: default
+  sort: "title"
+  fields: [title, description]
+draft: false
+---
+
+These notes cover physical systems and their applications, including circuits, electronics, signals, and control.
+The [study-note index](../index.qmd) connects this subject with mathematics and computing.

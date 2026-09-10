@@ -1,0 +1,64 @@
+---
+title: "Stop-gradient"
+description: "An unchanged forward value with a blocked derivative path, including detached context and the chain rule."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Computer Software
+  - Machine Learning
+  - Transformers
+---
+
+Stop-gradient is an automatic-differentiation operation that preserves a value in the forward computation and assigns zero derivative through that edge during backpropagation.
+It lets one component use another component's output without this particular path training the producer.
+For the attention example below, first read [keys and values](../machine-learning/attention.qmd#projections) and [attention masks](../machine-learning/attention.qmd#masks-and-gradients).
+
+## Forward Value and Backward Rule {#stop-gradient}
+
+Stop-gradient controls derivatives during backpropagation.
+For the operation $\operatorname{sg}$,
+
+$$
+  \begin{aligned}
+  \operatorname{sg}(x)&=x,\\
+  \frac{\partial\operatorname{sg}(x)}{\partial x}&=0.
+  \end{aligned}
+$$
+
+The forward numerical value remains available.
+Its producer receives no gradient through that particular edge.
+
+For example, an action stream may use $\operatorname{sg}(K_{\mathrm{VLM}})$ and $\operatorname{sg}(V_{\mathrm{VLM}})$ as context.
+Its predictions can still depend on the pretrained representations, while the action loss cannot update their producer through those detached paths.
+Other losses or unblocked paths can still update the producer.
+[Knowledge insulation](../../literature-review/action/knowledge-insulation.qmd) makes this distinction central.
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: detached context remains readable"}
+
+Let $h_\phi(o)$ be a backbone representation and let
+
+$$
+  \hat a=g_\theta(\operatorname{sg}(h_\phi(o)),x).
+$$
+
+Here, $x$ is another input to the action branch and $L$ is a loss on $\hat a$.
+Along this detached path, the chain rule includes the factor
+
+$$
+  \frac{\partial\operatorname{sg}(h)}{\partial h}=0.
+$$
+
+Consequently, this path contributes zero to $\partial L/\partial\phi$.
+The gradient with respect to the action-branch parameters $\theta$ can remain nonzero.
+If $\phi$ also reaches the loss through another path, that separate contribution must be examined.
+
+:::
+
+A mask that prevents the prefix from reading actions does not, by itself, stop an action loss from backpropagating through the prefix keys and values that actions read.
+Forward direction and gradient direction must be traced separately.
+
+## Related Concepts
+
+[Knowledge insulation](../../literature-review/action/knowledge-insulation.qmd) uses detached context to separate action-expert learning from selected backbone gradient paths.
+[DINO](../../literature-review/vision/dino.qmd) stops gradients through the teacher target while updating teacher parameters by a moving average.
+The [loss overview](../machine-learning/loss.qmd#loss-and-risk) distinguishes a per-example penalty from the objective whose gradients update parameters.

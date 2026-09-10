@@ -1,0 +1,13 @@
+---
+title: "Machine Learning"
+description: "Connected notes on models, representations, objectives, and learning procedures."
+listing-page: true
+listing:
+  contents: "*.qmd"
+  type: default
+  sort: "title"
+  fields: [title, description]
+draft: false
+---
+
+These notes group related model concepts into complete explanations and link to their mathematical foundations and paper applications.

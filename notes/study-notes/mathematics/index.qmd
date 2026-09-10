@@ -1,0 +1,13 @@
+---
+title: "Mathematics"
+description: "Probability, information, estimation, optimization, and matrix methods."
+listing-page: true
+listing:
+  contents: "*.qmd"
+  type: default
+  sort: "title"
+  fields: [title, description]
+draft: false
+---
+
+These notes develop mathematical definitions, assumptions, and derivations used across the other subjects.

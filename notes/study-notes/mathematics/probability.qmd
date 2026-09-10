@@ -1,0 +1,65 @@
+---
+title: "Probability: variables, distributions, and conditioning"
+description: "Random variables, probability masses and densities, joint distributions, marginalisation, and Bayes’ rule."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Mathematics
+  - Probability
+---
+
+Probability describes uncertainty about values, and its notation distinguishes the uncertain quantity from the values it can take.
+Before manipulating an expression, identify the random quantity, its possible values, and what information is held fixed.
+Joint, conditional, and marginal distributions then describe different views of that same uncertainty.
+
+## Random variables and distributions {#random-variables}
+
+A random variable $X$ is a measurable function from outcomes of an experiment to a space of values.
+A realisation $x$ is one value it takes.
+The distribution specifies how probability is assigned to those values.
+In $P(X=1)=0.8$, the value is $1$ and its probability is $0.8$.
+
+For a discrete variable, a probability mass function satisfies $p(x)\geq0$ and $\sum_xp(x)=1$.
+For a variable with a density, probabilities come from integrals:
+
+$$
+  P(a\leq X\leq b)=\int_a^b p(x)\,dx.
+$$
+
+A density can exceed one; its integral over the whole domain must be one.
+For such a continuous variable, the probability of any individual point is zero.
+See [Deep Learning, Sections 3.2–3.3](https://www.deeplearningbook.org/contents/prob.html) for these conventions.
+
+## Joint, conditional, and marginal distributions {#conditional-and-marginal}
+
+A joint distribution describes several variables together.
+Conditioning retains uncertainty about one variable while fixing information about another.
+Marginalisation removes a variable by summing or integrating over it.
+For discrete variables,
+
+$$
+  p(x\mid y)=\frac{p(x,y)}{p(y)},\qquad p(y)>0,
+$$
+
+$$
+  p(x)=\sum_y p(x,y)=\sum_y p(x\mid y)p(y).
+$$
+
+“Conditional” does not mean one data point, and “marginal” does not mean many data points.
+For example, $p(A\mid o)$ can have several action modes even for one fixed observation.
+Integrating over latent variables gives the action distribution in a [CVAE](../machine-learning/autoencoders.qmd#conditioning).
+Bayes' rule changes the direction of conditioning, where $p(x)>0$:
+
+$$
+  p(z\mid x)=\frac{p(x\mid z)p(z)}{p(x)}.
+$$
+
+## Connections {#connections}
+
+The [expectations note](expectations.qmd) explains distribution-weighted averages, Jensen’s inequality, and estimation through Monte Carlo sampling.
+[Entropy, cross-entropy, and divergence](entropy.qmd#entropy) applies expectations to information and prediction losses.
+[Likelihood and estimation](likelihood-and-estimation.qmd) treats observed data as fixed while varying model parameters, with MAP adding a parameter prior through Bayes’ rule.
+[A CVAE](../machine-learning/autoencoders.qmd#conditioning) distinguishes a latent prior from a posterior conditioned on an observed example.
+[Energy-based models](../machine-learning/energy-based-models.qmd) specify relative density and its score, while [Langevin dynamics](../machine-learning/energy-based-models.qmd#langevin-dynamics) uses the score in a sampling procedure.
+[Normalising flows](../../literature-review/theory/normalizing-flows.qmd) transform densities using a Jacobian determinant.
+[Policies and learning regimes](../machine-learning/policies.qmd) separates action selection, learning objectives, and data collection.

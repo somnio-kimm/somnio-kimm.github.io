@@ -1,0 +1,236 @@
+---
+title: 'State-space models'
+description: "Continuous dynamics, discretisation, recurrence and convolution, polynomial memory, and selective sequence layers."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+---
+
+A state summarises the past information that a model uses to update its future predictions.
+The state need not be the smallest possible representation or a directly measurable physical quantity.
+This note follows the construction from continuous dynamics to a discrete sequence layer, then explains how the state can represent history.
+
+## Continuous linear dynamics {#continuous-system}
+
+Let $h(t)\in\mathbb R^N$ be the state, $u(t)\in\mathbb R^m$ the input, and $y(t)\in\mathbb R^p$ the output.
+A continuous linear state-space system is
+
+$$
+  \begin{aligned}
+  \dot h(t)&=Ah(t)+Bu(t),\\
+  y(t)&=Ch(t)+Du(t).
+  \end{aligned}
+$$
+
+The matrices have compatible shapes: $A$ is $N\times N$, $B$ is $N\times m$, $C$ is $p\times N$, and $D$ is $p\times m$.
+The feedthrough term $Du$ bypasses the state and can act like a learned skip connection.
+If these matrices are constant, the dynamics are linear and time-invariant.
+The zero-initial-state input–output map obeys superposition and commutes with time shifts; a fixed nonzero initial state adds a homogeneous response.
+See [Mamba, Section 2](https://arxiv.org/abs/2312.00752) for this construction as a sequence layer.
+
+## Discretisation and the meaning of a step {#discretisation}
+
+Discretisation turns continuous parameters into a recurrence for sampled inputs.
+Assume $A$ and $B$ are constant over the integration interval.
+Let $\Delta>0$ be a step size, and assume the input is held constant during each step.
+Zero-order hold gives
+
+$$
+  \bar A=e^{\Delta A},\qquad
+  \bar B=\left(\int_0^\Delta e^{sA}\,ds\right)B.
+$$
+
+The integral formula remains valid when $A$ is singular.
+For invertible $A$, it becomes $\bar B=A^{-1}(e^{\Delta A}-I)B$.
+In a sequence model, $\Delta$ can be a learned parameter; it is not automatically a physical sensor's sampling interval.
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: zero-order hold"}
+
+The variation-of-constants solution over one interval is
+
+$$
+  \begin{aligned}
+  h(t+\Delta)
+  &=e^{\Delta A}h(t)\\
+  &\quad+\int_t^{t+\Delta}e^{(t+\Delta-s)A}Bu(s)\,ds.
+  \end{aligned}
+$$
+
+Set $u(s)=u_k$ on that interval and change variables to $r=t+\Delta-s$.
+The input contribution is then $(\int_0^\Delta e^{rA}\,dr)Bu_k$.
+If $A$ is invertible, integrate $\frac{d}{dr}e^{rA}=Ae^{rA}$ to obtain the alternative expression above.
+For $A=0$, the integral gives $\bar B=\Delta B$ directly.
+
+:::
+
+Other numerical methods approximate the same differential equation differently.
+For a scalar homogeneous mode $\dot h=\lambda h$, write $z=\Delta\lambda$.
+
+| Method | One-step multiplier | Accuracy and stability |
+|---|---|---|
+| Exact / ZOH homogeneous part | $e^z$ | Exact for the constant linear dynamics. |
+| Forward Euler | $1+z$ | First order; stability requires $\lvert1+z\rvert<1$. |
+| Backward Euler | $(1-z)^{-1}$ | First order; maps the open left half-plane inside the unit disk. |
+| Trapezoidal / bilinear | $(1+z/2)/(1-z/2)$ | Second order; also preserves that scalar stability region. |
+| Classical RK4 | $1+z+z^2/2+z^3/6+z^4/24$ | Fourth order; has a bounded explicit stability region. |
+
+For driven systems, endpoint input conventions must also agree.
+Trapezoidal integration averages the two endpoint forcing terms; the common S4 bilinear parameterisation is a discrete sequence-layer convention and should not be mixed silently with a different indexing of the input.
+
+## A recurrence and a convolution can represent the same layer {#convolution}
+
+Use the sequence convention
+
+$$
+  h_k=\bar A h_{k-1}+\bar B u_k,\qquad
+  y_k=Ch_k+Du_k,
+$$
+
+with $h_{-1}=0$.
+For constant matrices, the output is a causal convolution plus feedthrough:
+
+$$
+  y_k=\sum_{j=0}^k K_j u_{k-j}+Du_k,
+  \qquad K_j=C\bar A^j\bar B.
+$$
+
+This allows one layer to be evaluated on a whole sequence using convolution or incrementally using its state.
+An alternative convention $h_{k+1}=\bar Ah_k+\bar Bu_k$, $y_k=Ch_k$ introduces a one-step delay in the state-mediated output.
+Write the convention before comparing kernels or transfer functions.
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: unrolling the recurrence"}
+
+With the chosen initial condition,
+
+$$
+  \begin{aligned}
+  h_0&=\bar Bu_0,\\
+  h_1&=\bar A\bar Bu_0+\bar Bu_1,\\
+  h_k&=\sum_{j=0}^k\bar A^j\bar B u_{k-j}.
+  \end{aligned}
+$$
+
+Multiplication by $C$ gives the kernel coefficients.
+For the associated infinite sequence, its formal transfer function is
+
+$$
+  K(z)=C(I-\bar A z^{-1})^{-1}\bar B+D,
+$$
+
+where the geometric series converges in its region of convergence.
+Convolution becomes multiplication after a compatible Fourier or $z$ transform.
+The relation uses time-invariance; input-dependent state transitions generally require another computation.
+
+:::
+
+## Polynomial projection and HiPPO {#hippo}
+
+HiPPO defines a memory state through the projection of an input history onto polynomial basis functions under a specified time-dependent measure.
+It is a finite-dimensional approximation, not exact storage of an arbitrary full history.
+Here, consider one scalar input channel $u(t)\in\mathbb R$; the construction can be applied separately to multiple channels.
+For the scaled Legendre construction at $t>0$, use the uniform probability measure $ds/t$ over $[0,t]$.
+Let $P_n$ be the usual Legendre polynomial on $[-1,1]$, and define an orthonormal basis on $[0,1]$:
+
+$$
+  p_n(r)=\sqrt{2n+1}\,P_n(2r-1).
+$$
+
+The shift $2r-1$ and normalisation matter.
+The first $N$ memory coefficients are
+
+$$
+  c_n(t)=\frac1t\int_0^t u(s)p_n(s/t)\,ds.
+$$
+
+Here $n=0,\ldots,N-1$ indexes the retained basis functions.
+They specify the best squared-error approximation in the span of those basis functions under the chosen measure.
+The corresponding dynamics have the form
+
+$$
+  \dot c(t)=\frac1t\bigl(Ac(t)+Bu(t)\bigr).
+$$
+
+In this sign convention, $B_n=\sqrt{2n+1}$ and
+
+$$
+  A_{nm}=
+  \begin{cases}
+  -\sqrt{(2n+1)(2m+1)},&n>m,\\
+  -(n+1),&n=m,\\
+  0,&n<m.
+  \end{cases}
+$$
+
+This is a linear time-varying system in physical time.
+Neural networks do not require time-invariant dynamics.
+The formula and memory interpretation follow [HiPPO, Section 3 and Appendix D](https://arxiv.org/abs/2008.07669).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: the moving basis and the factor 1/t"}
+
+Differentiate the upper limit, the factor $1/t$, and the basis argument:
+
+$$
+  R_n(r)=p_n(r)+rp_n'(r),
+$$
+
+$$
+  \begin{aligned}
+  \dot c_n(t)
+  &=\frac{u(t)p_n(1)}{t}\\
+  &\quad-\frac1{t^2}\int_0^t u(s)R_n(s/t)\,ds.
+  \end{aligned}
+$$
+
+Here $R_n$ groups the terms from differentiating the normaliser and the moving basis.
+This polynomial has degree $n$.
+Expand it in the orthonormal basis through degree $n$; its coefficients are
+
+$$
+  -A_{nm}=\int_0^1
+  \bigl[p_n(r)+rp_n'(r)\bigr]p_m(r)\,dr.
+$$
+
+Coefficients for $m>n$ vanish by orthogonality, giving the lower-triangular structure.
+For $n=0$, $c_0(t)$ is the running average, so $\dot c_0=(u-c_0)/t$.
+This checks the signs and scaling.
+With logarithmic time $\tau=\ln t$, define $\tilde c(\tau)=c(e^\tau)$.
+Then
+
+$$
+  \frac{d\tilde c}{d\tau}=A\tilde c+B u(e^\tau).
+$$
+
+Both terms in the original dynamics had the factor $1/t$, so no extra factor $t$ remains on the input.
+
+:::
+
+## What S4 adds {#s4}
+
+S4 uses structured state-space parameters to make long convolution kernels efficient to compute.
+Its construction relates a HiPPO-derived matrix to a normal matrix plus a low-rank correction, then changes basis to obtain diagonal-plus-low-rank structure.
+Fast kernel evaluation uses that structure and efficient resolvent calculations, rather than repeatedly forming dense matrix powers.
+See [S4, Sections 3–4](https://arxiv.org/abs/2111.00396).
+
+Training can evaluate the fixed sequence kernel in parallel, and generation can update a fixed-size recurrent state.
+The [Woodbury identity](../mathematics/matrix-dynamics.qmd#woodbury) explains why a low-rank correction is computationally useful.
+A generic diagonal-plus-low-rank matrix is not automatically stable; the parameterisation and constraints matter.
+
+## From fixed memory to selective memory {#selectivity}
+
+An LTI kernel depends on a time lag, not on the content of the current token.
+Mamba makes selected state-space parameters depend on the input, allowing memory retention, input injection, and readout to change with content.
+This removes the single fixed convolution kernel while retaining an efficient scan over affine state updates.
+The [Mamba review](../../literature-review/theory/mamba.qmd) gives the actual parameter roles and the scan derivation.
+
+At fixed model width and state size, recurrent SSM inference stores a state whose size does not grow with the processed sequence length.
+For standard attention with a KV cache, each new token reads a growing set of stored keys and values.
+Whole-sequence attention cost and cost per generated token are different quantities; hardware, model dimensions, and implementation must be specified for a numerical speed comparison.
+
+## Connections {#connections}
+
+[Matrix structure and dynamics](../mathematics/matrix-dynamics.qmd) explains normality, long-time stability, transient amplification, and low-rank inverse corrections.
+[Loss](loss.qmd#loss-and-risk) explains the squared-error objective used in polynomial approximation.
+[KV caching](kv-cache.qmd) develops the attention-memory comparison.
+The [Mamba review](../../literature-review/theory/mamba.qmd) gives the input-dependent parameter roles and scan derivation.
+The recurrence and kernel formulations follow [S4, Section 2](https://arxiv.org/abs/2111.00396); the discretisation notation follows [Mamba, Section 2](https://arxiv.org/abs/2312.00752).

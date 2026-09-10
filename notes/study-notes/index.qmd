@@ -1,15 +1,31 @@
 ---
 title: "Study Notes"
-subtitle: "Notes from topics I am studying."
+subtitle: "Connected explanations across mathematics, science, and engineering."
 listing-page: true
 listing:
-  contents: "**/*.qmd"
+  contents:
+    - "**/*.qmd"
+    - "!**/index.qmd"
+    - "!template.qmd"
   type: grid
   sort: "title"
   categories: true
   filter-ui: true
   sort-ui: true
   fields: [title, description, categories]
+draft: false
 ---
 
-Notes on electrical engineering, machine learning, and mathematics will appear here.
+Each page develops one connected family of ideas, with sections for concepts best understood together.
+Substantial supporting topics have their own linked pages.
+Definitions and main results stay visible; expand a derivation or proof for the supporting steps.
+
+| Subject | Scope |
+|---|---|
+| [Mathematics](mathematics/index.qmd) | Probability, information, estimation, optimization, and matrix methods. |
+| [Machine Learning](machine-learning/index.qmd) | Models, representations, objectives, and learning procedures. |
+| [Physics](physics/index.qmd) | Physical systems, circuits, electronics, signals, and control. |
+| [Computer Hardware](computer-hardware/index.qmd) | Digital logic, processors, memory, and computer architecture. |
+| [Computer Software](computer-software/index.qmd) | Programming, algorithms, systems, and computational operations. |
+
+Browse a subject above, or use the filters below to find a note.

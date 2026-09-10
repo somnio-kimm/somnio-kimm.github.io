@@ -1,0 +1,94 @@
+---
+title: 'R-CNN: Region Proposals and CNN Features'
+description: "The original multi-stage detector, its different training labels, and ridge-regression box refinement."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Vision
+  - Object Detection
+---
+
+Paper: [Girshick et al. (2014), Rich Feature Hierarchies for Accurate Object Detection and Semantic Segmentation](https://arxiv.org/abs/1311.2524).
+The preprint first appeared in 2013.
+
+## Problem
+
+Object detection must determine both what objects are present and where they are located.
+A whole-image classifier does not directly provide a separate class and bounding box for every object.
+R-CNN applies learned CNN features to candidate regions supplied by a proposal method.
+
+## Previous Attempts
+
+Earlier detectors relied heavily on designed features and specialized detection models.
+R-CNN combines existing region proposals with CNN features pretrained for image classification and adapted to detection.
+Selective search is an input component of the pipeline, not an algorithm introduced by R-CNN. [Sections 1–2](https://arxiv.org/pdf/1311.2524#page=2).
+
+## Proposed Solution
+
+Selective search supplies candidate boxes.
+Each proposal is cropped from the image and warped to the CNN's fixed input size, then processed separately to obtain a feature vector.
+Class-specific linear SVMs score those features, and bounding-box regressors refine the proposal coordinates.
+Non-maximum suppression reduces redundant detections. [Section 2 and Figure 1](https://arxiv.org/pdf/1311.2524#page=2).
+
+Training consists of distinct stages with different positive-example definitions.
+The CNN starts from supervised ImageNet pretraining and is fine-tuned with a foreground-plus-background softmax classifier.
+For this stage, a proposal overlapping a ground-truth box by at least 0.5 IoU is positive for the matched class.
+The subsequent SVM stage uses ground-truth boxes as positives, proposals below 0.3 IoU with that class as negatives, and hard-negative mining.
+The overlap thresholds and labeling rules therefore cannot be combined into one universal R-CNN positive/negative test. [Section 2.3 and Appendix B](https://arxiv.org/pdf/1311.2524#page=12).
+
+## Bounding-Box Regression {#box-regression}
+
+Represent a proposal as center coordinates and size, $P=(P_x,P_y,P_w,P_h)$, with target box $G$ in the same form.
+The regression targets are normalized center shifts and logarithmic size ratios:
+
+$$
+    \begin{aligned}
+        t_x&=(G_x-P_x)/P_w,\\
+        t_y&=(G_y-P_y)/P_h,\\
+        t_w&=\log(G_w/P_w),\\
+        t_h&=\log(G_h/P_h).
+    \end{aligned}
+$$
+
+The original paper fits four linear regressors with squared error and L2 regularization, that is, ridge regression.
+It does **not** use the Smooth L1 box objective later introduced in [Fast R-CNN](fast-r-cnn.qmd). [Appendix C, Equation 5](https://arxiv.org/pdf/1311.2524#page=12).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: decoding shifts and log-scale predictions"}
+If the feature-based regressors predict $d_x,d_y,d_w,d_h$, invert the target transformations:
+
+$$
+    \begin{aligned}
+        \hat G_x&=P_x+P_wd_x,\\
+        \hat G_y&=P_y+P_hd_y,\\
+        \hat G_w&=P_w e^{d_w},\\
+        \hat G_h&=P_h e^{d_h}.
+    \end{aligned}
+$$
+
+A predicted width shift $d_w=\log 2$ doubles the proposal width.
+A zero shift leaves that coordinate unchanged.
+Center targets scale displacement relative to the proposal's size, so the same normalized shift has a larger pixel effect for a larger proposal.
+:::
+
+## Overlap and Suppression {#iou-nms}
+
+Intersection over union compares box overlap:
+
+$$
+    \operatorname{IoU}(A,B)=\frac{|A\cap B|}{|A\cup B|}.
+$$
+
+Class-wise non-maximum suppression repeatedly retains a high-scoring box and suppresses sufficiently overlapping lower-scoring boxes.
+Several spatially separated detections can remain; the procedure does not reduce the entire image to one proposal.
+Its threshold is a suppression choice, distinct from the IoU thresholds used to assign training labels.
+
+## Evidence and Limitations
+
+The paper reports detection improvements from CNN features, supervised pretraining, fine-tuning, and box regression through its benchmark comparisons and ablations. [Section 3](https://arxiv.org/pdf/1311.2524#page=4).
+Repeated CNN evaluation for overlapping regions and separate training stages make this pipeline expensive.
+[Fast R-CNN](fast-r-cnn.qmd) shares convolutional features across proposals, and [Faster R-CNN](faster-r-cnn.qmd) additionally learns the proposal mechanism.
+
+## Connections
+
+The [loss note](../../study-notes/machine-learning/loss.qmd#loss-and-risk) distinguishes squared regression loss from robust alternatives.
+[SSD](ssd.qmd) predicts from default boxes directly, while [DETR](detr.qmd) changes how predictions are assigned to target objects.

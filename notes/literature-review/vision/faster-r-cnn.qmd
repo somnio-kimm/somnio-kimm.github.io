@@ -1,0 +1,77 @@
+---
+title: 'Faster R-CNN: Learning Region Proposals'
+description: "Anchors, objectness, shared convolutional features, and the original proposal-training schemes."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Vision
+  - Object Detection
+---
+
+Paper: [Ren et al. (2015), Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks](https://arxiv.org/abs/1506.01497).
+
+## Problem
+
+[Fast R-CNN](fast-r-cnn.qmd) shares visual features but still obtains candidate regions from an external algorithm.
+Faster R-CNN learns to propose regions from the same convolutional features used by its detection head.
+
+## Previous Attempts
+
+Selective search provides class-independent proposals without learning them jointly with the CNN features.
+Fast R-CNN accelerates region classification but leaves proposal generation as a separate cost.
+Faster R-CNN introduces a **region proposal network**, or RPN, and combines it with the Fast R-CNN detector. [Sections 1–3](https://arxiv.org/pdf/1506.01497#page=2).
+
+## Proposed Solution
+
+A sliding network reads each spatial position of the shared convolutional feature map.
+At each position, predefined reference boxes called **anchors** cover several scales and aspect ratios.
+For $k$ anchors at a location, the original RPN predicts $2k$ object/background classification scores and $4k$ box offsets.
+The classification target is objectness, not a semantic category such as cat or chair. [Section 3.1 and Figure 3](https://arxiv.org/pdf/1506.01497#page=3).
+
+Predicted offsets refine anchors into proposals.
+Proposal filtering and non-maximum suppression produce candidate boxes for the second-stage Fast R-CNN head, which performs semantic classification and further box refinement.
+The architecture therefore has two detection stages even though its convolutional features are shared.
+
+## RPN Targets and Loss
+
+An anchor is positive if it has the highest IoU for a ground-truth box or has IoU above 0.7 with a ground-truth box.
+A non-positive anchor is negative if its IoU with every ground-truth box is below 0.3; remaining anchors are ignored for this training loss.
+The highest-overlap rule ensures a training match even when no anchor reaches the high threshold. [Section 3.1.2](https://arxiv.org/pdf/1506.01497#page=4).
+
+Let $p_i$ predict objectness, $p_i^*\in\{0,1\}$ be the label, and $t_i,t_i^*$ be predicted and target offsets.
+Writing the two normalized terms separately,
+
+$$
+    \begin{aligned}
+        L_{\mathrm{cls}}&=\frac1{N_{\mathrm{cls}}}
+        \sum_i\ell_{\mathrm{bin}}(p_i,p_i^*),\\
+        L_{\mathrm{reg}}&=\frac1{N_{\mathrm{reg}}}
+        \sum_i p_i^*\sum_k\rho(t_{ik}-t_{ik}^*),\\
+        L&=L_{\mathrm{cls}}+\lambda L_{\mathrm{reg}}.
+    \end{aligned}
+$$
+
+The factor $p_i^*$ restricts box regression to positive anchors, and $\rho$ is [Fast R-CNN's Smooth L1 penalty](fast-r-cnn.qmd).
+The normalization constants and weight determine the relative contribution of the terms. [Equation 1](https://arxiv.org/pdf/1506.01497#page=4).
+The original RPN minibatch samples 256 anchors from one image, with at most half positive; unavailable positives are replaced by negatives rather than inventing a balanced set. [Section 3.1.3](https://arxiv.org/pdf/1506.01497#page=5).
+
+## What Joint Training Means Here
+
+The paper presents a four-step alternating procedure to learn shared features between the proposal and detection networks.
+It also discusses approximate joint training, which treats proposals as fixed when differentiating the detection loss.
+That approximation omits the path through predicted proposal coordinates.
+The shared backbone can still receive gradients from both losses. [Section 3.2](https://arxiv.org/pdf/1506.01497#page=6).
+
+Consequently, “one network” does not mean that the original reported training differentiates exactly through every proposal-selection and coordinate operation.
+Architecture sharing, a combined objective, and exact end-to-end derivatives are separate claims.
+
+## Evidence and Limitations
+
+The paper evaluates learned proposals, shared features, and final detection quality through its experiments and ablations. [Section 4](https://arxiv.org/pdf/1506.01497#page=6).
+Anchor design, positive/negative assignment, proposal filtering, and the second stage remain explicit components.
+[SSD](ssd.qmd) predicts categories and boxes directly from multiple feature maps, while [DETR](detr.qmd) uses learned prediction slots and one-to-one target matching.
+
+## Connections
+
+[R-CNN](r-cnn.qmd#box-regression) defines the offset parameterization, and its [IoU explanation](r-cnn.qmd#iou-nms) separates overlap measurement from suppression.
+The [loss note](../../study-notes/machine-learning/loss.qmd#loss-and-risk) helps distinguish loss terms, their weights, and which examples contribute gradients.

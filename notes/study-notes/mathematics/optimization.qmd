@@ -1,0 +1,90 @@
+---
+title: 'Gradient-based optimization'
+description: "Gradient descent, parameter updates, and supporting slopes for convex objectives with corners."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Mathematics
+---
+
+Optimization chooses parameters to improve a scalar objective.
+This note connects ordinary derivatives to parameter updates, then defines a supporting slope that remains meaningful for a convex objective at a corner.
+
+## The update rule {#gradient-descent}
+
+Let $L$ be the differentiable scalar objective being minimised, such as an [empirical risk](../machine-learning/loss.qmd#loss-and-risk).
+For one real parameter, gradient descent repeatedly updates the parameter by subtracting a positive multiple of the objective's derivative:
+
+$$
+  w_{\text{new}}=w_{\text{old}}-\eta L'(w_{\text{old}}).
+$$
+
+The learning rate $\eta>0$ controls the step size.
+A positive derivative gives a decrease in $w$; a negative derivative gives an increase.
+The loss value measures the current penalty, while its derivative measures the local rate at which that penalty changes with the parameter.
+
+For a differentiable objective $L:\mathbb R^d\rightarrow\mathbb R$, the gradient is the vector of its partial derivatives:
+
+$$
+  \nabla L(\mathbf w)=
+  \begin{bmatrix}
+  \frac{\partial L}{\partial w_1}\\
+  \vdots\\
+  \frac{\partial L}{\partial w_d}
+  \end{bmatrix}.
+$$
+
+Here, $\mathbf w$ contains the $d$ model parameters.
+A partial derivative measures how the objective changes with one parameter while the other parameters are held fixed.
+The vector update is $\mathbf w_{\text{new}}=\mathbf w_{\text{old}}-\eta\nabla L(\mathbf w_{\text{old}})$.
+
+An excessive step can overshoot, increase the objective, or cause oscillation.
+Moving opposite the gradient does not guarantee improvement for an arbitrary step size.
+Training minimises the aggregate objective, so a step that improves it can still worsen an individual example.
+For differentiable individual losses, the gradient of their average is the average of their gradients.
+Examples can favour opposite changes, and their gradients can cancel while their errors remain nonzero.
+
+## Definition and absolute-loss example {#subgradients}
+
+Absolute loss has no ordinary derivative at zero.
+For a convex function $\ell:\mathbb R\rightarrow\mathbb R$, a subgradient at $e$ is a number $g$ satisfying
+
+$$
+  \ell(z)\geq\ell(e)+g(z-e)
+  \quad\text{for every }z\in\mathbb R.
+$$
+
+Here, $e$ is the fixed point being examined, while $z$ ranges over all possible inputs.
+Geometrically, $g$ is the slope of a line through $(e,\ell(e))$ that never rises above the function's graph.
+This criterion still applies when there is no unique tangent slope.
+
+For $\ell(e)=|e|$, the set of valid subgradients at zero is
+
+$$
+  \partial\ell(0)=[-1,1].
+$$
+
+A subgradient is one number $g$; the subdifferential $\partial\ell(0)$ is the set of all valid subgradients.
+
+::: {.callout-note collapse="true" icon="false" title="Proof: the subdifferential of absolute loss at zero"}
+
+At $e=0$, the subgradient condition becomes
+
+$$
+  |z|\geq gz
+  \quad\text{for every real }z.
+$$
+
+For $z>0$, this requires $z\geq gz$, hence $g\leq1$.
+For $z<0$, it requires $-z\geq gz$.
+Dividing by negative $z$ reverses the inequality, giving $g\geq-1$.
+At $z=0$, the inequality holds automatically.
+Together, these conditions are necessary and sufficient for $g\in[-1,1]$.
+
+:::
+
+## Connections {#connections}
+
+[Loss and empirical risk](../machine-learning/loss.qmd#loss-and-risk) defines common objectives and derives the minimisers of squared and absolute error.
+[Stop-gradient](../computer-software/stop-gradient.qmd) changes which paths contribute to an update without changing the forward value.
+[Exponential moving averages](exponential-moving-average.qmd) can average model parameters across updates; the averaged object must be specified.

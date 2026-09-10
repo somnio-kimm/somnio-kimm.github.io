@@ -1,0 +1,9 @@
+---
+title: "Computer Hardware"
+description: "Digital logic, processors, memory, and computer architecture."
+listing-page: true
+draft: false
+---
+
+This section is reserved for notes on digital logic, processors, memory, and computer architecture.
+The [study-note index](../index.qmd) connects hardware with software and electrical engineering.

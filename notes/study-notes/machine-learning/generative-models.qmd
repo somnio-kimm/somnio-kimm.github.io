@@ -1,0 +1,107 @@
+---
+title: 'Generative models'
+description: "Model families, output targets, autoregressive factorisation, teacher forcing, and action-policy applications."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+---
+
+A model family describes part of a system, while its architecture, loss, and sampler describe other choices.
+Identifying each choice makes apparently conflicting descriptions compatible.
+For robot policies, several actions can fit the same observation: a robot may reach around an obstacle from either side, while an average path passes through it.
+Identify the target, model inputs, sampler, and execution procedure before comparing such policies.
+
+## Task, architecture, loss, and generation order {#taxonomy}
+
+Regression is the task of predicting numerical quantities.
+A Transformer is an architecture, MSE is an objective component, and autoregression is a factorisation of a sequence distribution.
+These describe different choices and can occur in the same system.
+
+| Construction | What the network predicts |
+|---|---|
+| Direct point prediction | One action chunk from the observation. |
+| Autoregressive token model | A distribution over the next token given the prefix. |
+| Conditional VAE | Decoder outputs conditioned on an observation and a latent variable. |
+| Noise-prediction diffusion | Noise given a noisy sample, observation, and noise level. |
+| Flow matching | A velocity given a current sample, observation, and flow time. |
+
+Autoregression is not restricted to discrete tokens; continuous autoregressive models also exist.
+Likewise, a Transformer can predict an entire numerical chunk jointly.
+Its architecture alone does not determine whether generation is autoregressive.
+
+## How model families overlap {#generative-models}
+
+A generative model defines a way to sample data, often alongside a density or a method for evaluating or estimating one.
+The following descriptions overlap; they are not a partition based only on network architecture.
+
+| Family | Mathematical construction |
+|---|---|
+| Autoregressive model | Factorises a joint distribution into conditional distributions. |
+| Normalising flow | Transforms a base density through invertible differentiable maps. |
+| VAE | Uses latent variables and a variational objective when marginalisation is difficult. |
+| GAN | Trains a generator against a discriminator; a tractable generator density is not required. |
+| Energy model | Specifies an unnormalised density through an energy function. |
+| Diffusion or score model | Learns denoising or scores across noise levels, then uses a sampler. |
+| Flow matching | Regresses a velocity field for a chosen probability path. |
+
+An energy model explicitly specifies relative densities even when its normaliser is unknown.
+Diffusion models can also have likelihood bounds or likelihood evaluation procedures; “generates samples” does not imply that density is irrelevant.
+See [VAE](autoencoders.qmd#vae), [normalising flows](../../literature-review/theory/normalizing-flows.qmd), [diffusion](diffusion.qmd), and [flow matching](flow-matching.qmd).
+
+## Factorise the sequence distribution {#factorisation}
+
+For discrete tokens $c_1,\ldots,c_L$ and supplied context $o$, an autoregressive model represents
+
+$$
+  p_\theta(c_{1:L}\mid o)
+  =\prod_{j=1}^{L}p_\theta(c_j\mid c_{<j},o).
+$$
+
+During teacher-forced training, a Transformer decoder can evaluate positions in parallel using shifted target inputs and a causal mask.
+The shift aligns each prediction with the next target, and the mask restricts access to the allowed prefix.
+This parallel evaluation is a property of the architecture; a recurrent autoregressive model still has sequential state dependencies.
+During ordinary generation, each chosen token becomes part of the next prefix.
+[Cross-entropy](../mathematics/entropy.qmd#discrete-targets) trains the categorical distributions at those positions.
+A probability vector has real-valued entries even though the variable it describes takes discrete token values.
+
+## Architecture does not determine generation order {#architecture}
+
+Autoregression can describe continuous values as well as discrete tokens.
+A Transformer can instead predict an entire numerical chunk jointly, so the presence of attention does not establish autoregressive generation.
+A causal mask controls access to future positions during teacher-forced training; an ordinary autoregressive sampler still extends the prefix as it generates.
+[Attention masks](attention.qmd#mask-values) define allowed reads, while [attention](attention.qmd#projections) explains the query–key–value computation.
+
+## Tokens and robot actions {#actions}
+
+A categorical next-token probability vector has continuous numerical entries, while the next token itself takes a discrete value.
+The output variable and the numbers used to parameterise its distribution have different types.
+[FAST](../../literature-review/action/fast.qmd) applies discrete tokenisation to continuous action chunks.
+[Generative models](generative-models.qmd) compares autoregression with latent-variable, diffusion, and flow constructions.
+
+## What needs explaining? {#questions}
+
+| Question | Focused note |
+|---|---|
+| Does the name describe a task, architecture, or objective? | [Generative model terminology](generative-models.qmd). |
+| Why can squared error average incompatible actions? | [MSE and the conditional mean](loss.qmd#conditional-mean). |
+| How are sequence elements predicted and generated? | [Autoregression](generative-models.qmd#factorisation). |
+| What does a noise-prediction model learn? | [Diffusion](diffusion.qmd). |
+| What is a generated velocity, and why can local averages preserve modes? | [Flow matching](flow-matching.qmd). |
+| How can deterministic computation produce different samples? | [Generative sampling](generative-sampling.qmd). |
+| Which proposed commands are executed before replanning? | [Action horizons and feedback](../physics/action-horizons.qmd). |
+
+## Connect a concept to a policy {#papers}
+
+[ACT](../../literature-review/action/act.qmd) uses a [conditional VAE](autoencoders.qmd#conditioning) and temporal ensembling.
+[Diffusion Policy](../../literature-review/action/diffusion-policy.qmd) learns an observation-conditioned denoising field.
+[π0](../../literature-review/action/pi0.qmd) and [π0.5](../../literature-review/action/pi05.qmd) use flow-based action generation within larger vision-language systems.
+[IRTC](../../literature-review/action/irtc.qmd) addresses continuity between generated chunks.
+
+## Connections {#connections}
+
+[Autoencoders](autoencoders.qmd) develops latent-variable models and conditional reconstruction.
+[Diffusion](diffusion.qmd) learns noise predictions, while [flow matching](flow-matching.qmd) learns velocities.
+[Generative sampling](generative-sampling.qmd) explains randomness and deterministic computation.
+[Energy-based models](energy-based-models.qmd) connects relative density, scores, and Langevin sampling.
+[Action horizons](../physics/action-horizons.qmd) explains when the generated commands are executed.

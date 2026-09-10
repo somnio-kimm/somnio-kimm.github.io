@@ -1,0 +1,261 @@
+---
+title: 'DDPM: Denoising Diffusion Probabilistic Models'
+description: "From a Gaussian corruption chain to a variational bound, noise-prediction loss, and iterative generation."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+  - Generative Models
+  - Diffusion
+---
+
+Paper: Ho, Jain, and Abbeel (2020), [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239).
+A DDPM learns to reverse a fixed sequence of small corruptions, turning Gaussian noise into a sample through a sequence of learned denoising transitions.
+Its practical training objective predicts the noise added to a data example.
+
+## Problem
+
+A complex data distribution is difficult to sample directly, whereas a Gaussian is easy to sample.
+Diffusion modelling connects the two through a forward process that progressively destroys structure and a learned reverse process that reconstructs it.
+Here $x_0$ is a clean data example, $x_t$ is its noisy state, and $t$ indexes corruption strength rather than physical time. [Paper, §2](https://arxiv.org/pdf/2006.11239#page=2).
+
+## Previous attempts
+
+Earlier diffusion probabilistic models already used a forward corruption chain and a learned reverse chain.
+Denoising score matching learned directions related to noisy-data log-density gradients.
+This paper connects those approaches through a particular reverse-mean parameterisation and a reweighted variational training objective that improves sample quality in its experiments. [Paper, §§1–3](https://arxiv.org/pdf/2006.11239#page=1).
+
+## Proposed solution
+
+Choose variances $\beta_t\in(0,1)$ and define
+
+$$
+  \alpha_t=1-\beta_t,
+  \qquad\bar\alpha_t=\prod_{s=1}^{t}\alpha_s.
+$$
+
+The fixed forward transition is
+
+$$
+  q(x_t\mid x_{t-1})
+  =\mathcal N(\sqrt{\alpha_t}x_{t-1},\beta_t I).
+$$
+
+The standard deviation of the added noise is $\sqrt{\beta_t}$.
+At any selected timestep, a noisy example can be sampled directly:
+
+$$
+  x_t=\sqrt{\bar\alpha_t}x_0
+  +\sqrt{1-\bar\alpha_t}\,\epsilon,
+  \quad\epsilon\sim\mathcal N(0,I).
+$$
+
+Thus $q(x_t\mid x_0)$ has covariance $(1-\bar\alpha_t)I$, not $(1-\sqrt{\bar\alpha_t})I$.
+When $\bar\alpha_T$ is sufficiently small, the terminal distribution is approximately standard Gaussian for the intended data scaling. [Paper, Eqs. (2) and (4)](https://arxiv.org/pdf/2006.11239#page=2).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: accumulate independent noise variances"}
+
+Let each transition use an independent $\epsilon_t\sim\mathcal N(0,I)$.
+Unrolling two steps gives
+
+$$
+  \begin{aligned}
+  x_2={}&\sqrt{\alpha_2\alpha_1}x_0\\
+  &+\sqrt{\alpha_2\beta_1}\,\epsilon_1
+  +\sqrt{\beta_2}\,\epsilon_2.
+  \end{aligned}
+$$
+
+The two noise terms have combined covariance
+
+$$
+  (\alpha_2\beta_1+\beta_2)I
+  =(1-\alpha_2\alpha_1)I.
+$$
+
+In general, if $v_{t-1}=1-\bar\alpha_{t-1}$, then
+
+$$
+  v_t=\alpha_t v_{t-1}+\beta_t
+  =1-\bar\alpha_t.
+$$
+
+This induction gives the closed-form corruption distribution.
+Independent Gaussian variances add; their standard deviations do not simply add.
+For example, two independent additive noises of variance $\beta$ produce variance $2\beta$ and standard deviation $\sqrt{2\beta}$.
+
+:::
+
+The learned reverse process starts from $p(x_T)=\mathcal N(0,I)$ and uses transitions
+
+$$
+  p_\theta(x_{t-1}\mid x_t)
+  =\mathcal N(\mu_\theta(x_t,t),\sigma_t^2I).
+$$
+
+The original paper fixes the reverse variance in its main parameterisation and learns the mean through a noise-prediction network:
+
+$$
+  \mu_\theta(x_t,t)=\frac1{\sqrt{\alpha_t}}
+  \left(x_t-\frac{\beta_t\epsilon_\theta(x_t,t)}
+  {\sqrt{1-\bar\alpha_t}}\right).
+$$
+
+The network receives the noisy sample and the timestep, and its output has the same shape as the sampled noise target. [Paper, §3.2, Eq. (11)](https://arxiv.org/pdf/2006.11239#page=4).
+
+## Why noise prediction is a variational objective
+
+Treating $x_1,\ldots,x_T$ as latent variables gives an upper bound on the negative log-likelihood.
+The bound separates a terminal-prior term, reverse-transition KL terms, and a reconstruction term at the final denoising step. [Paper, Eqs. (3) and (5)](https://arxiv.org/pdf/2006.11239#page=2).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: decompose the negative ELBO"}
+
+Let $X=x_{1:T}$ denote the whole latent chain.
+For a fixed clean example, Jensen's inequality gives
+
+$$
+  \begin{aligned}
+  -\log p_\theta(x_0)&\leq L(x_0),\\
+  L(x_0)&=\mathbb E_{q(X\mid x_0)}
+  \left[\log\frac{q(X\mid x_0)}{p_\theta(x_0,X)}\right].
+  \end{aligned}
+$$
+
+Factor the forward chain in reverse order while conditioning on $x_0$:
+
+$$
+  q(X\mid x_0)=q(x_T\mid x_0)
+  \prod_{t=2}^{T}q(x_{t-1}\mid x_t,x_0).
+$$
+
+Substituting the reverse-model factorisation yields
+
+$$
+  L=\mathbb E_q\left[L_T+
+  \sum_{t=2}^{T}L_{t-1}+L_0\right],
+$$
+
+$$
+  L_T=D_{\mathrm{KL}}(q(x_T\mid x_0)\Vert p(x_T)),
+$$
+
+$$
+  \begin{aligned}
+  L_{t-1}=D_{\mathrm{KL}}\big(&q(x_{t-1}\mid x_t,x_0)\\
+  &\Vert p_\theta(x_{t-1}\mid x_t)\big),
+  \end{aligned}
+$$
+
+$$
+  L_0=-\log p_\theta(x_0\mid x_1).
+$$
+
+With a fixed forward schedule and terminal prior, $L_T$ has no learned parameters.
+The final reconstruction term $L_0$ still depends on the model and must not be discarded as a constant.
+For discrete image pixels, the paper defines it using a discretised decoder likelihood. [Paper, §3.3](https://arxiv.org/pdf/2006.11239#page=4).
+
+:::
+
+The posterior $q(x_{t-1}\mid x_t,x_0)$ is tractable because it conditions on the original clean example.
+This is a training target; a reverse sampler cannot condition on the unknown clean answer.
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: Gaussian posterior and the weighted noise loss"}
+
+For $t\geq2$, multiplying the two Gaussian factors in
+
+$$
+  q(x_{t-1}\mid x_t,x_0)
+  \propto q(x_t\mid x_{t-1})q(x_{t-1}\mid x_0)
+$$
+
+gives a Gaussian with variance and mean
+
+$$
+  \tilde\beta_t
+  =\frac{1-\bar\alpha_{t-1}}{1-\bar\alpha_t}\beta_t,
+$$
+
+$$
+  \begin{aligned}
+  \tilde\mu_t={}&
+  \frac{\sqrt{\bar\alpha_{t-1}}\beta_t}
+  {1-\bar\alpha_t}x_0\\
+  &+\frac{\sqrt{\alpha_t}(1-\bar\alpha_{t-1})}
+  {1-\bar\alpha_t}x_t.
+  \end{aligned}
+$$
+
+The first coefficient includes $\beta_t$.
+For a reverse variance $\sigma_t^2$ fixed independently of $\theta$, the KL becomes
+
+$$
+  L_{t-1}=\frac{\|\tilde\mu_t-\mu_\theta\|^2}
+  {2\sigma_t^2}+C_t,
+$$
+
+where $C_t$ is independent of $\theta$.
+If the two variances differ, the variance contribution remains part of that constant; the KL is not exactly just the mean error.
+Substitute the direct corruption formula to express the posterior mean using its sampled noise, then use the learned noise parameterisation:
+
+$$
+  L_{t-1}=w_t
+  \|\epsilon-\epsilon_\theta(x_t,t)\|^2+C_t,
+$$
+
+$$
+  w_t=\frac{\beta_t^2}
+  {2\sigma_t^2\alpha_t(1-\bar\alpha_t)}.
+$$
+
+This is the timestep-weighted noise error obtained from the variational bound. [Paper, Eqs. (6)–(12)](https://arxiv.org/pdf/2006.11239#page=3).
+
+:::
+
+The practical simplified objective removes that timestep weighting:
+
+$$
+  L_{\mathrm{simple}}
+  =\mathbb E_{t,x_0,\epsilon}
+  \|\epsilon-\epsilon_\theta(x_t,t)\|^2.
+$$
+
+Here $t$ is sampled uniformly from the training timesteps.
+This reweights the learning problem; it is not an algebraically identical name for the original weighted variational bound. [Paper, §3.4, Eq. (14)](https://arxiv.org/pdf/2006.11239#page=5).
+
+::: {.callout-note collapse="true" icon="false" title="Implementation: train on one directly sampled corruption"}
+
+This minimal fragment illustrates the objective without prescribing a particular denoiser architecture.
+
+```python
+t = torch.randint(1, T + 1, (x0.shape[0],), device=x0.device)
+eps = torch.randn_like(x0)
+shape = (-1,) + (1,) * (x0.ndim - 1)
+a_bar = alpha_bar[t].reshape(shape)
+xt = a_bar.sqrt() * x0 + (1 - a_bar).sqrt() * eps
+eps_hat = denoiser(xt, t)
+loss = (eps_hat - eps).square().flatten(1).mean(1).mean()
+```
+
+The timestep conditions the network because the same noisy values can require different predictions at different corruption strengths.
+An image U-Net can inject a timestep embedding into its blocks and use skip connections to preserve spatial information.
+Training uses MSE against the sampled noise and does not require unrolling the reverse sampling chain for every minibatch. [Paper, Algorithms 1–2 and §4](https://arxiv.org/pdf/2006.11239#page=4).
+
+:::
+
+## Evidence
+
+The paper reports image-generation experiments on CIFAR-10 and LSUN, including ablations over parameterisations and training objectives.
+These results support the noise-prediction parameterisation and simplified objective for the tested image models. [Paper, §4 and Table 2](https://arxiv.org/pdf/2006.11239#page=5).
+
+## Limitations
+
+Original DDPM generation requires repeated network evaluations and ordinarily samples fresh reverse-transition noise, except at the final step.
+The approximate terminal Gaussian, learned reverse transitions, and numerical sampling choices all affect the generated distribution.
+The theoretical forward posterior is available during training because $x_0$ is known; it is not an oracle accessible at inference.
+
+## Connections
+
+[Score-based models](score-based-models.qmd) express related noising and generation procedures in continuous time.
+[Classifier-free guidance](cfg.qmd) modifies conditional denoising predictions during sampling.
+[Diffusion Policy](../action/diffusion-policy.qmd) changes the generated object from an image to an observation-conditioned action sequence.
+The [generative action study](../../study-notes/machine-learning/generative-models.qmd#questions) compares its noise target with direct action regression and flow-matching velocity targets.

@@ -1,0 +1,200 @@
+---
+title: "Attention: projections, masks, and action queries"
+description: "How queries read keys and values, how masks constrain access, and why action queries differ from robot state."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+  - Transformers
+---
+
+Attention updates a representation by combining information from selected source representations.
+To identify its inputs, first identify the positions being updated and the positions they can read.
+A token can represent a word, an image patch, a robot state, or an action position; its semantic type does not permanently assign it the role of query, key, or value.
+
+Start with the [representation overview](representations.qmd) for the distinction between a sequence element and its numerical vector.
+
+## Tokens and learned projections {#projections}
+
+A token at a Transformer layer is represented by a vector.
+The initial vector may come from a vocabulary embedding, an image encoder, a numerical projection, or a positional representation.
+Later layers operate on the hidden representations produced by earlier computation.
+
+For one attention head, let $X_q\in\mathbb R^{n_q\times d}$ contain the representations being updated and $X_s\in\mathbb R^{n_s\times d}$ contain the source representations.
+For simplicity, both streams have input width $d$ here.
+Attention forms
+
+$$
+  \begin{aligned}
+  Q&=X_qW_Q,\\
+  K&=X_sW_K,\\
+  V&=X_sW_V.
+  \end{aligned}
+$$
+
+The projection matrices are learned parameters.
+The resulting $Q$, $K$, and $V$ are activations that change with the current input and layer.
+
+| Object | Shape | Meaning |
+|---|---|---|
+| $Q$ | $n_q\times d_k$ | One query for each position being updated. |
+| $K$ | $n_s\times d_k$ | One key for each source position. |
+| $V$ | $n_s\times d_v$ | One value for each source position. |
+| $QK^\top$ | $n_q\times n_s$ | A score for each query–source pair. |
+| Output | $n_q\times d_v$ | One combined value vector per query. |
+
+Architectures with different stream widths use compatible stream-specific projections.
+A projection shared across positions does not mean the positions have identical activations.
+The basic construction follows [Attention Is All You Need, Section 3.2](https://arxiv.org/abs/1706.03762).
+
+## Scores, weights, and outputs {#weights-and-values}
+
+For scaled dot-product attention,
+
+$$
+  S=\frac{QK^\top}{\sqrt{d_k}}+M,
+$$
+
+$$
+  P=\operatorname{softmax}_{\mathrm{row}}(S),
+  \qquad Z=PV.
+$$
+
+Here, $M$ is an attention mask expressed as additive score adjustments.
+The [mask section](#mask-values) specifies allowed and prohibited reads and the condition for a valid row.
+
+The score $S_{ij}$ measures compatibility between query $i$ and source key $j$.
+The weight $P_{ij}$ is nonnegative, and each row sums to one.
+The output row is
+
+$$
+  Z_i=\sum_{j=1}^{n_s}P_{ij}V_j.
+$$
+
+The weights describe how information is combined; they are not the combined information itself.
+The values provide that information.
+Neither a query nor an attention output is automatically an action command: subsequent layers and an output projection determine what the model predicts.
+
+::: {.callout-note collapse="true" icon="false" title="Worked example: one query reading two values"}
+
+Suppose one query produces weights $0.25$ and $0.75$.
+Let the source values be $V_1=(2,0)$ and $V_2=(0,4)$.
+Then
+
+$$
+  \begin{aligned}
+  Z_1&=0.25(2,0)+0.75(0,4)\\
+     &=(0.5,3).
+  \end{aligned}
+$$
+
+There are two source positions but only one query, so this head produces one output vector.
+Changing the number of source tokens changes the number of possible contributions, not the number of output positions.
+
+:::
+
+Multi-head attention performs several such combinations with separate learned projections.
+It concatenates their outputs and applies an output projection.
+A Transformer block also contains residual connections, normalisation, and a feed-forward component; attention is one operation within that block.
+
+## Self-attention and cross-attention {#self-and-cross}
+
+In self-attention, query and source representations come from the same sequence.
+Every participating position supplies query, key, and value projections, subject to the mask.
+In cross-attention, queries come from the sequence being updated and keys/values come from another sequence.
+
+For example, a decoder can contain $H$ action positions and read $N$ encoded observation positions.
+Its cross-attention scores have shape $H\times N$.
+It produces $H$ updated representations, one per action position, even when $H\ne N$.
+
+The source and destination matter more than the words “encoder” and “decoder.”
+An encoder can use self-attention, and a decoder can use both self-attention and cross-attention.
+[Section 3.2.3 of the Transformer paper](https://arxiv.org/abs/1706.03762) identifies these roles for the original encoder–decoder architecture.
+
+## Causal and block attention masks {#mask-values}
+
+An attention mask controls forward access: it determines which source positions a query can use.
+A causal mask prevents a position from reading prohibited future positions.
+A block mask can allow an action stream to read a prefix while preventing the prefix from reading actions.
+
+The additive mask has one entry per query–source pair:
+
+$$
+  M_{ij}=
+  \begin{cases}
+    0,&\text{if the read is allowed},\\
+    -\infty,&\text{otherwise}.
+  \end{cases}
+$$
+
+A prohibited pair then receives zero softmax weight.
+Every query must retain at least one allowed source; a row containing only prohibited scores does not define a valid attention distribution.
+
+## Forward Access and Gradient Paths {#masks-and-gradients}
+
+A mask excludes prohibited query–source pairs from this attention operation.
+[Stop-gradient](../computer-software/stop-gradient.qmd) preserves a forward value but blocks derivatives through a specified computation edge.
+An action stream can therefore read a prefix through detached keys and values: the information is available even though that path cannot update its producer.
+[Knowledge insulation](../../literature-review/action/knowledge-insulation.qmd) relies on this distinction.
+
+## Attention order does not determine generation order {#generation-order}
+
+A causal attention mask specifies dependencies inside a network evaluation.
+Autoregressive generation additionally feeds generated outputs back as inputs for later output positions.
+A denoising network can use causal attention over noisy action positions while updating a whole candidate chunk in one evaluation.
+
+To decide whether a policy is autoregressive, inspect its generation loop and predicted object.
+[Generative action models](generative-models.qmd#taxonomy) separates architecture, objective, and sampling order.
+
+## Action positions before actions have been predicted {#action-positions}
+
+A decoder can allocate a representation for each future action position before it knows the action's numerical value.
+The representation says which output position is being formed.
+It need not be a previously predicted command.
+
+In [ACT](../../literature-review/action/act.qmd), decoder positions read encoded observation and latent information to produce the whole action chunk.
+The paper describes fixed sinusoidal positional inputs; the released implementation uses learned query embeddings.
+Those are different constructions of the initial slot representations, while the attention projections are learned in either case.
+The ACT review records the source distinction.
+
+A query coming from an action position therefore does not imply that a clean future action was supplied at inference.
+For diffusion or flow policies, an action position can instead start with an embedding of its current noisy numerical value.
+That noisy candidate is an available input even though the clean target is unknown.
+
+## Robot state and attention Q are different objects {#robot-state}
+
+Robotics papers often write $q_t$ for current joint positions or proprioceptive measurements.
+Attention papers write $Q$ for query activations.
+The similar letters do not imply that all attention queries come from robot state.
+
+For an action token with hidden representation $h_a$, its query is formed from that token:
+
+$$
+  Q_a=h_aW_Q^a.
+$$
+
+It can read keys and values from permitted image, text, state, or action tokens.
+The precise set depends on the architecture and mask.
+
+~~~{mermaid}
+flowchart TD
+  A["Current action representation"] --> Q["Action query"]
+  C["Permitted context representations"] --> K["Context keys"]
+  C --> V["Context values"]
+  Q --> S["Scores and attention weights"]
+  K --> S
+  S --> Z["Updated action representation"]
+  V --> Z
+~~~
+
+This diagram shows information flow for one action query, not a complete model architecture.
+Other action tokens can be additional sources if the mask permits them.
+In [π0](../../literature-review/action/pi0.qmd) and [π0.5](../../literature-review/action/pi05.qmd), also check where state is represented before deciding which stream owns its projections.
+
+## Connections {#connections}
+
+[Stop-gradient](../computer-software/stop-gradient.qmd) controls where a loss can send derivatives while leaving a forward value readable.
+[KV caching](kv-cache.qmd) reuses keys and values when the mask and inputs keep their representations independent of newly added or changing inputs.
+[BERT](../../literature-review/language/bert.qmd) and [PaliGemma](../../literature-review/language/paligemma.qmd) illustrate different bidirectional and causal access patterns.
+[Visual tokens](representations.qmd#visual-tokens) and [text tokenization](representations.qmd#sentencepiece) explain how image and text inputs become vectors.
+[Generative action models](generative-models.qmd#questions) distinguishes parallel chunk prediction from iterative denoising and autoregressive token generation.

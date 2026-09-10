@@ -1,0 +1,72 @@
+---
+title: ''
+description: ""
+date-modified: XXXX-XX-XX
+draft: true
+categories:
+  - XXXX
+---
+
+<!-- Use this template for one connected family of ideas.
+Choose a home in mathematics/, machine-learning/, physics/,
+computer-hardware/, or computer-software/.
+Place electrical engineering material directly in physics/.
+Use lowercase, hyphen-separated filenames that name the family.
+Give related concepts sections within the same document when they form one explanation.
+Keep a separate supporting note when it has substantial reusable material.
+Use categories and cross-links for relationships that cross folder boundaries.
+Keep one sentence per line and use level-two headings for sections.
+Leave definitions, assumptions, and main results visible.
+Place supporting calculations in a closed callout immediately after the result.
+Use Derivation for a calculation and Proof for an argument establishing a claim.
+Keep the full explanation in one main note and link to its sections from related notes.
+Include a short definition or result locally when a reader needs it to follow the argument.
+Do not force the reader to leave the page for every prerequisite reminder.
+Remove unused sections and replace the metadata placeholders before publishing.
+-->
+
+## Question
+
+<!-- What connected question does this family explain, and why is it needed?
+Give a short reading path through the page and link to substantial prerequisites.
+-->
+
+## Definition
+
+<!-- Define the objects, notation, and assumptions before using them.
+Replace these generic headings with topic-specific level-two sections.
+For example, an Autoencoders note can have Autoencoders, VAE, and Conditional VAE sections.
+Give important sections stable IDs such as {#vae} for links from other pages.
+-->
+
+## Main result
+
+<!-- State the result and its meaning outside the toggle.
+Copy this block for each derivation or proof and give it a specific title.
+-->
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: name the result"}
+
+Write the derivation or proof here, defining any additional notation before using it.
+
+<!-- Explain each step here.
+Use $$ on separate lines for display math and indent the math inside them.
+For a proof, change the title to Proof: name the claim.
+-->
+
+:::
+
+## Example
+
+<!-- Work through a concrete example and explain when the result applies. -->
+
+## Connections
+
+<!-- Link to related notes and explain each relationship.
+Link to a prerequisite, a related concept, and an application when relevant.
+If this is a navigation page, keep comparisons brief and link to the main explanations.
+-->
+
+## References
+
+<!-- Link to the sources used for definitions, derivations, and claims. -->

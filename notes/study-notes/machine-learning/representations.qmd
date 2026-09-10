@@ -1,0 +1,88 @@
+---
+title: 'Representations, tokens, and embeddings'
+description: "How physical coordinates, text, and images become the numerical inputs to a model."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+---
+
+A model receives numerical representations of an instruction, an image, or a joint angle.
+To understand its inputs, separate the original quantity, the operation that represents it, and the objective used to learn from it.
+An ID, an embedding vector, and a physical coordinate have different roles even when a model processes them in one sequence.
+
+## Four transformations with different jobs {#four-transformations-with-different-jobs}
+
+| Transformation | Input | Output |
+|---|---|---|
+| [Quantile normalization](quantile-normalization.qmd) | Physical coordinate | Scaled continuous number |
+| [Text tokenization](representations.qmd#sentencepiece) | String | Discrete vocabulary IDs |
+| [Embedding lookup](representations.qmd#embeddings) | Vocabulary ID | Learned vector |
+| [Visual encoding](representations.qmd#visual-tokens) | Image patches | Continuous feature vectors |
+
+An ID identifies an entry in a finite vocabulary; an embedding is a vector used in computation.
+A sequence position can therefore hold an embedding without having a corresponding vocabulary ID.
+[PaliGemma, §3.1](https://arxiv.org/abs/2407.07726), illustrates this distinction: text passes through a tokenizer and embedding lookup, while visual features pass through a learned projection.
+
+## Text pieces, IDs, and embeddings {#sentencepiece}
+
+SentencePiece is a tokenisation framework supporting algorithms including BPE and unigram models.
+Calling a tokenizer “SentencePiece” does not identify its segmentation algorithm, vocabulary, or preprocessing rules.
+A BPE model uses learned merge rules for frequent adjacent symbols; a unigram model scores candidate segmentations using a learned vocabulary model.
+The loaded model file determines the behaviour.
+The [official SentencePiece documentation](https://github.com/google/sentencepiece) describes these alternatives and the distinction between pieces and IDs.
+
+## IDs and Embedding Vectors {#embeddings}
+
+For a text string, tokenisation produces IDs $z_1,\ldots,z_n$.
+An embedding matrix $E\in\mathbb R^{V\times d}$ contains one learned row for each of $V$ vocabulary entries:
+
+$$
+  e_i=E[z_i,:]\in\mathbb R^d.
+$$
+
+The ID is an index, so subtracting two IDs does not measure semantic distance.
+The embedding has learned coordinates, which are subsequently modified by the Transformer.
+Tokenisation and contextual representation learning are distinct stages.
+
+## State Bins Serialized as Text {#state-bins}
+
+In [OpenPI's PaliGemma tokenizer](https://github.com/Physical-Intelligence/openpi/blob/main/src/openpi/models/tokenizer.py), the $\pi_{0.5}$ path bins normalised state coordinates, serialises the resulting integers as text, and tokenises that string together with the instruction.
+Thus a state coordinate, its bin number, and the text IDs spelling that number are three different objects.
+One coordinate need not correspond to one text token.
+The observed implementation assumes an appropriate normalised range and does not explicitly clip before binning; values below its lowest edge can receive index $-1$.
+“256 bins” therefore does not, by itself, establish out-of-range handling.
+
+## Image tokens are continuous features {#visual-tokens}
+
+A vision Transformer projects patches of image pixels into vectors, adds positional information, and lets these vectors exchange information through attention.
+Its final patch features need not describe only their original patches because attention introduces wider context.
+
+PaliGemma uses the image encoder from SigLIP and projects its output vectors to Gemma's embedding width.
+It concatenates those vectors with embedded text tokens.
+There is no step that assigns each image patch a text-vocabulary ID in this path, and PaliGemma does not use SigLIP's original text tower as its language model.
+These are architectural statements from [PaliGemma, §3.1 and Figure 2](https://arxiv.org/abs/2407.07726).
+
+The word *token* describes a sequence element here.
+It does not imply discrete quantisation, next-token prediction, or one named object per element.
+
+## Follow the Learning Objective {#follow-the-learning-objective}
+
+[Contrastive image–text learning](representation-learning.qmd#clip-and-siglip) explains CLIP and SigLIP's paired-image-and-text objectives.
+Its [pretraining discussion](representation-learning.qmd#representation-pretraining-and-policy-training) separates the origin of an encoder's weights from the objective used by a downstream policy.
+[Activation normalization](normalization.qmd#what-to-check-when-reading-a-model) transforms internal activations and has a different role from scaling physical input or output coordinates.
+
+## Paper Connections {#paper-connections}
+
+[PaliGemma](../../literature-review/language/paligemma.qmd) combines projected visual vectors with embedded text.
+[FAST](../../literature-review/action/fast.qmd) converts continuous action trajectories into discrete targets.
+[π0.5](../../literature-review/action/pi05.qmd) shows why a physical state coordinate, its quantized bin, and the text IDs representing that bin must be distinguished.
+
+## Connections {#connections}
+
+[Quantile normalization](quantile-normalization.qmd) develops continuous coordinate scaling and its inverse.
+[Attention](attention.qmd#projections) updates representations using permitted positions; [activation normalization](normalization.qmd#what-to-check-when-reading-a-model) transforms their internal statistics.
+[Representation learning](representation-learning.qmd) explains training and adapting the encoders that produce these vectors.
+[Cross-entropy](../mathematics/entropy.qmd#cross-entropy) evaluates predicted distributions over discrete targets.
+The [ViT review](../../literature-review/vision/vit.qmd) gives the patch projection and transformer architecture.
+[FAST](../../literature-review/action/fast.qmd) tokenizes temporal action trajectories, while [PaliGemma](../../literature-review/language/paligemma.qmd) and [π0](../../literature-review/action/pi0.qmd) use visual features to condition other outputs.

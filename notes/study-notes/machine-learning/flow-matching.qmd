@@ -1,0 +1,134 @@
+---
+title: "Flow matching and local velocity prediction"
+description: "Construct a probability path, regress its velocity, and understand why local averages can generate multiple modes."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+  - Generative Models
+  - Robotics
+---
+
+Flow matching learns a velocity field that transports a distribution of initial samples toward a data distribution.
+For the action example, $A$ is a demonstrated chunk, $o$ is its observation, and $\epsilon$ is Gaussian noise of the same shape.
+
+## Choose a path and its velocity {#flow-matching}
+
+Use the convention $\tau=0$ for noise and $\tau=1$ for clean data.
+For an independently sampled demonstration and noise, a simple straight training path is
+
+$$
+  A^\tau=(1-\tau)\epsilon+\tau A.
+$$
+
+The path's target velocity is $u=A-\epsilon$.
+Training samples $\tau$, constructs $A^\tau$, and evaluates
+
+$$
+  \begin{aligned}
+  \hat u&=v_\theta(A^\tau,o,\tau),\\
+  L_{\mathrm{flow}}&=\mathbb E[\|\hat u-u\|^2].
+  \end{aligned}
+$$
+
+The target $u$ comes from the known training pair.
+At inference, the target action is unavailable; the network predicts a velocity from the current sample and conditioning.
+Starting at $A^0=\epsilon$, generation integrates
+
+$$
+  \frac{dA^\tau}{d\tau}=v_\theta(A^\tau,o,\tau).
+$$
+
+For example, one Euler step is
+
+$$
+  A^{\tau+\Delta\tau}
+  =A^\tau+\Delta\tau\,v_\theta(A^\tau,o,\tau).
+$$
+
+The velocity is in action-space units per unit of generative time.
+It is not necessarily the robot's physical joint velocity.
+An action chunk can contain position commands even when the generator predicts this mathematical velocity.
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: the target velocity and a reversed time convention"}
+
+During construction of one training path, $A$ and $\epsilon$ are fixed.
+Differentiating their interpolation gives
+
+$$
+  \frac{d}{d\tau}[(1-\tau)\epsilon+\tau A]
+  =A-\epsilon.
+$$
+
+If another convention uses $s=1-\tau$, its path is $A^s=s\epsilon+(1-s)A$.
+Its derivative with respect to $s$ is $\epsilon-A$.
+Generation then runs from $s=1$ down to $s=0$.
+Changing the time convention changes both the velocity sign and the integration direction.
+
+:::
+
+Straight training paths do not imply that every generated trajectory is straight.
+The trained network aggregates compatible supervision into a marginal velocity field, which the solver follows.
+The framework and its marginalisation result come from [Flow Matching, Section 3 and Theorems 1–2](https://arxiv.org/abs/2210.02747).
+
+## Why local averages can preserve multiple modes {#local-averaging}
+
+The ideal flow predictor is
+
+$$
+  v^*(x,o,\tau)
+  =\mathbb E[A-\epsilon\mid A^\tau=x,o,\tau].
+$$
+
+Two samples at different locations $x$ need not receive the same velocity.
+The conditional mean here describes the net movement of probability mass at one location and time.
+It does not require every initial sample to end at the mean demonstrated action.
+
+::: {.callout-note collapse="true" icon="false" title="Proof sketch: averaging probability flux preserves the marginal path"}
+
+Hold the observation fixed and consider smooth conditional densities $p_\tau(x\mid c)$ with velocities $u_\tau(x\mid c)$.
+Here, $c$ labels a training condition with fixed mixing density $\rho(c)$.
+Assume differentiation can pass under the integral and each conditional pair satisfies the continuity equation.
+
+Define the mixture and its probability flux by
+
+$$
+  p_\tau(x)=\int p_\tau(x\mid c)\rho(c)\,dc,
+$$
+
+$$
+  j_\tau(x)=
+  \int p_\tau(x\mid c)u_\tau(x\mid c)\rho(c)\,dc.
+$$
+
+Integrating the conditional continuity equations gives
+
+$$
+  \partial_\tau p_\tau(x)
+  +\nabla_x\cdot j_\tau(x)=0.
+$$
+
+Where $p_\tau(x)>0$, let $v_\tau(x)=j_\tau(x)/p_\tau(x)$.
+This is the conditional average velocity given the location, and it yields
+
+$$
+  \partial_\tau p_\tau
+  +\nabla_x\cdot(p_\tau v_\tau)=0.
+$$
+
+Thus the averaged field gives the intended marginal probability evolution under these assumptions.
+This is a distribution-level result; it does not recover a unique original training pair for every generated sample.
+See the full assumptions and proof in Flow Matching, Appendix A.
+
+:::
+
+This construction allows multimodal distributions; it does not guarantee that every trained model covers every mode.
+Data imbalance, approximation error, optimisation, and inaccurate numerical integration can still remove or distort modes.
+Mode averaging by a point predictor and mode dropping by a generator are distinct failure mechanisms.
+
+## Connect the field to a sampler {#connections}
+
+A [generative sampler](generative-sampling.qmd) integrates the predicted field from an initial noise draw.
+[Direct MSE regression](loss.qmd#conditional-mean) instead predicts one final answer for an observation.
+The [flow-matching paper review](../../literature-review/theory/flow-matching.qmd) derives Gaussian conditional paths and the equality of conditional and marginal objective gradients.
+[π0](../../literature-review/action/pi0.qmd) applies flow matching to observation-conditioned robot actions.

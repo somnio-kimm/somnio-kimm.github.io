@@ -1,0 +1,134 @@
+---
+title: 'Matrix structure and dynamics'
+description: "Matrix properties, eigenvalue modes, transient amplification, and inverses with low-rank corrections."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Mathematics
+---
+
+Eigenvalues describe long-time modes of a linear system, while singular values describe its largest Euclidean amplification at a given time.
+Here $h(t)$ is a finite-dimensional state and $A$ is a constant square matrix.
+The related matrix properties and inverse identities explain how these systems can be analysed and computed.
+
+## Matrix properties {#properties}
+
+Write $A^*$ for conjugate transpose and $A^\top$ for ordinary transpose.
+
+| Property | Definition or characterisation |
+|---|---|
+| Real symmetric | $A^\top=A$. |
+| Complex Hermitian | $A^*=A$. |
+| Normal | $A^*A=AA^*$. |
+| Orthogonal | Real square $Q$ with $Q^\top Q=I$. |
+| Unitary | Complex square $U$ with $U^*U=I$. |
+| Diagonalisable | $A=V\Lambda V^{-1}$ for an invertible eigenvector matrix $V$. |
+
+A real matrix is orthogonally diagonalisable exactly when it is symmetric.
+A complex matrix is unitarily diagonalisable exactly when it is normal.
+General diagonalisation does not imply that the eigenvectors are orthogonal.
+For compatible dimensions, singular values are the nonnegative square roots of the eigenvalues of $A^*A$.
+The spectral norm $\|A\|_2$ is its largest singular value.
+
+## Modes and long-time stability {#modes}
+
+For $\dot h=Ah$, the solution is $h(t)=e^{tA}h(0)$.
+If $A=V\Lambda V^{-1}$, then
+
+$$
+  e^{tA}=V\operatorname{diag}(e^{t\lambda_i})V^{-1}.
+$$
+
+The real part of each eigenvalue controls exponential growth or decay; its imaginary part controls oscillation.
+All eigenvalues having strictly negative real parts implies asymptotic stability in finite dimensions.
+Purely imaginary eigenvalues require more care: a nontrivial Jordan block can introduce polynomial growth even when exponential growth rates are zero.
+Calling a matrix “coupled” also depends on coordinates; a diagonalisable system has independent modal equations in its eigenvector basis.
+
+## Transient amplification {#transient-amplification}
+
+For a fixed time, the largest possible amplification over nonzero initial states is
+
+$$
+  G(t)=\sup_{h_0\ne0}\frac{\|e^{tA}h_0\|_2}{\|h_0\|_2}
+  =\|e^{tA}\|_2.
+$$
+
+Define $G_{\max}=\sup_{t\geq0}G(t)$.
+An asymptotically stable non-normal matrix can have $G_{\max}>1$, but non-normality alone does not force it.
+For a normal matrix, $G(t)=\max_i e^{t\operatorname{Re}\lambda_i}$, so strictly negative real parts give monotone decay.
+
+::: {.callout-note collapse="true" icon="false" title="Proof and counterexample: non-normal does not mean transient growth"}
+
+For real dynamics,
+
+$$
+  \frac{d}{dt}\|h\|_2^2=h^\top(A+A^\top)h.
+$$
+
+If $A+A^\top$ is negative semidefinite, the norm cannot increase for any initial state.
+Consider
+
+$$
+  A=\begin{pmatrix}-1&1\\0&-1\end{pmatrix}.
+$$
+
+This matrix is non-normal, but the eigenvalues of $A+A^\top$ are $-1$ and $-3$.
+Every nonzero state therefore has decreasing squared norm, despite non-normality.
+In contrast, replacing the upper-right entry by $4$ gives $A+A^\top$ eigenvalues $2$ and $-6$.
+An initial vector in the positive eigendirection has initial norm growth, even though both eigenvalues of $A$ remain $-1$.
+Both systems eventually decay; only the second has transient amplification above its initial norm for some input state.
+
+:::
+
+## Woodbury and low-rank corrections {#woodbury}
+
+Low-rank matrix structure can reduce the size of an inverse calculation.
+The reduction is useful when the base inverse can already be applied efficiently.
+Let $A\in\mathbb C^{n\times n}$ and $C\in\mathbb C^{r\times r}$ be invertible, with $U\in\mathbb C^{n\times r}$ and $V\in\mathbb C^{r\times n}$.
+Assume the remaining inverse below exists, and define
+
+$$
+  S=C^{-1}+VA^{-1}U.
+$$
+
+The Woodbury identity is
+
+$$
+  (A+UCV)^{-1}
+  =A^{-1}-A^{-1}US^{-1}VA^{-1}.
+$$
+
+The correction has a minus sign.
+For $r\ll n$, the additional inverse is only $r\times r$.
+S4 uses related structured inverses in its kernel calculation; see [S4, Appendix C](https://arxiv.org/abs/2111.00396).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: checking the sign in Woodbury"}
+
+Let $R=A^{-1}-A^{-1}US^{-1}VA^{-1}$.
+Since $CS=I+CVA^{-1}U$,
+
+$$
+  (A+UCV)A^{-1}U=UCS.
+$$
+
+Multiplying out gives
+
+$$
+  \begin{aligned}
+  (A+UCV)R
+  &=I+UCVA^{-1}\\
+  &\quad-UCS S^{-1}VA^{-1}\\
+  &=I.
+  \end{aligned}
+$$
+
+Thus $R$ is the inverse under the stated assumptions.
+The scalar check $A=C=U=V=1$ gives $(1+1)^{-1}=1-1/2$, immediately detecting the incorrect plus sign.
+
+:::
+
+## Connections {#connections}
+
+[State-space models](../machine-learning/state-space-models.qmd) introduces the continuous dynamics and sequence-layer construction.
+Its [discretisation section](../machine-learning/state-space-models.qmd#discretisation) compares how numerical updates represent continuous modes, while [S4](../machine-learning/state-space-models.qmd#s4) uses structured matrices for efficient kernels.
+These distinctions unpack the supplied State-Space Models presentation.

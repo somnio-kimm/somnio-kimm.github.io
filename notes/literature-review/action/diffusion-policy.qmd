@@ -1,0 +1,200 @@
+---
+title: 'Diffusion Policy'
+description: "Why a robot policy predicts noise during training, how observation and action horizons differ, and what reaches the controller."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Robotics
+  - Machine Learning
+  - Imitation Learning
+  - Diffusion Models
+---
+
+Paper: [Chi et al. (2023), Diffusion Policy: Visuomotor Policy Learning via Action Diffusion](https://arxiv.org/abs/2303.04137).
+
+## Problem
+
+Similar observations can admit several valid action sequences, such as approaching an object from either side.
+A policy must represent these alternatives while producing a temporally coherent sequence and responding to new observations.
+Diffusion Policy models a conditional distribution over action sequences by learning to remove noise from demonstrated actions. [§§II-C and IV-A](https://arxiv.org/pdf/2303.04137#page=3).
+
+## Previous Attempts
+
+Direct regression trains a model to predict actions from observations with a distance loss.
+Under squared error, the best unrestricted point predictor is a conditional mean, which can fall between distinct valid strategies.
+Other prior approaches use mixture distributions, discrete action representations, or implicit energy functions.
+The paper compares representative baselines. [§I](https://arxiv.org/pdf/2303.04137#page=1).
+
+Diffusion Policy's MSE training objective therefore needs careful interpretation: the supervised quantity is noise, and the denoiser's inputs contain a corrupted action sequence as well as the observation.
+
+## Proposed Solution
+
+Let $O_t$ denote the observation history available at controller time $t$, and let $A_t^0$ be a clean demonstrated action window.
+The superscript describes the diffusion noise level; it is not a controller timestep.
+A standard scheduled corruption can be written as
+
+$$
+  A_t^k=\sqrt{\bar\alpha_k}A_t^0
+  +\sqrt{1-\bar\alpha_k}\,\epsilon,
+$$
+
+where $\epsilon\sim\mathcal N(0,I)$ has the same shape as the action window and $\bar\alpha_k$ specifies the retained signal at noise level $k$.
+The denoising network predicts
+
+$$
+  \hat\epsilon=\epsilon_\theta(O_t,A_t^k,k).
+$$
+
+Training minimises the squared difference between the known sampled noise and the prediction:
+
+$$
+  J=\mathbb E\!\left[\|\epsilon-\hat\epsilon\|_2^2\right].
+$$
+
+The expectation averages over demonstrations, noise levels, and Gaussian noise; coordinate averaging gives the usual MSE normalisation.
+The target is $\epsilon$, not the clean action chunk.
+The paper writes the corruption schematically as an additive perturbation in Eq. (5); the coefficients above make the standard noise schedule explicit. [§II-B, Eq. (3), and §II-C, Eq. (5)](https://arxiv.org/pdf/2303.04137#page=2).
+The [DDPM note](../theory/ddpm.qmd#why-noise-prediction-is-a-variational-objective) distinguishes this simplified noise objective from the timestep-weighted variational bound.
+Training minimises an upper bound on negative log-likelihood in the variational formulation; it does not minimise a lower bound on log-likelihood.
+
+At execution time, start from a Gaussian action-shaped sample and iteratively denoise it, conditioned on $O_t$.
+The final result $\hat A_t^0$ is the model's generated action sequence.
+Only selected actions from this final sequence go to the robot; intermediate noisy iterates are internal computation. [Fig. 3](https://arxiv.org/pdf/2303.04137#page=3).
+
+## Why noise MSE can support different action modes
+
+The MSE-optimal noise predictor is a conditional expectation given $(O_t,A_t^k,k)$.
+That conditioning includes the current noisy candidate, rather than only the scene.
+Different initial candidates can therefore follow different denoising trajectories under the same observation.
+The sampler, together with the learned denoiser, produces the action distribution.
+The paper illustrates different approach directions in Push-T. [§IV-A and Fig. 4](https://arxiv.org/pdf/2303.04137#page=4).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: the noise target determines the clean-action estimate"}
+
+For $\bar\alpha_k>0$, rearrange the corruption equation:
+
+$$
+  A_t^0=
+  \frac{A_t^k-\sqrt{1-\bar\alpha_k}\,\epsilon}
+  {\sqrt{\bar\alpha_k}}.
+$$
+
+Replacing the unknown noise with the predicted noise gives an estimate of the clean action window.
+This conversion scales prediction errors by a noise-dependent factor, so noise MSE and direct clean-action MSE are not numerically identical across noise levels.
+The sampler uses these predictions internally.
+
+:::
+
+## Observation, prediction, and execution horizons
+
+The paper distinguishes three horizons. [§II-C and Fig. 3](https://arxiv.org/pdf/2303.04137#page=3).
+
+| Symbol | Meaning |
+|---|---|
+| $T_o$ | Number of recent observation steps supplied to the policy. |
+| $T_p$ | Number of action steps in the predicted window. |
+| $T_a$ | Number of actions executed before replanning. |
+
+A longer predicted window lets the model represent temporal relationships beyond the immediately executed action.
+Executing only $T_a$ actions allows the next planning call to incorporate newer observations before the entire prediction window is consumed.
+Longer prediction is not automatically more robust, and shorter execution requires more frequent inference.
+
+Action indices must be aligned with the observation history.
+The paper's diagram includes history-aligned entries in its prediction window, so the executable segment begins at the current controller time rather than necessarily at array index zero.
+
+## What enters attention and what is denoised
+
+In the main formulation, observations condition the denoising process while the action sequence is the object being denoised.
+Future camera images need not be generated. [§II-C](https://arxiv.org/pdf/2303.04137#page=3).
+
+The CNN uses observation features and the diffusion step to modulate action features.
+The transformer embeds the noisy action sequence into decoder tokens and uses observation embeddings through cross-attention.
+Consequently, its cross-attention queries come from action-side representations, while keys and values come from observation-side representations. [§III-A and Fig. 3](https://arxiv.org/pdf/2303.04137#page=3).
+
+The paper motivates the transformer as a way to reduce the temporal CNN's tendency to smooth high-frequency action changes.
+This is an architectural motivation supported by particular experiments, not a guarantee that causal attention always preserves sharp changes.
+The CNN can still receive goals through FiLM; removing the earlier inpainting-based goal mechanism does not make goal conditioning impossible. [§III-A](https://arxiv.org/pdf/2303.04137#page=3).
+
+The transformer's causal action-attention mask does not turn diffusion sampling into one-action-at-a-time autoregression.
+Each denoising iteration processes the action window, and successive iterations refine it along the diffusion index.
+The [attention note](../../study-notes/machine-learning/attention.qmd#projections) distinguishes token position, attention masks, and generation order.
+
+## Visual features and the noise schedule
+
+The visual encoder uses ResNet-18 with spatial softmax pooling in place of global average pooling and GroupNorm in place of BatchNorm.
+Spatial softmax retains spatial information through feature-location summaries, while GroupNorm uses statistics within channel groups rather than across the batch.
+The observation representation can be computed once per planning call and reused across its denoising iterations. [§III-B](https://arxiv.org/pdf/2303.04137#page=4).
+
+The paper chooses a square-cosine noise schedule after empirical comparison.
+The schedule determines corruption levels and sampler coefficients; these coefficients should not all be described as learned neural-network parameters. [§III-C](https://arxiv.org/pdf/2303.04137#page=4).
+
+## DDPM, DDIM, and deterministic sampling
+
+The paper uses DDPM-style denoising training and discusses DDIM to accelerate inference by using fewer sampling steps. [§III-D](https://arxiv.org/pdf/2303.04137#page=4).
+The main text and appendix report different inference-step settings, so there is no single universal step count for every reported experiment. [Appendix D and Tables VI–VII](https://arxiv.org/pdf/2303.04137#page=14).
+
+DDIM can use a deterministic update when its additional-noise parameter is zero.
+Then fixed initial noise, observation, model, and sampling schedule determine the output, assuming deterministic model computation.
+Different initial noise can still give different chunks for the same observation.
+With stochastic sampling, fixing the initial sample alone is insufficient because later steps also draw noise. [Original DDIM sampling implementation](https://github.com/ermongroup/ddim/blob/main/functions/denoising.py#L8-L29).
+
+## The score interpretation and training stability
+
+A score is the gradient of a log density with respect to the sample, rather than a probability or a gradient with respect to model parameters.
+For the Gaussian corruption used above, define $\sigma_k=\sqrt{1-\bar\alpha_k}>0$.
+The ideal noise predictor determines the score of the noisy conditional action distribution:
+
+$$
+  s^*(A_t^k,O_t,k)
+  =-\frac{\mathbb E[\epsilon\mid A_t^k,O_t,k]}{\sigma_k}.
+$$
+
+Thus, the learned approximation is $s_\theta=-\epsilon_\theta/\sigma_k$; simply writing $s_\theta=-\epsilon_\theta$ omits the noise-level scaling.
+A Langevin-style update moves in the positive score direction toward locally increasing log density.
+The minus sign in a noise-prediction update is consistent with this negative relationship between score and predicted noise.
+DDPM and DDIM updates also contain their scheduled rescaling terms, so the Langevin analogy is not an exact description of every sampler. [§§II-B and IV-D](https://arxiv.org/pdf/2303.04137#page=5).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: the normalising constant disappears from an action gradient"}
+
+For an energy model with observation fixed, write
+
+$$
+  p_\theta(A\mid O)=\frac{e^{-E_\theta(O,A)}}{Z_\theta(O)}.
+$$
+
+Taking a log and differentiating with respect to $A$ gives
+
+$$
+  \nabla_A\log p_\theta(A\mid O)
+  =-\nabla_A E_\theta(O,A).
+$$
+
+The derivative of $\log Z_\theta(O)$ vanishes because it does not depend on the action being differentiated.
+It need not vanish when differentiating with respect to the model parameters $\theta$.
+This distinction helps explain why learning a denoising score can avoid explicitly estimating an action-space normalising constant in the training objective.
+
+:::
+
+The paper compares diffusion training with an implicit behaviour-cloning baseline that uses contrastive negative actions.
+Its observed training stability supports the tested denoising recipe, rather than a guarantee that every energy model is unstable. [§IV-D and Fig. 7](https://arxiv.org/pdf/2303.04137#page=6).
+
+## Evidence
+
+The paper compares task success across state and visual policies, simulated benchmarks, and real manipulation tasks.
+Its tables separate best-checkpoint performance from averages over final checkpoints, making evaluation protocol relevant to numerical comparisons. [§V and Tables I–III](https://arxiv.org/pdf/2303.04137#page=6).
+The visual-policy comparison shows improvements on tasks including Transport and ToolHang, with results depending on the model variant.
+These rollout results do not make lower training noise MSE a guarantee of successful control.
+The authors also observe benefits from position-control actions and action-sequence prediction in their settings.
+Their explanations involving compounding velocity errors, temporal consistency, and idle segments are mechanisms and empirical findings, not proofs that position control or longer chunks always improve a policy. [§§IV-B–C](https://arxiv.org/pdf/2303.04137#page=4).
+
+## Limitations
+
+Iterative denoising costs inference time, and observations can become stale while a chunk is generated or executed.
+Sampling separate chunks also does not inherently guarantee continuity between them.
+
+## Connections
+
+[Generative action models](../../study-notes/machine-learning/generative-models.qmd#questions) separates the training target from the generated action and the execution schedule.
+[Loss](../../study-notes/machine-learning/loss.qmd#mse) explains squared error as a mathematical penalty.
+[ACT](act.qmd) generates chunks with a CVAE decoder and can combine overlapping predictions through temporal ensembling.
+[IRTC](irtc.qmd) addresses the continuity and latency problem when generating a new chunk while the old one executes.

@@ -1,0 +1,118 @@
+---
+title: "Likelihood and estimation: MLE and MAP"
+description: "Likelihood as a parameter function, its classification cross-entropy objective, and the effect of a parameter prior."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Mathematics
+  - Probability
+---
+
+A distribution assigns probabilities or densities to possible data; a likelihood evaluates the observed data as a function of model parameters.
+Maximum likelihood and maximum a posteriori estimation use that likelihood to choose one parameter value, with different treatment of prior information.
+
+## Likelihood and maximum likelihood {#estimation}
+
+For fixed observations $\mathcal D=\{x_i\}_{i=1}^n$ and an independent-sample model, the likelihood is
+
+$$
+  \mathcal L(\theta;\mathcal D)=\prod_{i=1}^n p_\theta(x_i).
+$$
+
+It is a function of parameters, not a normalised probability distribution over parameters.
+Maximum likelihood estimation chooses parameters maximising this function, equivalently minimising the negative log-likelihood.
+For classification, that gives empirical [cross-entropy](entropy.qmd#cross-entropy), as derived below.
+
+## Classification likelihood {#classification}
+
+For classification, the likelihood is the probability assigned to the fixed observed labels, viewed as a function of the model parameters $w$, with the inputs held fixed.
+Changing $w$ changes the probabilities assigned to those labels.
+The likelihood is not a probability distribution over the parameters.
+
+Suppose the labels are conditionally independent under the model, given the inputs and parameters.
+Then the likelihood of the observed labels is the product of their predicted probabilities.
+Maximizing this likelihood is equivalent to minimizing the sum of their cross-entropy losses:
+
+$$
+  \begin{gathered}
+  \text{maximize likelihood}\\
+  \Updownarrow\\
+  \text{minimize negative log-likelihood}.
+  \end{gathered}
+$$
+
+For a fixed dataset of $n\geq1$ examples, dividing this sum by $n$ gives the empirical mean loss without changing its minimizers.
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: from likelihood to mean cross-entropy"}
+
+Let $q_i(w)$ be the positive probability the model assigns to the observed class for example $i$.
+Under the conditional independence assumption, the likelihood is
+
+$$
+  \mathcal L(w)=\prod_{i=1}^{n}q_i(w).
+$$
+
+The logarithm is strictly increasing, so it preserves which parameters maximize the likelihood and turns the product into a sum:
+
+$$
+  \ln\mathcal L(w)
+  =\ln\!\left(\prod_{i=1}^{n}q_i(w)\right)
+  =\sum_{i=1}^{n}\ln q_i(w).
+$$
+
+Negating this expression turns maximization into minimization:
+
+$$
+  -\ln\mathcal L(w)=\sum_{i=1}^{n}-\ln q_i(w).
+$$
+
+For a binary target $y_i\in\{0,1\}$, let $p_i(w)$ be the predicted probability of class $1$.
+The probability of the observed class can be written as
+
+$$
+  q_i(w)=p_i(w)^{y_i}\left(1-p_i(w)\right)^{1-y_i}.
+$$
+
+Its negative logarithm is binary cross-entropy:
+
+$$
+  \begin{aligned}
+  &-\ln q_i(w)\\
+  &\quad =-y_i\ln p_i(w)\\
+  &\qquad -(1-y_i)\ln\left(1-p_i(w)\right).
+  \end{aligned}
+$$
+
+For a categorical target, the same term is $-\ln p_{i,\text{observed class}}(w)$.
+The empirical mean cross-entropy is therefore
+
+$$
+  L(w)=\frac{1}{n}\sum_{i=1}^{n}-\ln q_i(w)
+  =-\frac{1}{n}\ln\mathcal L(w).
+$$
+
+The factor $1/n$ is a positive constant, so it does not change the minimizers.
+
+:::
+
+## Maximum a posteriori estimation {#map-estimation}
+
+Return to the notation $\mathcal D=\{x_i\}_{i=1}^n$ and $\mathcal L(\theta;\mathcal D)$ for the fixed dataset and its likelihood.
+Maximum a posteriori (MAP) estimation specifies a prior density or mass function $p(\theta)$.
+The posterior satisfies $p(\theta\mid\mathcal D)\propto\mathcal L(\theta;\mathcal D)p(\theta)$.
+Assume the observations are independent under the model for a fixed $\theta$, so the likelihood is $\prod_i p_\theta(x_i)$.
+MAP then minimises the negative log posterior up to a constant:
+
+$$
+  -\sum_i\ln p_\theta(x_i)-\ln p(\theta).
+$$
+
+For example, a zero-mean isotropic Gaussian parameter prior contributes a squared parameter penalty.
+A MAP point estimate is not the full posterior and does not retain all its uncertainty.
+
+## Connections {#connections}
+
+[Probability](probability.qmd#conditional-and-marginal) gives the conditional-probability rule behind the posterior.
+[Entropy and cross-entropy](entropy.qmd#cross-entropy) defines the binary and categorical losses used in classification.
+[Loss](../machine-learning/loss.qmd#loss-and-risk) explains how a regularisation term changes an objective.
+[The ELBO](elbo.qmd) supports likelihood-based learning when latent marginalisation is intractable.

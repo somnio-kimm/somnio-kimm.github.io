@@ -1,0 +1,127 @@
+---
+title: 'Representation learning and adaptation'
+description: "Learned features, task adaptation, contrastive image–text objectives, and downstream policy training."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+---
+
+A representation is an internal description used by a model or a later task.
+To interpret a representation-learning claim, identify what is optimised, what is frozen, and what information the representation can access.
+CLIP and SigLIP provide concrete examples of learning encoders from paired images and text.
+
+## Learning representations and adapting to tasks {#representations}
+
+Representation learning produces features useful for some objective or later use.
+Task-specific learning optimises performance on a particular prediction or control problem.
+Both can occur in the same end-to-end model.
+Task learning is not a synonym for in-context learning or zero-shot generalisation.
+
+| Evaluation or adaptation | What is updated or supplied? |
+|---|---|
+| Linear probe | Freeze the feature extractor and fit a linear prediction head. |
+| Fine-tuning | Update some or all pretrained parameters for the target task. |
+| Zero-shot evaluation | Evaluate the stated task without task-specific training examples or parameter updates, under the paper's protocol. |
+| In-context learning | Provide examples or instructions in the input context, ordinarily without updating model parameters. |
+
+An end-to-end training objective connects inputs to task outputs through a shared optimisation process.
+A modular system splits responsibilities into components; some modular systems are still trained jointly.
+Late fusion processes modalities separately before combining representations or scores.
+These properties should be established from the actual computation and gradient paths.
+[CLIP](../../literature-review/vision/clip.qmd), [DINO](../../literature-review/vision/dino.qmd), and [PaliGemma](../../literature-review/language/paligemma.qmd) illustrate different representation and adaptation choices.
+
+## Context and position in sequence representations {#sequence-terms}
+
+Self-attention uses query and source representations from the same sequence; its mask determines which positions can communicate.
+Cross-attention reads a different source sequence.
+Causal attention prevents access to later positions, while bidirectional attention permits both directions among allowed tokens.
+Neither definition alone says how training examples were collected.
+
+Absolute positional representations can be learned or fixed; they are not always fixed vectors.
+Relative position methods encode position differences or transform queries and keys so their scores depend on relative positions.
+A token's contextual representation incorporates information from the positions its model permits it to read.
+Diffusion time embeddings identify a noise level or generative step, distinct from the position of a word or robot command.
+See [attention](attention.qmd#projections), [representations](representations.qmd), and [generative time](generative-sampling.qmd#objects).
+
+## CLIP and SigLIP: what the visual encoder learned {#clip-and-siglip}
+
+Both methods train image and text encoders using paired examples.
+For a batch of $B$ pairs, let $u_i$ and $v_j$ be unit-normalised image and text embeddings.
+The dot product $u_i^\top v_j$ measures their cosine similarity.
+The original pairing provides positive labels when $i=j$; other pairings provide negatives, even though some can also be semantically compatible.
+
+CLIP uses scores $s_{ij}=t\,u_i^\top v_j$, with learned positive scale $t$.
+For image $i$, its matching caption competes with the batch's other captions:
+
+$$
+  p(j\mid i)=\frac{e^{s_{ij}}}{\sum_{m=1}^{B}e^{s_{im}}}.
+$$
+
+CLIP averages image-to-text and text-to-image cross-entropies.
+The latter applies the corresponding softmax down columns of the score matrix.
+See [CLIP, §2.3 and Figure 3](https://arxiv.org/abs/2103.00020).
+
+$$
+  \begin{aligned}
+  L_{\mathrm{CLIP}}=-\frac{1}{2B}\sum_{i=1}^{B}
+  \bigl[&\log p(T_i\mid I_i)\\
+  &+\log p(I_i\mid T_i)\bigr].
+  \end{aligned}
+$$
+
+Here $I_i$ and $T_i$ denote the paired image and caption, respectively.
+
+SigLIP scores pairs with $s_{ij}=t\,u_i^\top v_j+b$, including learned bias $b$.
+With labels $y_{ij}=1$ for matched pairs and $-1$ otherwise, its objective is
+
+$$
+  \begin{aligned}
+  \sigma(s)&=\frac{1}{1+e^{-s}},\\
+  L_{\mathrm{SigLIP}}
+  &=-\frac1B\sum_{i,j=1}^{B}
+  \log\sigma(y_{ij}s_{ij}).
+  \end{aligned}
+$$
+
+This follows [SigLIP, Algorithm 1](https://arxiv.org/abs/2303.15343), including its division by $B$ rather than $B^2$.
+Each pair contributes a binary logistic loss without a denominator involving other pairs.
+SigLIP still uses negatives and shared encoder parameters; pairwise loss terms do not imply statistically independent embeddings or training without batches.
+The pairwise decomposition permits computing and accumulating smaller blocks of pair scores.
+
+::: {.callout-note collapse="true" icon="false" title="Calculation: competition versus pairwise classification"}
+
+Suppose one image has two caption scores, $2$ and $0$, with the first caption designated positive.
+Its CLIP image-to-text probability is
+
+$$
+  p(1\mid i)=\frac{e^2}{e^2+e^0}\approx0.881.
+$$
+
+Adding a third caption with score $2$ changes this to approximately $0.468$, although the first pair's score stayed fixed.
+The alternatives change the softmax denominator.
+
+For the same numerical logits, SigLIP assigns $\sigma(2)\approx0.881$ to the first pair and $\sigma(0)=0.5$ to the second.
+An additional negative pair contributes another loss term without changing either existing pair's sigmoid value.
+Their values need not sum to one.
+The [binary and categorical cross-entropy note](../mathematics/entropy.qmd#cross-entropy) derives both loss forms.
+
+:::
+
+## Representation pretraining and policy training {#representation-pretraining-and-policy-training}
+
+Using a SigLIP-initialised encoder does not mean a robot policy trains with SigLIP's image-text matching loss.
+The pretraining objective explains how the initial visual representation was learned; downstream objectives supervise what the assembled policy must predict.
+In the [$\pi_{0.5}$ paper, §IV-B](https://arxiv.org/abs/2504.16054), discrete action tokens and continuous flow outputs receive different objectives.
+
+[FAST](../../literature-review/action/fast.qmd) explains how an action trajectory becomes discrete targets for autoregressive cross-entropy.
+[Generative action models](generative-models.qmd#questions) explains noisy continuous inputs and velocity targets.
+The [$\pi_{0.5}$](../../literature-review/action/pi05.qmd) and [knowledge insulation](../../literature-review/action/knowledge-insulation.qmd) notes connect these representations to the branches that receive their gradients.
+
+## Connections {#connections}
+
+[Input representations](representations.qmd) distinguishes token identifiers, embeddings, image patches, and numerical scaling.
+[Cross-entropy](../mathematics/entropy.qmd#cross-entropy) derives the binary and categorical loss forms used above.
+[Autoregression](generative-models.qmd#factorisation) describes output factorisation and generation order, separately from how features were learned.
+The [CLIP review](../../literature-review/vision/clip.qmd) develops zero-shot classification and transfer evidence; [DINO](../../literature-review/vision/dino.qmd) uses a student–teacher objective without paired text.
+[Stop-gradient](../computer-software/stop-gradient.qmd) explains why an available target or context can have a blocked derivative path.

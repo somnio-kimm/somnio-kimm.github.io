@@ -1,0 +1,136 @@
+---
+title: 'Autoencoders'
+description: "Ordinary autoencoders, VAEs, conditional VAEs, and the roles of reconstruction, latent sampling, and deployment."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+---
+
+Autoencoders learn a representation from which an example can be reconstructed.
+Variational autoencoders (VAEs) add a latent-variable probability model and approximate-posterior inference; conditional VAEs also supply context to the generative model.
+Let $A$ denote an observed example, $z$ an internal latent vector, and $\hat A$ a reconstructed prediction with the same output shape as $A$.
+
+## Ordinary autoencoders {#autoencoders}
+
+An ordinary autoencoder maps an example to a code and reconstructs the example from that code:
+
+$$
+  z=f_\phi(A),
+  \qquad \hat A=g_\theta(z).
+$$
+
+The encoder parameters $\phi$ and decoder parameters $\theta$ are learned by reducing reconstruction error.
+This alone does not specify a probability distribution from which useful new codes can be sampled.
+
+## Variational autoencoders {#vae}
+
+A VAE specifies a prior $p(z)$, a decoder distribution $p_\theta(A\mid z)$, and an approximate posterior $q_\phi(z\mid A)$.
+The encoder outputs parameters of a distribution over codes, rather than only one code.
+The decoder describes a distribution over possible examples given a code.
+These are the recognition and generative models in [Kingma and Welling, §§2.1–2.2](https://arxiv.org/pdf/1312.6114#page=3).
+
+An implementation may output a point such as $\hat A=g_\theta(z)$ that parameterises the decoder distribution's mean or location.
+The probability model and that point prediction are related objects, but their mathematical types differ.
+
+## Training and generation {#training-and-generation}
+
+Training observes $A$, uses $q_\phi(z\mid A)$ to sample a code, and evaluates how well $p_\theta(A\mid z)$ explains that example.
+Generation has no observed answer to encode: it samples $z$ from the prior and then samples an example from the decoder.
+An implementation can instead return a decoder mean or location, which is a particular decoding choice.
+The [ELBO](../mathematics/elbo.qmd) combines reconstruction likelihood with a KL penalty to train these distributions.
+
+## Objective and differentiable sampling {#objective-and-sampling}
+
+For the unconditional model, write $q_A=q_\phi(z\mid A)$.
+The negative ELBO is
+
+$$
+  \begin{aligned}
+  J(A)&=\mathbb E_{q_A}[-\ln p_\theta(A\mid z)]\\
+  &\quad+D_{\mathrm{KL}}(q_A\Vert p(z)).
+  \end{aligned}
+$$
+
+The first term evaluates reconstruction likelihood, and the second penalises disagreement between the encoder distribution and the prior.
+The [ELBO derivation](../mathematics/elbo.qmd) explains the bound and its separate posterior-approximation gap.
+For a diagonal Gaussian encoder, one can write a sampled code as
+
+$$
+  z=\mu_\phi(A)+\sigma_\phi(A)\odot\epsilon,
+  \qquad\epsilon\sim\mathcal N(0,I).
+$$
+
+Here $\mu_\phi(A)$ and the positive standard-deviation vector $\sigma_\phi(A)$ have the same dimension as $z$, and $\odot$ denotes coordinatewise multiplication.
+This separates the random draw from the differentiable encoder outputs.
+[Reparameterisation](../mathematics/reparameterization.qmd) gives the full gradient argument and distinguishes variance from standard deviation.
+
+## An action chunk as a conditional example {#objects}
+
+Let $A=(a_t,\ldots,a_{t+H-1})$ be a demonstrated chunk of $H$ actions, and let $o$ be the observation available when that chunk starts.
+Each $a_s$ is a vector of robot commands.
+The decoder's prediction $\hat A$ has the same action coordinates and shape as $A$.
+
+| Symbol | Role |
+|---|---|
+| $A$ | Demonstrated actions, available in training data. |
+| $\hat A$ | Actions produced by the model. |
+| $o$ | Observed context, such as images and joint positions. |
+| $z$ | A latent vector used internally to generate a chunk. |
+
+Reconstruction compares $\hat A$ with $A$.
+It does not compare the observation with the action, or the latent vector with the action.
+The letters do not determine these roles; the model's data flow does.
+
+## Conditional variational autoencoders {#conditioning}
+
+A CVAE supplies $o$ to the generative model:
+
+$$
+  z\sim p(z\mid o),
+  \qquad A\sim p_\theta(A\mid o,z).
+$$
+
+The prior may depend on $o$, but a fixed prior $p(z)=\mathcal N(0,I)$ is also possible.
+During training, the approximate posterior can use both the observation and the demonstrated answer, $q_\phi(z\mid A,o)$.
+It infers which latent codes help explain this particular demonstrated chunk.
+
+The prior is available before seeing $A$.
+The true posterior $p_\theta(z\mid A,o)$ describes latent codes after observing $A$, under the generative model.
+The encoder distribution $q_\phi$ approximates that posterior because computing it exactly is generally intractable.
+Thus, $q$ is neither the prior nor a distribution over predicted actions.
+This extends the posterior distinction in [the VAE paper, §2.1](https://arxiv.org/pdf/1312.6114#page=3), and is instantiated for actions in [ACT, §IV-B](https://arxiv.org/pdf/2304.13705#page=5).
+
+## Conditional training and generation {#cvae-training-and-generation}
+
+During training, a dataset provides $(o,A)$.
+The encoder uses that pair to construct a latent distribution, a code is sampled, and the decoder predicts $\hat A$ using $(o,z)$.
+The target $A$ provides supervision for the reconstruction loss.
+
+During generation, the desired future action chunk is unknown.
+The model therefore cannot use an encoder that requires that chunk.
+A generic CVAE draws $z$ from its prior and generates using $(o,z)$.
+Conditioning on $o$ is what lets the same generative model respond to different scenes.
+
+Original ACT makes a specific deployment choice: it discards the CVAE encoder and fixes $z=0$, the mean of its standard Gaussian prior.
+The current images and joint positions still enter the decoder.
+Fixing $z$ therefore does not make the policy ignore the scene or repeat the same chunk in every scene.
+This is ACT's deterministic decoding choice, not the definition of every CVAE's inference procedure. [ACT, Fig. 4 and Algorithm 2](https://arxiv.org/pdf/2304.13705#page=4).
+
+## ACT’s reconstruction objective {#act-objective}
+
+Let $R$ denote reconstruction negative log-likelihood and $K$ the encoder-to-prior KL in the [conditional ELBO](../mathematics/elbo.qmd).
+ACT uses an L1 reconstruction term plus a weighted KL term, $J=R+\beta K$.
+For fixed-scale independent Laplace decoder coordinates, negative log-likelihood is proportional to an L1 error plus a constant.
+This explains the likelihood connection without equating every reconstruction loss with MSE.
+Choosing $\beta\ne1$ changes the standard ELBO weighting and should be understood as a modified training objective. [ACT, §§IV-B–IV-C](https://arxiv.org/pdf/2304.13705#page=5).
+
+[MAE](loss.qmd#mae) and [MSE](loss.qmd#mse) compare absolute and squared error; [maximum likelihood](../mathematics/likelihood-and-estimation.qmd#classification) gives the discrete-label likelihood construction.
+
+## Connections {#connections}
+
+[The ELBO](../mathematics/elbo.qmd) derives the reconstruction-plus-KL objective and distinguishes the prior penalty from the posterior approximation gap.
+[Reparameterisation](../mathematics/reparameterization.qmd) develops the pathwise gradient and implementation details.
+[Gaussian KL](../mathematics/entropy.qmd#gaussian-kl) gives the analytic prior penalty.
+The [VAE paper review](../../literature-review/theory/vae.qmd) places the construction in variational inference, and [normalizing flows](../../literature-review/theory/normalizing-flows.qmd) expands the encoder beyond a diagonal Gaussian.
+The [ACT review](../../literature-review/action/act.qmd) distinguishes its CVAE encoder from the transformer encoder inside the policy.

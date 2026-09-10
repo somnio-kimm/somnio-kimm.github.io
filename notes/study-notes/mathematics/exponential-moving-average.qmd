@@ -1,0 +1,56 @@
+---
+title: "Exponential moving averages"
+description: "Track geometrically weighted history while keeping the averaged object and time index explicit."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Mathematics
+  - Machine Learning
+  - Optimisation
+---
+
+An exponential moving average updates a running value using a fixed fraction of the new observation.
+The update has the same algebra for different objects, but its interpretation depends on what is being averaged.
+
+## The update and its object {#ema}
+
+An EMA of values $v_t$ uses
+
+$$
+  m_t=\rho m_{t-1}+(1-\rho)v_t,
+  \qquad 0\leq\rho<1.
+$$
+
+Older observations receive geometrically decaying weights, with an initialisation contribution until it decays or is corrected.
+The averaged object matters: model weights, a teacher's weights, losses, and action predictions are different objects.
+[DINO](../../literature-review/vision/dino.qmd) averages teacher parameters.
+[ACT temporal ensembling](../../literature-review/action/act.qmd#temporal-ensembling-uses-a-common-target-time) combines predictions for a common execution time and uses its own age convention.
+
+## How past values contribute {#weights}
+
+For a fixed decay $\rho$, unrolling the update gives
+
+$$
+  m_t=\rho^t m_0
+  +(1-\rho)\sum_{j=1}^{t}\rho^{t-j}v_j.
+$$
+
+The latest value has weight $1-\rho$, and each additional step into the past multiplies its weight by $\rho$.
+The initial value still contributes $\rho^t m_0$.
+Thus, initialisation and the identity of the time index matter when comparing two averaging procedures.
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: expand the recurrence"}
+
+Substituting the previous update once gives
+
+$$
+  \begin{aligned}
+  m_t={}&\rho^2m_{t-2}\\
+  &+\rho(1-\rho)v_{t-1}+(1-\rho)v_t.
+  \end{aligned}
+$$
+
+Repeating the substitution back to $m_0$ yields the visible sum.
+The data weights sum to $1-\rho^t$, while the initialisation contributes the remaining weight $\rho^t$.
+
+:::

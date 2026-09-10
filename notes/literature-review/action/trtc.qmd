@@ -5,6 +5,7 @@ date-modified: 2026-09-01
 categories:
   - Robotics
   - ML
+draft: false
 ---
 
 Paper: [arXiv:2512.05964](https://arxiv.org/abs/2512.05964v2)
@@ -18,7 +19,7 @@ That increases the computation cost and delays inference, which is somewhat coun
 The effect becomes more noticeable when the inference delay is long.
 Then IRTC has to keep a larger part of the new chunk consistent with the previous chunk, so the inpainting problem gets harder as well as more expensive.
 
-## Previous Attempt
+## Previous Attempts
 
 Let the prediction horizon be $H$, the execution horizon be $s$, and the inference delay be $d$ controller steps.
 While the current chunk is being generated, the robot keeps executing the previous chunk.

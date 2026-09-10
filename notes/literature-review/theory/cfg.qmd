@@ -1,0 +1,128 @@
+---
+title: 'Classifier-Free Diffusion Guidance'
+description: "Combine conditional and unconditional denoising predictions to control the trade-off between conditional fidelity and diversity."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+  - Generative Models
+  - Diffusion
+---
+
+Paper: Ho and Salimans (2022), [Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598).
+Classifier-free guidance (CFG) strengthens conditioning at sampling time by combining conditional and unconditional predictions from a jointly trained diffusion model.
+It provides an adjustable fidelity–diversity trade-off without a separate classifier's gradients.
+
+## Problem
+
+A conditional generative model represents a distribution of possible outputs for a condition $c$, such as an image class.
+Ordinary conditional sampling need not provide the desired balance between variety and strong agreement with that condition.
+The paper seeks a sampling-time control over this balance for diffusion models. [Paper, §1](https://arxiv.org/pdf/2207.12598#page=2).
+
+## Previous attempts
+
+In discrete models, temperature sampling rescales logits before softmax, $p_i\propto\exp(l_i/T)$.
+Latent truncation changes the distribution of starting codes in certain generative models.
+Neither construction directly supplies the noisy-state conditioning direction used by classifier guidance.
+The CFG paper discusses these approaches as motivation for controlling diffusion sampling. [Paper, §1](https://arxiv.org/pdf/2207.12598#page=2).
+
+Classifier guidance uses a classifier adapted to noisy inputs and adds its conditional log-probability gradient to the diffusion score.
+Training and maintaining this additional classifier introduces a separate modelling requirement.
+It does not inherently mean adversarial training, nor does the method require that the classifier's parameters always be initialised from scratch. [Paper, §3.1](https://arxiv.org/pdf/2207.12598#page=4).
+
+## Proposed solution
+
+During training, randomly replace the designated condition with a null condition for some examples.
+The noisy sample and noise-level information remain present.
+The same denoiser therefore learns both $\epsilon_\theta(x_t,t,c)$ and $\epsilon_\theta(x_t,t,\varnothing)$. [Paper, Algorithm 1 and §3.2](https://arxiv.org/pdf/2207.12598#page=4).
+
+At each sampling step, evaluate both versions and combine them:
+
+$$
+  \tilde\epsilon=(1+w)\epsilon_{\mathrm{cond}}
+  -w\epsilon_{\mathrm{uncond}}.
+$$
+
+The paper's convention uses $w=0$ for ordinary conditional sampling and $w>0$ for extrapolation beyond it.
+A common equivalent convention writes
+
+$$
+  \begin{aligned}
+  \tilde\epsilon={}&\epsilon_{\mathrm{uncond}}\\
+  &+\gamma(\epsilon_{\mathrm{cond}}-\epsilon_{\mathrm{uncond}}),
+  \end{aligned}
+$$
+
+where $\gamma=1+w$.
+Under the second convention, $\gamma=1$ means ordinary conditional prediction and $\gamma=0$ means unconditional prediction.
+Reporting a guidance scale without its formula leaves this convention ambiguous. [Paper, Eq. (6) and Algorithm 2](https://arxiv.org/pdf/2207.12598#page=5).
+
+The combination enters the sampler in place of the ordinary denoising prediction.
+It is not simply a final subtraction of two generated images.
+
+## Why the difference carries conditioning information
+
+At a fixed noise level, define exact conditional and unconditional scores by
+
+$$
+  \begin{aligned}
+  s_c(x)&=\nabla_x\log p_t(x\mid c),\\
+  s_u(x)&=\nabla_x\log p_t(x).
+  \end{aligned}
+$$
+
+Bayes' rule gives
+
+$$
+  s_c(x)-s_u(x)=\nabla_x\log p_t(c\mid x).
+$$
+
+Thus, with exact scores, their difference acts like a noisy-input classifier gradient.
+Noise predictions and scores are related by the same noise-level scaling, so the linear CFG combination can be expressed in either parameterisation. [Paper, §3.2](https://arxiv.org/pdf/2207.12598#page=5).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: Bayes' rule and the idealised density tilt"}
+
+Take the logarithm of Bayes' rule:
+
+$$
+  \begin{aligned}
+  \log p_t(x\mid c)
+  & =\log p_t(c\mid x)\\
+  &\quad+\log p_t(x)-\log p(c).
+  \end{aligned}
+$$
+
+The final term is constant with respect to $x$, so differentiation yields the score-difference identity.
+For exact scores, the guided field is
+
+$$
+  \begin{aligned}
+  s_g&=(1+w)s_c-ws_u\\
+  &=\nabla_x\log\left[
+  p_t(x\mid c)^{1+w}p_t(x)^{-w}\right].
+  \end{aligned}
+$$
+
+If the expression can be normalised, this describes a tilted density at that fixed time.
+It does not by itself prove that a finite-step guided reverse sampler produces a corresponding simple density tilt at the final endpoint.
+Furthermore, learned score fields need not be exact gradients of any scalar density, a qualification the paper explicitly discusses.
+
+:::
+
+## Evidence
+
+The experiments use class-conditional ImageNet generation and study how guidance strength changes sample metrics and diversity.
+They show that the proposed combination can provide a trade-off similar to classifier guidance without training a separate classifier. [Paper, §4](https://arxiv.org/pdf/2207.12598#page=5).
+These experiments establish the method for the tested class-conditioned diffusion models, rather than a universal best scale for every condition or domain.
+
+## Limitations
+
+The basic method requires two denoiser evaluations per sampling step, even when implementations batch them together.
+Stronger guidance can reduce diversity, and increasing the scale does not guarantee monotonic improvement in every quality measure.
+Conditioning dropout must prepare the model for its null-condition query; dropping arbitrary inputs from an otherwise conditional model is not equivalent training.
+
+## Connections
+
+[DDPM](ddpm.qmd) explains noise prediction and the denoising sampler that guidance modifies.
+[Score-based models](score-based-models.qmd) defines the score used in the Bayes identity.
+[IRTC](../action/irtc.qmd) uses guidance in a different setting, where constraints concern portions of an action trajectory; the conditioning signal and its mathematical construction must be checked separately.

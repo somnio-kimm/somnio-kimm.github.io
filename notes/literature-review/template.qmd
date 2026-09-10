@@ -1,11 +1,10 @@
 ---
-title: ''
-description: ""
+title: 'XXXX'
+description: "XXXX"
 date-modified: XXXX-XX-XX
 draft: true
 categories:
-  - Robotics
-  - ML
+  - XXXX
 ---
 
 Paper: [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX)
@@ -18,5 +17,27 @@ Paper: [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX)
 
 ## Proposed Solution
 
+<!-- Define the inputs, outputs, symbols, and training/inference stages.
+For training, identify the loss, pretraining data, and any later adaptation.
+For inference, trace available inputs through the model to its actual outputs.
+Link reusable concepts to study notes instead of repeating full derivations.
+Keep main results visible and place supporting steps in a collapsed block.
+-->
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: name the result"}
+
+Write the derivation or proof here, including its assumptions.
+
+:::
+
+## Evidence
+
+<!-- State what was tested, which comparison supports the claim, and its scope.
+Cite the paper's section, figure, or table and distinguish evidence from interpretation.
+-->
 
 ## Limitations
+
+## Connections
+
+<!-- Link the study notes and related papers, explaining each relationship. -->

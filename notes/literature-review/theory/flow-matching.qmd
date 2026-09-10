@@ -1,0 +1,182 @@
+---
+title: 'Flow Matching for Generative Modeling'
+description: "Train a continuous generative flow by regressing tractable conditional velocities along a chosen probability path."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+  - Generative Models
+  - Flow Matching
+---
+
+Paper: Lipman et al. (2022), [Flow Matching for Generative Modeling](https://arxiv.org/abs/2210.02747), published at ICLR 2023.
+Flow matching trains a continuous normalizing flow by matching a neural velocity field to velocities that generate a chosen probability path.
+Conditional flow matching makes this regression practical even when the marginal target velocity is unavailable.
+
+## Problem
+
+A continuous generative flow moves a random point $x_0$ from a simple base distribution toward a data distribution.
+Let $\phi_t:\mathbb R^d\to\mathbb R^d$ be the flow map, with $\phi_0$ the identity.
+For one starting point, $x_t=\phi_t(x_0)$ is a vector following an ordinary differential equation:
+
+$$
+  \frac{dx_t}{dt}=v_\theta(x_t,t).
+$$
+
+The function $\phi_t$ is a map; its value $\phi_t(x_0)$ is a state.
+This note uses $t=0$ for base noise and $t=1$ for data, so generation integrates forward in $t$. [Paper, §2](https://arxiv.org/pdf/2210.02747#page=2).
+
+## Previous attempts
+
+Likelihood-based training of continuous normalizing flows typically requires solving an ODE and tracking its density during optimisation.
+That simulation can make training expensive.
+Diffusion models provide another route through carefully constructed noising processes, with score prediction used to recover generative dynamics.
+Flow matching proposes direct regression of a velocity field, allowing a wider choice of probability paths and avoiding model-trajectory simulation during training. [Paper, §§1–2 and §5](https://arxiv.org/pdf/2210.02747#page=2).
+
+## Proposed solution
+
+Choose a time-indexed density $p_t(x)$ and a velocity field $u_t(x)$ that generates it.
+The ideal flow-matching objective is
+
+$$
+  L_{\mathrm{FM}}(\theta)
+  =\mathbb E_{t,x\sim p_t}
+  \|v_\theta(x,t)-u_t(x)\|^2.
+$$
+
+An intermediate path is explicitly part of the method.
+The challenge is that its marginal density and velocity may be difficult to evaluate when the endpoint distribution is known only through samples. [Paper, §3, Eq. (5)](https://arxiv.org/pdf/2210.02747#page=3).
+
+For each data example $x_1\sim q$, instead choose a tractable conditional path $p_t(x\mid x_1)$ and a corresponding conditional velocity $u_t(x\mid x_1)$.
+Mixing these paths gives
+
+$$
+  p_t(x)=\int p_t(x\mid x_1)q(x_1)\,dx_1.
+$$
+
+The density $q$ denotes the data distribution, while $p_t$ is the constructed path.
+For a Gaussian endpoint with nonzero width, $p_1$ is a smoothed approximation to $q$ rather than exactly the same density.
+The conditional training loss is
+
+$$
+  L_{\mathrm{CFM}}(\theta)
+  =\mathbb E_{t,x_1,x}
+  \|v_\theta(x,t)-u_t(x\mid x_1)\|^2,
+$$
+
+where $x_1\sim q$ and $x\sim p_t(\cdot\mid x_1)$.
+The network does not need access to the unknown target example at generation time: $x_1$ constructs the training target. [Paper, §3.1, Eqs. (6)–(9)](https://arxiv.org/pdf/2210.02747#page=3).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: why conditional regression learns the marginal velocity"}
+
+At a fixed time, the marginal velocity is the conditional average of the component velocities:
+
+$$
+  u_t(x)=\mathbb E[U\mid x,t],
+  \qquad U=u_t(x\mid x_1).
+$$
+
+Its integral form weights each endpoint by how likely it is to produce the current state:
+
+$$
+  u_t(x)=\int u_t(x\mid x_1)\omega_t(x_1\mid x)\,dx_1,
+$$
+
+$$
+  \omega_t(x_1\mid x)
+  =\frac{p_t(x\mid x_1)q(x_1)}{p_t(x)}.
+$$
+
+For $V=v_\theta(x,t)$, expand $V-U=(V-u_t)+(u_t-U)$.
+The cross term vanishes after conditioning on $(x,t)$ because $\mathbb E[U-u_t\mid x,t]=0$.
+Therefore,
+
+$$
+  \begin{aligned}
+  \mathbb E\|V-U\|^2
+  &=\mathbb E\|V-u_t\|^2\\
+  &\quad+\mathbb E\|U-u_t\|^2.
+  \end{aligned}
+$$
+
+The final term depends on the chosen paths but not on the model parameters.
+Consequently $L_{\mathrm{CFM}}$ and $L_{\mathrm{FM}}$ have identical parameter gradients when differentiation and integration can be interchanged.
+This argument assumes the conditional path construction is fixed independently of $\theta$. [Paper, Theorems 1–2](https://arxiv.org/pdf/2210.02747#page=3).
+
+:::
+
+## Construct a Gaussian path
+
+A useful family is
+
+$$
+  p_t(x\mid x_1)
+  =\mathcal N(\mu_t(x_1),\sigma_t(x_1)^2I).
+$$
+
+Draw $x_0\sim\mathcal N(0,I)$ and set $x_t=\sigma_t(x_1)x_0+\mu_t(x_1)$.
+This samples an intermediate point directly, without integrating the learned ODE.
+The corresponding conditional velocity is
+
+$$
+  u_t(x\mid x_1)
+  =\frac{\dot\sigma_t}{\sigma_t}(x-\mu_t)+\dot\mu_t,
+$$
+
+with the dependence on $x_1$ suppressed on the right. [Paper, §4, Theorem 3](https://arxiv.org/pdf/2210.02747#page=5).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: differentiate the conditional trajectory"}
+
+For fixed $x_0$ and $x_1$, differentiate the affine path:
+
+$$
+  \dot x_t=\dot\sigma_t x_0+\dot\mu_t.
+$$
+
+When $\sigma_t>0$, substitute $x_0=(x_t-\mu_t)/\sigma_t$.
+This gives the conditional velocity as a function of the current state.
+The result follows from the chosen trajectory, rather than from guessing a vector field that happens to point toward the endpoint.
+
+:::
+
+The paper's conditional optimal-transport path uses
+
+$$
+  \mu_t=tx_1,
+  \qquad\sigma_t=1-(1-\sigma_{\min})t.
+$$
+
+For each sampled pair, this gives
+
+$$
+  x_t=[1-(1-\sigma_{\min})t]x_0+tx_1,
+$$
+
+$$
+  \dot x_t=x_1-(1-\sigma_{\min})x_0.
+$$
+
+The target velocity is constant along this conditional straight trajectory.
+Taking $\sigma_{\min}=0$ yields the familiar paired target $x_1-x_0$ and linear interpolation $(1-t)x_0+tx_1$.
+The conditional density then degenerates at the endpoint, so formulas dividing by $\sigma_t$ require an endpoint limit or $t<1$.
+The paired velocity target itself remains finite. [Paper, Eqs. (20)–(23)](https://arxiv.org/pdf/2210.02747#page=6).
+
+The conditional Gaussian transport is optimal in the sense stated by the paper, but the resulting marginal flow is not guaranteed to be the globally optimal transport between the base and data distributions.
+Straight conditional training paths also do not guarantee perfectly straight trajectories of the learned marginal field. [Paper, §4](https://arxiv.org/pdf/2210.02747#page=6).
+
+## Evidence
+
+The paper compares diffusion and conditional optimal-transport paths on synthetic distributions and image-generation tasks.
+It studies sample quality, likelihood, and numerical sampling efficiency, finding advantages for its flow-matching constructions in those settings. [Paper, §6](https://arxiv.org/pdf/2210.02747#page=7).
+
+## Limitations
+
+Training avoids model ODE simulation, but generation still integrates the learned field and incurs solver error and repeated network evaluations.
+The model must approximate a marginal velocity assembled from many conditional paths, and path choice affects regression difficulty.
+Fewer steps than a particular diffusion baseline is an empirical result, not a definition or universal property of flow matching.
+
+## Connections
+
+[Normalizing flows](normalizing-flows.qmd) provide the broader density-transformation framework, while [score-based models](score-based-models.qmd) connect diffusion to a probability-flow ODE.
+The [generative action study](../../study-notes/machine-learning/generative-models.qmd#questions) applies the same conditional-expectation argument to robot actions.
+In [π0](../action/pi0.qmd), the generated state is an action chunk and the velocity network also receives observation and language context.

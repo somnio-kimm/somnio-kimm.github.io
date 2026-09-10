@@ -1,0 +1,103 @@
+---
+title: 'Mamba: Linear-Time Sequence Modeling with Selective State Spaces'
+description: "Input-dependent state-space parameters, associative scan, and the distinction between selectivity and a generic gate."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Sequence Models
+  - Machine Learning
+---
+
+Paper: [Gu and Dao, arXiv:2312.00752v2](https://arxiv.org/abs/2312.00752v2).
+The exported Mamba notes and State-Space Models slides motivate the mathematical background in [state-space models](../../study-notes/machine-learning/state-space-models.qmd).
+
+## Problem
+
+A fixed convolution kernel can retain information according to its age, but its coefficients do not change according to the content of each new token.
+This makes selective retention and content-dependent recall difficult for an LTI sequence layer.
+Attention supports content-dependent routing, but standard full attention has quadratic work in sequence length and a growing history cache during generation.
+
+## Previous Attempts
+
+[S4](../../study-notes/machine-learning/state-space-models.qmd#s4) uses structured dynamics to evaluate a sequence layer as a convolution during training and as a recurrence during generation.
+The convolution route relies on fixed parameters across positions.
+Mamba keeps a recurrent state while changing which state-space parameters depend on the current input.
+
+## Proposed Solution
+
+Write $u_t$ for the input activation at one position and $h_t$ for a per-channel state.
+Algorithm 2 makes $B_t$, $C_t$, and the positive step size $\Delta_t$ functions of the input.
+The continuous base matrix $A$ remains a learned parameter shared across positions.
+
+$$
+  \begin{aligned}
+  B_t&=s_B(u_t),\\
+  C_t&=s_C(u_t),\\
+  \Delta_t&=\operatorname{softplus}(b+s_\Delta(u_t)).
+  \end{aligned}
+$$
+
+Discretisation then makes $\bar A_t$ and $\bar B_t$ input-dependent.
+The state update and readout have the form
+
+$$
+  \begin{aligned}
+  h_t&=\bar A_t h_{t-1}+\bar B_tu_t,\\
+  y_t&=C_th_t.
+  \end{aligned}
+$$
+
+For the ZOH construction in Equation 4, $\bar A_t=\exp(\Delta_tA)$.
+The [discretisation note](../../study-notes/machine-learning/state-space-models.qmd#discretisation) gives the matching input coefficient.
+The full Mamba block adds projections, a local convolution, nonlinearities, a gated branch, and an output projection around the selective SSM.
+These surrounding operations make the network more than an isolated linear recurrence; see Figure 3.
+
+The generic expression “keep a fraction of the old state and inject a fraction of the input” is useful intuition, but a sigmoid gate multiplying two fixed matrices is not a complete statement of Mamba's parameterisation.
+In particular, $C_t$ also depends on the input, and $\Delta_t$ changes the discretised transition even though $A$ is shared.
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: why affine recurrence supports a parallel scan"}
+
+For a fixed input sequence, each position defines an affine map $F_t(h)=M_th+b_t$.
+Composing two successive maps gives
+
+$$
+  (M_2,b_2)\circ(M_1,b_1)
+  =(M_2M_1,\;M_2b_1+b_2).
+$$
+
+For three maps, either grouping yields transition $M_3M_2M_1$ and offset
+
+$$
+  M_3M_2b_1+M_3b_2+b_3.
+$$
+
+Composition is therefore associative, so prefix compositions can be computed with a parallel scan.
+The operation is generally not commutative: token order still matters.
+For a diagonal transition, matrix products reduce to elementwise products, supporting efficient per-channel state updates.
+Input dependence removes the fixed convolution kernel but does not remove this associativity.
+
+:::
+
+The hardware implementation combines scan, kernel fusion, and recomputation to avoid repeatedly materialising the full expanded state in GPU high-bandwidth memory.
+Thus the algorithmic claim concerns both the recurrence and memory traffic; merely writing a parallel scan in a high-level loop does not establish the same runtime.
+These details are in Section 3.3 and Appendix D.
+
+## Evidence
+
+Selective copying and induction-head tasks test whether the model retains or retrieves information based on content rather than a fixed offset.
+The paper also evaluates language, audio, and genomics modelling, with efficiency measurements in Section 4.5.
+Its reported throughput advantages belong to the specified models, sequence lengths, hardware, and batching conditions.
+They are not a universal speed ratio against every Transformer implementation.
+
+## Limitations
+
+At fixed width and state dimension, sequence work grows linearly with length and recurrent state size is independent of the number of processed tokens.
+That fixed state still compresses history; it is not exact storage of every prior token.
+The full network is nonlinear in its input, even though the state update is affine when the input-dependent coefficients are held fixed.
+Stable scalar decay coefficients alone do not prove bounded behaviour of every trained block under arbitrary input or unbounded readout gains.
+
+## Connections
+
+[Matrix structure](../../study-notes/mathematics/matrix-dynamics.qmd#properties) separates asymptotic stability, transient amplification, and diagonalisation.
+[Attention and KV caching](../../study-notes/machine-learning/kv-cache.qmd#kv-cache) explain the different way an attention model retains history.
+[HiPPO](../../study-notes/machine-learning/state-space-models.qmd#hippo) derives memory coefficients from a projection problem; Mamba does not guarantee that every learned state retains that exact polynomial interpretation.

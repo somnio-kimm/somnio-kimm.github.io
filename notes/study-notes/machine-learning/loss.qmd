@@ -1,0 +1,255 @@
+---
+title: "Loss functions: MSE, MAE, and Huber"
+description: "Per-example loss, empirical risk, and the mean, median, and robust penalties favoured by common regression objectives."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+---
+
+A loss function measures how a prediction compares with its target.
+The choice of loss determines which errors receive larger penalties and influences the predictions favoured by training.
+
+## Loss, empirical risk, and the training objective {#loss-and-risk}
+
+A loss function assigns a scalar penalty to a prediction–target pair:
+
+$$
+  \ell:\widehat{\mathcal Y}\times\mathcal Y\rightarrow\mathbb R.
+$$
+
+Here, $\widehat{\mathcal Y}$ is the set of allowed predictions and $\mathcal Y$ is the set of allowed targets.
+For example, a regression loss can compare a real-valued prediction $\hat y$ with a real-valued target $y$.
+
+Empirical risk is the average loss over a finite dataset of observed examples.
+For $n\geq1$ examples $(x_i,y_i)$ and model predictions $\hat y_i=f_{\mathbf w}(x_i)$,
+
+$$
+  L(\mathbf w)=\frac1n\sum_{i=1}^{n}\ell(f_{\mathbf w}(x_i),y_i).
+$$
+
+The inputs and targets are fixed; changing the parameters $\mathbf w$ changes the predictions and therefore the empirical risk.
+A training objective is a scalar-valued function of the model parameters that training seeks to minimise.
+It can be the empirical risk itself or include additional terms, such as a regularisation penalty.
+In this note, the objective is $L$.
+
+A parameter value $\mathbf w^*$ is a global minimiser of $L$ if
+
+$$
+  L(\mathbf w^*)\leq L(\mathbf w)
+  \quad\text{for every allowed }\mathbf w.
+$$
+
+## Comparing common losses {#comparison}
+
+For a real-valued prediction and target, write the signed error as $e=\hat y-y$.
+
+| Loss | Penalty for one example | Main feature |
+|---|---|---|
+| [Squared loss](#mse) | $e^2$ | The derivative grows in magnitude with the error. |
+| [Absolute loss](#mae) | $\lvert e\rvert$ | The derivative has constant magnitude away from zero. |
+| [Huber loss](#huber) | Quadratic near zero, linear beyond a threshold | The derivative is continuous and bounded. |
+| [Cross-entropy](../mathematics/entropy.qmd#cross-entropy) | $-\ln p_y$ for an observed class $y$ | Penalises assigning low probability $p_y$ to the observed class. |
+
+MSE and MAE are the averages of squared and absolute losses, respectively.
+The distinction between an individual loss $\ell$ and its dataset average $L$ matters when interpreting formulas and gradients.
+
+## Mean squared error {#mse}
+
+Let $n\geq1$ be the number of examples, $y_i\in\mathbb R$ a target, and $\hat y_i\in\mathbb R$ its prediction.
+Mean squared error (MSE) is the average squared loss:
+
+$$
+  L_{\mathrm{MSE}}=\frac1n\sum_{i=1}^{n}(\hat y_i-y_i)^2.
+$$
+
+For one shared real prediction $w$ and equally weighted targets, the unique MSE-minimising prediction is their arithmetic mean:
+
+$$
+  w^*=\bar y=\frac1n\sum_{i=1}^{n}y_i.
+$$
+
+This statement concerns a model that predicts the same adjustable number for every example.
+A general model can make different predictions for different inputs.
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: why the mean minimises MSE"}
+
+Suppose the model predicts $w$ for every example.
+Then
+
+$$
+  L(w)=\frac1n\sum_{i=1}^{n}(w-y_i)^2.
+$$
+
+Differentiating with respect to $w$ gives
+
+$$
+  \begin{aligned}
+  L'(w)
+  &=\frac2n\sum_{i=1}^{n}(w-y_i)\\
+  &=\frac2n\left(nw-\sum_{i=1}^{n}y_i\right)\\
+  &=2(w-\bar y).
+  \end{aligned}
+$$
+
+The second line uses the fact that adding the same $w$ exactly $n$ times gives $nw$.
+Setting $L'(w)=0$ gives $w=\bar y$.
+Since $L''(w)=2>0$ everywhere, this stationary point is the unique global minimiser.
+
+:::
+
+## Squared error and the conditional mean {#conditional-mean}
+
+Let $A$ be a random action chunk and $o$ the observed context.
+Squared norms sum over the chunk's action coordinates.
+Suppose the deployed model outputs one chunk $\hat A=f_\theta(o)$.
+Under squared error, the unrestricted population-optimal point prediction is the conditional mean:
+
+$$
+  f^*(o)=\mathbb E[A\mid o].
+$$
+
+This statement assumes finite second moments and optimisation over all measurable point predictors.
+A finite neural network trained on finite data need not reach that ideal.
+The sample-mean result above is the finite-data case when one number is shared across examples.
+
+For an observation with equally likely scalar targets $-2$ and $+2$, this mean is $0$.
+A small expected squared error does not establish that the resulting action is physically feasible.
+For trajectories, the same issue can appear coordinate by coordinate.
+
+::: {.callout-note collapse="true" icon="false" title="Proof: squared error selects the conditional mean"}
+
+Fix the observation and write $\mu=\mathbb E[A\mid o]$.
+For any proposed point prediction $b$,
+
+$$
+  b-A=(b-\mu)+(\mu-A).
+$$
+
+Expand the squared norm and take a conditional expectation:
+
+$$
+  \begin{aligned}
+  \mathbb E[\|b-A\|^2\mid o]
+  &=\|b-\mu\|^2\\
+  &\quad+\mathbb E[\|A-\mu\|^2\mid o].
+  \end{aligned}
+$$
+
+The cross term vanishes because $\mathbb E[\mu-A\mid o]=0$.
+The second term does not depend on $b$, and the first is minimised at $b=\mu$.
+
+:::
+
+Giving a direct MSE regressor an independent random input does not by itself fix the objective.
+If that input conveys no information about the training target, the conditional mean remains unchanged.
+A generative construction needs an objective and conditioning scheme that give the random input a useful role.
+
+## Mean absolute error {#mae}
+
+Let $n\geq1$ be the number of examples, $y_i\in\mathbb R$ a target, and $\hat y_i\in\mathbb R$ its prediction.
+Mean absolute error (MAE) is the average absolute difference between predictions and targets:
+
+$$
+  L_{\mathrm{MAE}}=\frac1n\sum_{i=1}^{n}|\hat y_i-y_i|.
+$$
+
+For one shared real prediction and equally weighted targets, MAE is minimised at a median.
+For an odd number of observations, the minimiser is the middle observation after sorting them.
+For an even number, every value between the two central sorted observations minimises MAE.
+This differs from MSE because absolute distances change at a constant rate on either side of a target, whereas squared-error derivatives grow with error magnitude.
+
+::: {.callout-note collapse="true" icon="false" title="Proof: why a median minimises MAE"}
+
+Sort the targets as $y_{(1)}\leq\cdots\leq y_{(n)}$.
+The factor $1/n$ does not change the minimisers, so consider the sum of absolute errors.
+For any pair $a\leq b$, the triangle inequality gives
+
+$$
+  |w-a|+|w-b|\geq b-a,
+$$
+
+with equality exactly when $w\in[a,b]$.
+
+If $n=2m$, pair the smallest target with the largest, the second smallest with the second largest, and so on.
+Each pair attains its minimum when $w$ lies between its two targets.
+The intersection of all these intervals is $[y_{(m)},y_{(m+1)}]$, so exactly those values minimise the total error.
+
+If $n=2m+1$, the same pairing leaves the middle term $|w-y_{(m+1)}|$.
+Choosing $w=y_{(m+1)}$ minimises every pair and makes that remaining term zero.
+Every other choice makes the middle term positive without reducing any pair below its minimum, so this minimiser is unique.
+
+:::
+
+## Huber loss {#huber}
+
+For signed error $e=\hat y-y$ and a fixed threshold $\delta>0$, Huber loss is
+
+$$
+  \ell_\delta(e)=
+  \begin{cases}
+  \frac12e^2,& |e|\leq\delta,\\[4pt]
+  \delta\left(|e|-\frac12\delta\right),& |e|>\delta.
+  \end{cases}
+$$
+
+The threshold $\delta$ determines where the penalty changes from quadratic to linear.
+Its coefficients make the two branches meet with matching values and slopes.
+The derivative is
+
+$$
+  \ell_\delta'(e)=
+  \begin{cases}
+  e,& |e|\leq\delta,\\
+  \delta\,\operatorname{sign}(e),& |e|>\delta,
+  \end{cases}
+$$
+
+where $\operatorname{sign}(e)$ is $+1$ for positive errors and $-1$ for negative errors.
+The magnitude of the derivative is bounded by $\delta$.
+For multiple examples, their Huber losses can be averaged to form an empirical risk.
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: matching the two branches of Huber loss"}
+
+On the positive side, the quadratic branch is $q(e)=\frac12e^2$.
+At the threshold $e=\delta$, its value and slope are
+
+$$
+  q(\delta)=\frac12\delta^2,
+  \qquad q'(\delta)=\delta.
+$$
+
+Suppose we extend it with a straight line $ae+b$.
+Matching the slope requires $a=\delta$.
+Matching the value then requires
+
+$$
+  \delta^2+b=\frac12\delta^2
+  \quad\Rightarrow\quad
+  b=-\frac12\delta^2.
+$$
+
+Thus, the positive linear branch must be $\delta e-\frac12\delta^2$.
+Using $|e|$ extends this symmetrically to negative errors, giving
+
+$$
+  \delta\left(|e|-\frac12\delta\right).
+$$
+
+The subtraction term positions the linear branch so that it meets the quadratic branch exactly.
+Differentiating the two branches gives the derivative above, with both formulas agreeing at $e=\pm\delta$.
+
+:::
+
+## Using the objective {#using-the-objective}
+
+[Gradient descent](../mathematics/optimization.qmd#gradient-descent) uses derivatives to update parameters.
+[Subgradients](../mathematics/optimization.qmd#subgradients) describe supporting slopes for convex losses at corners.
+A loss name alone does not identify which parameters receive its gradients; [knowledge insulation](../../literature-review/action/knowledge-insulation.qmd) makes this distinction explicit.
+
+## Connections {#connections}
+
+[Cross-entropy](../mathematics/entropy.qmd#cross-entropy) penalises predicted class probabilities, while [zero-one loss](../mathematics/entropy.qmd#zero-one-loss) counts incorrect class predictions.
+[The ELBO](../mathematics/elbo.qmd) combines reconstruction likelihood and a latent-distribution penalty.
+[Diffusion Policy](../../literature-review/action/diffusion-policy.qmd) uses squared error to predict noise, so its conditioning and target differ from direct action regression.
+[Generative action models](generative-models.qmd#questions) compares objectives for actions, noise, and velocity.

@@ -1,0 +1,79 @@
+---
+title: 'Fast R-CNN: Shared Features and RoI Pooling'
+description: "One image feature map, region-wise classification, Smooth L1 localization, and joint head training."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Vision
+  - Object Detection
+---
+
+Paper: [Girshick (2015), Fast R-CNN](https://arxiv.org/abs/1504.08083).
+
+## Problem
+
+[R-CNN](r-cnn.qmd) runs a CNN separately on many overlapping image crops and trains its classifier and box regressors in separate stages.
+Fast R-CNN shares the convolutional computation across regions and trains the classification and localization heads together.
+
+## Previous Attempts
+
+R-CNN establishes the value of pretrained CNN features for region-based detection.
+Spatial pyramid pooling methods show how regions can share a whole-image feature map.
+Fast R-CNN combines region pooling with a differentiable multi-task detection network. [Sections 1–2](https://arxiv.org/pdf/1504.08083#page=2).
+
+## Proposed Solution
+
+The backbone processes the whole image once to produce a convolutional feature map.
+An external proposal method supplies regions of interest, or RoIs.
+For each RoI, **RoI pooling** divides its projected feature-map region into a fixed grid and max-pools each bin independently for every channel.
+The resulting fixed-size features pass through fully connected layers and branch into a class softmax and class-specific box offsets. [Section 2.1 and Figure 1](https://arxiv.org/pdf/1504.08083#page=2).
+
+Pooling acts on shared features, not on a separately resized raw-image crop.
+Its quantized regions and bins are also distinct from the later RoIAlign operation.
+Image features are shared across proposals, while each region still receives its own pooled representation and predictions.
+
+## Joint Classification and Localization
+
+Let $u$ be a region's class label, with $u=0$ denoting background.
+Let $p$ be the predicted class distribution, $t^u$ the predicted box offsets for class $u$, and $v$ the target offsets.
+The region loss is
+
+$$
+    \begin{aligned}
+        L&=L_{\mathrm{cls}}+\lambda\mathbf1[u\ge1]L_{\mathrm{loc}},\\
+        L_{\mathrm{cls}}&=-\log p_u,\\
+        L_{\mathrm{loc}}&=\sum_k\rho(t_k^u-v_k).
+    \end{aligned}
+$$
+
+Background regions contribute classification loss but no foreground box-regression loss.
+The offsets follow the center-and-log-size parameterization described in [R-CNN](r-cnn.qmd#box-regression).
+The robust penalty is Smooth L1:
+
+$$
+    \rho(r)=
+    \begin{cases}
+        \tfrac12r^2,& |r|<1,\\
+        |r|-\tfrac12,& |r|\ge1.
+    \end{cases}
+$$
+
+It is quadratic near zero and linear for larger residuals, avoiding the unbounded residual-proportional slope of squared loss. [Section 2.3, Equations 1–3](https://arxiv.org/pdf/1504.08083#page=3).
+
+::: {.callout-note collapse="true" icon="false" title="Training details: region sampling and feature sharing"}
+The paper samples a small number of images, then multiple RoIs from each image, so those regions share the expensive backbone computation.
+Its standard recipe samples 25% foreground RoIs with IoU at least 0.5 and selects background RoIs from the interval $[0.1,0.5)$.
+These are minibatch construction choices, not the definition of Smooth L1 or universal thresholds for every detector. [Section 2.3](https://arxiv.org/pdf/1504.08083#page=3).
+:::
+
+## Evidence and Limitations
+
+The paper evaluates detection accuracy, training time, and inference time against earlier region-based systems. [Section 3](https://arxiv.org/pdf/1504.08083#page=4).
+The shared feature map removes repeated CNN processing of image crops, but the detector still depends on external proposals.
+Its inference-time SVD option approximates a large fully connected matrix by two lower-rank linear maps without inserting a new nonlinearity between them. [Section 2.4](https://arxiv.org/pdf/1504.08083#page=4).
+This compression is an optional speed optimization, separate from RoI pooling and the multi-task loss.
+
+## Connections
+
+[Faster R-CNN](faster-r-cnn.qmd) replaces the external proposal generator with a learned region proposal network.
+The [loss note](../../study-notes/machine-learning/loss.qmd#huber) explains the quadratic-to-linear robust penalty, and [cross-entropy](../../study-notes/mathematics/entropy.qmd#cross-entropy) explains the class term.

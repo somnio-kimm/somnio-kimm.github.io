@@ -1,0 +1,91 @@
+---
+title: "Evidence lower bound"
+description: "The reconstruction-plus-KL objective and the separate posterior KL that forms its likelihood gap."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Mathematics
+  - Generative Models
+---
+
+The evidence lower bound (ELBO) is a tractable objective for a latent-variable model whose marginal likelihood is difficult to compute.
+For the conditional version, let $A$ be an observed example, $o$ fixed context, and $z$ a latent variable.
+The model has prior $p(z\mid o)$, decoder $p_\theta(A\mid o,z)$, and approximate posterior $q_\phi(z\mid A,o)$.
+
+## Reconstruction and prior KL {#objective}
+
+For compactness, write $q_A=q_\phi(z\mid A,o)$ and $p_o=p(z\mid o)$.
+The negative conditional evidence lower bound has two terms:
+
+$$
+  R=\mathbb E_{q_A}[-\log p_\theta(A\mid o,z)],
+$$
+
+$$
+  K=D_{\mathrm{KL}}(q_A\Vert p_o),
+  \qquad J=R+K.
+$$
+
+The reconstruction term $R$ rewards assigning high conditional likelihood to the demonstrated actions.
+The KL term $K$ penalises disagreement between the encoder's latent distribution and the prior.
+It does not directly measure action accuracy.
+Both terms are minimised together, rather than one guaranteeing the other. [VAE, Eq. (3)](https://arxiv.org/pdf/1312.6114#page=3).
+
+Writing $B$ for the ELBO, the bound is
+
+$$
+  B=-J\leq\log p_\theta(A\mid o).
+$$
+
+The right side is the conditional log evidence after integrating out $z$.
+Maximising $B$ is equivalent to minimising $J$.
+
+## Deriving the bound {#deriving-the-bound}
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: why reconstruction and KL form a bound"}
+
+With $o$ fixed, marginalising the latent variable gives
+
+$$
+  p_\theta(A\mid o)
+  =\int p_\theta(A\mid o,z)p_o(z)\,dz.
+$$
+
+Assume the relevant densities and expectations exist and the variational distribution has suitable support.
+Introduce $q_A$ and apply [Jensen's inequality](expectations.qmd#jensen) to the concave logarithm:
+
+$$
+  \begin{aligned}
+  \log p_\theta(A\mid o)&\geq B,\\
+  B&=\mathbb E_{q_A}[\log p_\theta(A\mid o,z)]\\
+  &\quad-D_{\mathrm{KL}}(q_A\Vert p_o).
+  \end{aligned}
+$$
+
+Here, $B$ is the ELBO.
+Negating it produces $R+K$, which training minimises.
+The bound's gap is the KL divergence from $q_A$ to the true posterior, rather than the KL divergence to the prior. [VAE, Eqs. (1)–(3)](https://arxiv.org/pdf/1312.6114#page=3).
+
+:::
+
+## The posterior approximation gap {#posterior-gap}
+
+For an unconditional [VAE](../machine-learning/autoencoders.qmd#vae) observing $x$, the exact decomposition is:
+
+$$
+  \begin{aligned}
+  \ln p_\theta(x)
+  &=\operatorname{ELBO}(\theta,\phi;x)\\
+  &\quad+D_{\mathrm{KL}}\!\left(q_\phi(z\mid x)\Vert p_\theta(z\mid x)\right).
+  \end{aligned}
+$$
+
+For fixed $\theta$, maximising the ELBO over $\phi$ minimises this posterior approximation gap.
+When $\theta$ changes too, both the evidence and the true posterior change.
+An increase in the ELBO alone therefore does not prove that this KL gap decreased.
+
+## Connections {#connections}
+
+The [CVAE note](../machine-learning/autoencoders.qmd#act-objective) applies the conditional objective to ACT and explains how a KL weight changes it.
+[Monte Carlo estimation](expectations.qmd#latent-expectation) estimates the reconstruction expectation.
+[Reparameterisation](reparameterization.qmd) supports encoder gradients, while [Gaussian KL](entropy.qmd#gaussian-kl) gives a closed-form prior penalty.

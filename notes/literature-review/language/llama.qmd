@@ -1,0 +1,56 @@
+---
+title: 'LLaMA: An Architecture Reading Note'
+description: "A concise map of original LLaMA's decoder, RMSNorm, SwiGLU, rotary positions, and inference cache."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Language
+  - Transformers
+---
+
+Paper: [Touvron et al. (2023), LLaMA: Open and Efficient Foundation Language Models](https://arxiv.org/abs/2302.13971).
+This is an architecture reference for original LLaMA, with the broader experimental review still to be developed.
+
+## Problem
+
+The paper studies language models trained on large quantities of publicly available text, emphasizing useful performance at different inference budgets.
+The architectural reading question is how text tokens pass through the decoder to become next-token scores. [Sections 1–2](https://arxiv.org/html/2302.13971v1#S2).
+
+## Previous Attempts
+
+LLaMA builds on the causal transformer and combines existing design choices: normalization before each sublayer, SwiGLU feedforward blocks, and rotary positional embeddings.
+These mechanisms have distinct roles and should not be treated as one operation called attention. [Section 2.2](https://arxiv.org/html/2302.13971v1#S2.SS2).
+
+## Architecture
+
+Token IDs index learned embedding vectors.
+Each decoder layer uses causal self-attention and a feedforward sublayer, with residual additions and RMSNorm before the sublayers.
+Rotary position information modifies query and key representations used to compute attention.
+The final hidden representation passes through normalization and a vocabulary projection to produce logits. [Section 2.2](https://arxiv.org/html/2302.13971v1#S2.SS2).
+
+Training compares next-token logits with shifted text targets using cross-entropy.
+Generation chooses successive tokens from the model's scores according to a decoding rule.
+Softmax itself produces a probability distribution; it does not select the next token.
+An implementation may fuse log-softmax into its training loss, so a diagram without a separate training softmax box does not mean normalization is absent.
+
+## Diagram Caveats
+
+The saved [architecture diagram](../../../images/notes/llama/imported-architecture.png) is retained as a study attachment with unrecorded authorship.
+It includes useful labels for embeddings, rotary positions, residual paths, RMSNorm, SwiGLU, and a KV cache, but it is not an original-paper figure.
+
+Its grouped-query-attention label should not be assigned to original LLaMA: the Llama 2 report identifies GQA as a later architectural change for larger models. [Llama 2, Section 2.2 and Table 1](https://arxiv.org/pdf/2307.09288#page=5).
+Its fixed 32-layer stack also describes only a particular size; the original family includes different layer counts. [LLaMA, Table 2](https://arxiv.org/html/2302.13971v1#S2.T2).
+The two nearby normalization labels around the attention input should not be read as evidence for two consecutive independent RMSNorm operations.
+
+## Evidence and Limitations
+
+The architecture attachment does not establish benchmark performance, training-data composition, or behavior of a particular checkpoint.
+Those require a separate reading of the paper's experiments and the selected model configuration.
+The original paper reports model-size-dependent evaluations in Section 3; this short note does not reproduce or assess them.
+
+## Connections
+
+[Activation normalization](../../study-notes/machine-learning/normalization.qmd#rmsnorm) gives the RMSNorm equation and its difference from LayerNorm.
+[Attention](../../study-notes/machine-learning/attention.qmd#projections) explains query–key weighting and the reuse of earlier keys and values during decoding.
+[Cross-entropy](../../study-notes/mathematics/entropy.qmd#cross-entropy) connects vocabulary logits to next-token training.
+[BERT](bert.qmd) offers a useful comparison with bidirectional encoder pretraining.

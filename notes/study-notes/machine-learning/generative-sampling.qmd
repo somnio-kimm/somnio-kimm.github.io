@@ -1,0 +1,69 @@
+---
+title: "Generative sampling and randomness"
+description: "Separate internal generative time, random inputs, deterministic computation, and repeated sampling."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+  - Generative Models
+  - Robotics
+---
+
+A trained network and its sampling procedure are separate parts of a generative model.
+A deterministic computation can produce a random output distribution when its input is random.
+
+## Distinguish physical and generative time {#objects}
+
+Let $o_t$ denote the observation available at robot time $t$.
+A demonstrated action chunk is $A=(a_t,\ldots,a_{t+H-1})$, with $H$ future control steps.
+If each action has $d_a$ coordinates, the chunk belongs to $\mathbb R^{H\times d_a}$.
+Norms below compare all entries, or equivalently a flattened chunk.
+
+| Symbol | Object |
+|---|---|
+| $A$ | A clean demonstrated action chunk used as a training target. |
+| $\hat A$ | A predicted clean chunk. |
+| $\epsilon$ | A Gaussian noise sample shaped like a chunk. |
+| $A_k$ | An intermediate noisy chunk at diffusion index $k$. |
+| $A^\tau$ | An intermediate chunk at flow time $\tau$. |
+| $\theta$ | Learned parameters, fixed during ordinary inference. |
+
+Robot time orders executed commands.
+Diffusion index and flow time order computations that generate a chunk.
+An intermediate noisy chunk is a numerical state inside the sampler; it is not the action currently being executed by the robot.
+
+## Deterministic computation and random outputs {#randomness}
+
+A deterministic generator can be written as $\hat A=G_\theta(o,z)$.
+Fixing the observation, initial noise $z$, parameters, and numerical procedure fixes its output in an ideal deterministic implementation.
+Sampling a different $z$ can produce a different output.
+
+For a simple mathematical example, let $z\sim\mathcal N(0,1)$ and define
+
+$$
+  G(z)=
+  \begin{cases}
+  -2,&z<0,\\
+  +2,&z\geq0.
+  \end{cases}
+$$
+
+This deterministic function generates two equally likely values because its input is random.
+It illustrates randomness propagation, not a proposed smooth flow model.
+
+ODE flow sampling and DDIM with its stochasticity parameter set to zero can be deterministic conditional on their initial noise.
+Other diffusion samplers inject additional noise during reverse steps, so fixing only the initial sample is insufficient.
+[DDIM, Section 4](https://arxiv.org/abs/2010.02502) distinguishes its deterministic case from the wider sampling family.
+
+Reusing the same initial noise on every call, with deterministic sampling, chooses one repeatable mapping from observations to chunks.
+Seeding a random-number generator once instead produces a reproducible sequence of draws; successive calls can still receive different noise.
+It does not prove that the learned model has only one possible mode.
+It also does not guarantee compatible chunks when the observation changes between replanning steps.
+
+## Generation and execution are different stages {#execution}
+
+A noisy intermediate sample belongs to the generator's computation.
+Only a final prediction is considered for execution, and an [execution horizon](../physics/action-horizons.qmd#horizons) determines which commands are adopted before an update.
+Reusing noise can make a deterministic sampler repeatable, but it does not ensure compatible chunks as observations change.
+The [action-horizon note](../physics/action-horizons.qmd#execution) explains why switching between valid chunks requires its own mechanism.
+Compare the [diffusion](diffusion.qmd) and [flow-matching](flow-matching.qmd) training targets before interpreting a paper's sampler.

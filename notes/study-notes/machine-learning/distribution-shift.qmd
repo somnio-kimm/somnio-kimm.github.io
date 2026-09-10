@@ -1,0 +1,37 @@
+---
+title: "Distribution shift and confounding"
+description: "Distinguish changed distributions, policy-induced observation shift, and causal explanations for associations."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+  - Learning Regimes
+---
+
+Training and deployment may expose a model to different distributions.
+Identifying the changed distribution and the assumed causal relationships prevents several different issues from being called the same thing.
+
+## Which distribution changes? {#distribution-shift}
+
+Distribution shift means that training and deployment distributions differ.
+Covariate shift is the more specific assumption that $p_{\mathrm{train}}(x)\ne p_{\mathrm{test}}(x)$ while $p(y\mid x)$ stays the same.
+A change in the full joint distribution alone does not establish that assumption.
+
+In behavioural cloning, the learner's actions affect which observations it later visits.
+Errors can therefore move the learner away from the expert's training distribution.
+[DAgger](https://arxiv.org/abs/1011.0686) addresses this by obtaining expert supervision on states induced by the learner.
+
+A confounder, in a causal analysis, influences both a putative cause and an outcome and can create a misleading association between them.
+For example, suppose a scene variable determines both the background colour and which task a demonstrator is assigned.
+That scene variable can confound the association between background colour and demonstrated action; the colour itself is not automatically the confounder.
+Correlation alone does not establish this causal structure.
+
+“Internal covariate shift” names the explanation proposed in the original [batch normalisation paper](https://arxiv.org/abs/1502.03167).
+Batch normalisation standardises activations using batch statistics and then applies a learned scale and shift, so final activations need not have mean zero or variance one.
+[Santurkar et al.](https://arxiv.org/abs/1805.11604) provide evidence that smoother optimisation, rather than reduced internal distribution shift alone, is important to its effectiveness.
+
+## Apply the distinction {#connections}
+
+[Behavioural cloning](policies.qmd#policies) learns from demonstrated observations and actions, while the deployed policy helps determine its future observations.
+[Action horizons and feedback](../physics/action-horizons.qmd) describe when the controller can respond to those observations.
+[Conditional and marginal distributions](../mathematics/probability.qmd#conditional-and-marginal) provide the notation needed to state a particular shift assumption.

@@ -1,0 +1,199 @@
+---
+title: 'Literature library and reading queue'
+description: "The imported paper notes, original reading statuses, and links into the concept wiki."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Reading Maps
+---
+
+This library incorporates the supplied Notion export and links its material to the study notes and paper reviews.
+The two exported CSV files contain the same 115 records, with a different ordering of columns and entries.
+The records include topic dividers, two unnamed empty entries, a template, a glossary, and presentation links as well as papers.
+
+Read and Status below reproduce the export as separate fields.
+A review link means that a note is available here; it does not change the exported reading status.
+Entries without substantive exported notes remain in the queue.
+
+## Starting points
+
+The [study notes](../study-notes/index.qmd) connect definitions to paper mechanisms.
+The exported Jargon page is integrated into [probability and information](../study-notes/mathematics/probability.qmd#random-variables), [policies and learning regimes](../study-notes/machine-learning/policies.qmd), [attention](../study-notes/machine-learning/attention.qmd#projections), and [representations](../study-notes/machine-learning/representations.qmd).
+
+## Presentation sources
+
+| Original presentation | Study destinations |
+|---|---|
+| Generative Models, 23 September 2025 | [VAE](../study-notes/machine-learning/autoencoders.qmd#vae), [DDPM](theory/ddpm.qmd), [GAN](theory/gan.qmd), [normalising flows](theory/normalizing-flows.qmd), and [flow matching](theory/flow-matching.qmd). |
+| State-Space Models, 14 October 2025 | [State-space models](../study-notes/machine-learning/state-space-models.qmd), [matrix dynamics](../study-notes/mathematics/matrix-dynamics.qmd#properties), and [Mamba](theory/mamba.qmd). |
+
+The linked notes incorporate these presentations with revised equations and explanations.
+
+## Corrections to retain
+
+| Original ambiguity or error | Corrected explanation |
+|---|---|
+| Cross-entropy expectation lost its minus sign. | [Entropy and KL](../study-notes/mathematics/entropy.qmd#kl-divergence). |
+| Conditional meant one data point and marginal meant many. | [Conditional and marginal distributions](../study-notes/mathematics/probability.qmd#conditional-and-marginal). |
+| Online and offline processing were reversed. | [Online and offline](../study-notes/machine-learning/policies.qmd#online-and-offline). |
+| Forward and inverse Jacobian determinants were treated as equal. | [Normalising flow density](theory/normalizing-flows.qmd). |
+| Non-normality was treated as sufficient for transient growth. | [A stable counterexample](../study-notes/mathematics/matrix-dynamics.qmd#transient-amplification). |
+| Woodbury used a plus sign for the inverse correction. | [Woodbury derivation](../study-notes/mathematics/matrix-dynamics.qmd#woodbury). |
+| A generic gate was presented as the full Mamba parameterisation. | [Mamba parameter roles](theory/mamba.qmd). |
+| MAE could name a loss or a vision paper. | [Mean absolute error](../study-notes/machine-learning/loss.qmd#loss-and-risk) and the Masked Autoencoders queue entry are different topics. |
+
+## Background resources
+
+- [Original background resource 1](https://www.youtube.com/watch?v=KHVR587oW8I&ab_channel=ArtemKirsanov)
+- [Original background resource 2](https://www.youtube.com/playlist?list=PLtBw6njQRU-rwp5__7C0oIVt26ZgjG9NI)
+- [Original background resource 3](https://www.youtube.com/watch?v=iv-5mZ_9CPY&t=217s&ab_channel=3Blue1Brown)
+
+## Generative models
+
+| Paper or topic | Export status / Read | Available note or resource |
+|---|---|---|
+| VAE: Auto-Encoding Variational Bayes | In progress / Yes | [Review](theory/vae.qmd); [Export reference 1](https://arxiv.org/abs/1312.6114); [Export reference 2](https://arxiv.org/abs/1906.02691); [Export reference 3](https://arxiv.org/abs/1606.05908); [Export reference 4](https://lilianweng.github.io/posts/2018-08-12-vae/); [Export reference 5](https://www.youtube.com/watch?v=qJeaCHQ1k2w&ab_channel=Deepia) |
+| Flow Matching: Flow Matching for Generative Modelling | In progress / No | [Review](theory/flow-matching.qmd); [Export reference 1](https://arxiv.org/abs/2210.02747); [Export reference 2](https://arxiv.org/abs/2412.06264); [Export reference 3](https://lilianweng.github.io/posts/2018-10-13-flow-models/); [Export reference 4](https://www.youtube.com/watch?v=7NNxK3CqaDk&ab_channel=YannicKilcher); [Export reference 5](http://youtube.com/watch?v=7cMzfkWFWhI&ab_channel=Outlier) |
+| Normalising Flow: Variational Inference w/ Normalising Flows | In progress / No | [Review](theory/normalizing-flows.qmd); [Export reference 1](https://arxiv.org/abs/1505.05770); [Export reference 2](https://www.youtube.com/watch?v=i7LjDvsLWCg&ab_channel=AriSeff) |
+| Rectified Flow: Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow | Not started / No | Reading queue |
+| Score Matching: Score-Based Generative Modelling through Stochastic Differential Equations | In progress / No | [Review](theory/score-based-models.qmd); [Export reference 1](https://arxiv.org/abs/2011.13456); [Export reference 2](https://www.iro.umontreal.ca/~vincentp/Publications/smdae_techreport.pdf); [Export reference 3](https://www.youtube.com/watch?v=lUljxdkolK8) |
+| DDPM: Denoising Diffusion Probabilistic Models | In progress / No | [Review](theory/ddpm.qmd); [Export reference 1](https://arxiv.org/abs/2006.11239); [Export reference 2](https://calvinyluo.com/2022/08/26/diffusion-tutorial.html); [Export reference 3](http://youtube.com/watch?v=EhndHhIvWWw&ab_channel=Deepia); [Export reference 4](https://www.youtube.com/watch?v=HoKDTa5jHvg&t=1338s&ab_channel=Outlier); [Export reference 5](https://www.youtube.com/watch?v=a4Yfz2FxXiY&ab_channel=DeepFindr) |
+| DDIM: Denoising Diffusion Implicit Models | Not started / No | Reading queue |
+| Schrödinger Bridge: Diffusion Schrödinger Bridge with Applications to Score-Based Generative Modeling | Not started / No | Reading queue |
+| Stable (Latent) Diffusion: High-Resolution Image Synthesis w/ Latent Diffusion Models | Not started / No | [Export reference 1](https://arxiv.org/pdf/2112.10752) |
+| Ablated Diffusion: Diffusion Models Beat GANs on Image Synthesis | Not started / No | Reading queue |
+| Consistency Models | Not started / No | Reading queue |
+| GAN: Generative Adversarial Networks | Not started / Yes | [Review](theory/gan.qmd) |
+| CFG: Classifier-Free Diffusion Guidance | Not started / No | [Review](theory/cfg.qmd) |
+
+Original area resources: [resource 1](https://www.youtube.com/playlist?list=PLoROMvodv4rPOWA-omMM6STXaWW4FvJT8), [resource 2](https://diffusion.csail.mit.edu/), [resource 3](https://www.youtube.com/playlist?list=PL8VDJoEXIjpo2S7X-1YKZnbHyLGyESDCe).
+
+## Language
+
+| Paper or topic | Export status / Read | Available note or resource |
+|---|---|---|
+| Seq2Seq: Sequence to Sequence Learning w/ Neural Networks | Not started / No | [Export reference 1](https://arxiv.org/abs/1409.3215) |
+| Attention: Neural Machine Translation by Jointly Learning to Align and Translate | Not started / No | Reading queue |
+| Transformer: Attention is All You Need | Not started / Yes | [Concept background](../study-notes/machine-learning/attention.qmd#projections); [Export reference 1](https://arxiv.org/abs/1706.03762); [Export reference 2](https://jalammar.github.io/illustrated-transformer/); [Export reference 3](https://bbycroft.net/llm) |
+| ELMo: Deep Contextualized Word Representations | Not started / No | Reading queue |
+| BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding | In progress / No | [Review](language/bert.qmd) |
+| GPT-1: Improving Language Understanding by Generative Pre-Training | Not started / No | Reading queue |
+| GPT-2: Language Models are Unsupervised Multitask Learners | Not started / No | Reading queue |
+| GPT-3: Language Models are Few-Shot Learners | Not started / No | Reading queue |
+| T5: Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer | Not started / No | Reading queue |
+| LLaMA: Open and Efficient Foundation Language Models | In progress / No | [Review](language/llama.qmd) |
+| InstructGPT: Training Language Models to Follow Instructions with Human Feedback | Not started / No | Reading queue |
+| Scaling Law: Scaling Laws for Neural Language Models | Not started / No | Reading queue |
+| LoRA: Low Rank Adaptation of Large Language Models | Not started / No | Reading queue |
+| Prefix-Tuning: Optimizing Continuous Prompts for Generation | Not started / No | Reading queue |
+| Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity | Not started / No | Reading queue |
+
+Original area resources: [resource 1](https://www.youtube.com/playlist?list=PL3FW7Lu3i5Jsnh1rnUwq_TcylNr7EkRe6).
+
+## Computer vision
+
+| Paper or topic | Export status / Read | Available note or resource |
+|---|---|---|
+| LeNet: Gradient-Based Learning Applied to Document Recognition | Not started / No | Reading queue |
+| AlexNet: ImageNet Classification w/ Deep CNNs | Not started / No | Reading queue |
+| VGG: Very Deep Convolutional Networks for Large-Scale Image Recognition | Not started / No | Reading queue |
+| Inception: Going Deeper w/ Convolutions | Not started / No | Reading queue |
+| ResNet: Deep Residual Learning for Image Recognition | Not started / No | Reading queue |
+| FPN: Feature Pyramid Networks for Object Detection | Not started / No | Reading queue |
+| DPM: Object Detection w/ Discriminatively Trained Part Based Models | Not started / No | Reading queue |
+| R-CNN: Rich Feature Hierarchies for Accurate Object Detection and Semantic Segmentation | In progress / No | [Review](vision/r-cnn.qmd); [Export reference 1](https://arxiv.org/abs/1311.2524); [Export reference 2](https://www.youtube.com/watch?v=nJzQDpppFj0) |
+| Fast R-CNN | In progress / No | [Review](vision/fast-r-cnn.qmd); [Export reference 1](https://arxiv.org/abs/1504.08083); [Export reference 2](https://www.youtube.com/watch?v=5gAq6BZ87aA) |
+| Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks | In progress / No | [Review](vision/faster-r-cnn.qmd); [Export reference 1](https://arxiv.org/abs/1506.01497); [Export reference 2](https://www.youtube.com/watch?v=auHkGHM-x_M) |
+| YOLO: Unified, Real-Time Object Detection | In progress / No | [Review](vision/yolo.qmd); [Export reference 1](https://arxiv.org/abs/1506.02640); [Export reference 2](https://www.youtube.com/watch?v=svn9-xV7wjk&t=170s) |
+| SSD: Single Shot MultiBox Detector | In progress / No | [Review](vision/ssd.qmd) |
+| ViT: An Image is Worth 16x16 Words | In progress / Yes | [Review](vision/vit.qmd); [Export reference 1](https://arxiv.org/abs/2010.11929); [Export reference 2](https://www.youtube.com/watch?v=j3VNqtJUoz0&ab_channel=DeepFindr) |
+| DeiT: Training Data-Efficient Image Transformers & Distillation through Attention | Not started / Yes | [Export reference 1](https://arxiv.org/abs/2012.12877) |
+| Swin Transformer: Hierarchical Vision Transformer using Shifted Windows | Not started / Yes | [Export reference 1](https://arxiv.org/abs/2103.14030); [Export reference 2](https://www.youtube.com/watch?v=qUSPbHE3OeU) |
+| Pyramid Vision Transformer: A Versatile Backbone for Dense Prediction without Convolutions | Not started / No | Reading queue |
+| DETR: End-to-End Object Detection with Transformers | In progress / Yes | [Review](vision/detr.qmd); [Export reference 1](https://arxiv.org/abs/2005.12872); [Export reference 2](https://www.youtube.com/watch?v=T35ba_VXkMY) |
+| Deformable DETR: Deformable Transformers for End-to-End Object Detection | Not started / No | Reading queue |
+| BYOL: A New Approach to Self-Supervised Learning | Not started / No | Reading queue |
+| DINO: Emerging Properties in Self-Supervised Vision Transformers | In progress / Yes | [Review](vision/dino.qmd); [Export reference 1](https://arxiv.org/abs/2104.14294); [Export reference 2](https://www.youtube.com/watch?v=h3ij3F3cPIk) |
+| SimCLR: A Simple Framework for Contrastive Learning of Visual Representations | Not started / No | Reading queue |
+| MAE: Masked Autoencoders are Scalable Vision Learners | Not started / No | Reading queue |
+| FCN: Fully Convolutional Networks for Semantic Segmentation | Not started / No | Reading queue |
+| U-Net: Convolutional Networks for Biomedical Image Segmentation | Not started / No | Reading queue |
+| Mask R-CNN | Not started / No | Reading queue |
+| SAM: Segment Anything | Not started / No | Reading queue |
+
+Original area resources: [resource 1](https://www.youtube.com/playlist?list=PL8VDJoEXIjppNvOzocFbRciZBrtSMi81v).
+
+## Vision-language models
+
+| Paper or topic | Export status / Read | Available note or resource |
+|---|---|---|
+| ALIGN: Scaling Up Visual and Vision-Language Representation Learning With Noisy Text Supervision | Not started / No | Reading queue |
+| CLIP: Learning Transferable Visual Models from Natural Language Supervision | In progress / Yes | [Review](vision/clip.qmd); [Export reference 1](https://arxiv.org/abs/2103.00020); [Export reference 2](https://www.youtube.com/watch?v=T9XSU0pKX2E&ab_channel=YannicKilcher); [Export reference 3](https://www.youtube.com/watch?v=KcSXcpluDe4&ab_channel=Computerphile) |
+| SigLip: Sigmoid Loss for Language Image Pre-Training | Not started / No | [Concept background](../study-notes/machine-learning/representations.qmd) |
+| GLIP | Not started / No | Reading queue |
+| Grounding DINO: Marrying DINO with Grounded Pre-Training for Open-Set Object Detection | Not started / No | Reading queue |
+| BLIP: Bootstrapping Language-Image Pre-training for Unified Vision-Language Understanding and Generation | Not started / No | Reading queue |
+| Flamingo: A Visual Language Model for Few-Shot Learning | Not started / No | Reading queue |
+| LLaVA: Visual Instruction Tuning | Not started / No | Reading queue |
+| LanguageBind: Extending Video-Language Pretraining to N-Modality by Language-Based Semantic Alignment | Not started / No | Reading queue |
+| InternVL: Scaling Up Vision Foundation Models and Aligning for Generic Visual-Linguistic Tasks | Not started / No | Reading queue |
+| PaLM-E | Not started / No | Reading queue |
+| QwenVL: A Versatile Vision-Language Model for Understanding, Localisation, Text Reading, and Beyond | Not started / No | Reading queue |
+| PaliGemma: A Versatile 3B VLM for Transfer | In progress / No | [Review](language/paligemma.qmd) |
+| Prismatic VLMs: Investigating the Design Space of Visually-Conditioned Language Models | Not started / No | Reading queue |
+
+## Robot action models
+
+| Paper or topic | Export status / Read | Available note or resource |
+|---|---|---|
+| RT-1: Robotics Transformer for Real-World Control at Scale | Not started / No | Reading queue |
+| RT-2: Vision-Language-Action Models Transfer Web Knowledge to Robotic Control | Not started / No | Reading queue |
+| RT-H: Action Hierarchies Using Language | Not started / No | Reading queue |
+| Diffusion Policy: Visuomotor Policy Learning via Action Diffusion | In progress / Yes | [Review](action/diffusion-policy.qmd); [Export reference 1](https://arxiv.org/abs/2303.04137v4); [Export reference 2](https://github.com/real-stanford/diffusion_policy); [Export reference 3](https://www.youtube.com/watch?v=M03sZFfW-qU&ab_channel=HuggingFace) |
+| ACT: Learning Fine-Grained Bimanual Manipulation w/ Low-Cost Hardware | In progress / Yes | [Review](action/act.qmd); [Export reference 1](https://arxiv.org/abs/2304.13705); [Export reference 2](https://www.youtube.com/watch?v=ft73x0LfGpM&ab_channel=HuggingFace) |
+| Octo: An Open-Source Generalist Robot Policy | Not started / No | Reading queue |
+| OpenVLA: An Open-Source Vision-Language-Action Model | In progress / Yes | [Review](action/openvla.qmd) |
+| OpenVLA-OFT: Fine-Tuning Vision-Language-Action Models | In progress / Yes | [Review](action/openvla-oft.qmd) |
+| Pi 0: A Vision-Language-Action Flow Model for General Robot Control | In progress / Yes | [Review](action/pi0.qmd) |
+| FAST: Efficient Action Tokenisation for Vision-Language-Action Models | In progress / Yes | [Review](action/fast.qmd) |
+| Hi Robot: Open-Ended Instruction Following with Hierarchical Vision-Language-Action Models | Not started / Yes | Reading queue |
+| Pi 0.5: A Vision-Language-Action Model w/ Open-World Generalisation | In progress / Yes | [Review](action/pi05.qmd) |
+| Knowledge Insulating Vision-Language-Action Models: Train Fast, Run Fast, Generalise Better | In progress / Yes | [Review](action/knowledge-insulation.qmd) |
+| Pi 0.6: A VLA that Learns from Experience | In progress / No | [Review](action/pi06.qmd) |
+| Gemini Robotics: Bringing AI into the Physical World | Not started / No | Reading queue |
+| Gemini Robotics 1.5: Pushing the Frontier of Generalist Robots with Advanced Embodied Reasoning, Thinking, and Motion Transfer | Not started / No | Reading queue |
+| Unified VLA | Not started / No | Reading queue |
+
+## 3D perception
+
+| Paper or topic | Export status / Read | Available note or resource |
+|---|---|---|
+| 3D CNN | Not started / No | Reading queue |
+| Point net++ | Not started / No | Reading queue |
+| DGCNN | Not started / No | Reading queue |
+| VoxelNet | Not started / No | Reading queue |
+| Point R-CNN | Not started / No | Reading queue |
+| ImVoxelNet | Not started / No | Reading queue |
+| InPoint Anything | Not started / No | Reading queue |
+
+## Sequence and state-space models
+
+| Paper or topic | Export status / Read | Available note or resource |
+|---|---|---|
+| Linear Transformer: Transformers are RNNs | Not started / No | [Export reference 1](https://www.youtube.com/watch?v=hAooAOFRsYc&t=1240s) |
+| Linear RNN: Resurrecting Recurrent Neural Networks for Long Sequences | Not started / No | Reading queue |
+| LMU: Continuous-Time Representation in Recurrent Neural Networks | Not started / No | Reading queue |
+| LSSL: Combining Recurrent, Convolutional, and Continuous-Time Models with Linear State-Space Layers | Not started / No | Reading queue |
+| HiPPO: Recurrent Memory with Optimal Polynomial Projections | Not started / No | [Concept background](../study-notes/machine-learning/state-space-models.qmd#hippo) |
+| S4: Efficiently Modeling Long Sequences with Structured State Spaces | Not started / No | [Concept background](../study-notes/machine-learning/state-space-models.qmd#s4); [Export reference 1](https://srush.github.io/annotated-s4/) |
+| Mamba: Linear-Time Sequence Modeling with Selective State Spaces | In progress / Yes | [Review](theory/mamba.qmd); [Export reference 1](https://arxiv.org/abs/2312.00752); [Export reference 2](https://www.youtube.com/watch?v=N6Piou4oYx8); [Export reference 3](https://www.youtube.com/watch?v=BDTVVlUU1Ck); [Export reference 4](https://www.youtube.com/watch?v=8Q_tqwpTpVU) |
+
+## Other topics
+
+| Paper or topic | Export status / Read | Available note or resource |
+|---|---|---|
+| Knowledge Distillation: Distilling the Knowledge in a Neural Network | In progress / Yes | [Review](theory/knowledge-distillation.qmd) |
+| V-JEPA: Revisiting Feature Prediction for Learning Visual Representations from Video | Not started / No | Reading queue |
+
+The two unnamed empty entries remain in the original catalogue CSV.
+Their missing titles do not identify a paper to review.

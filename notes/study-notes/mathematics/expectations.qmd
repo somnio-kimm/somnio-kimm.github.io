@@ -1,0 +1,74 @@
+---
+title: "Expectations, Jensen’s inequality, and Monte Carlo estimation"
+description: "Distribution-weighted averages, convexity, sample estimators, and latent reconstruction expectations."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Mathematics
+  - Probability
+---
+
+Expectations connect a probability distribution to an average quantity of interest.
+Jensen’s inequality compares transformations of those averages, while Monte Carlo estimation approximates them from samples.
+
+## Expectation of a function {#expectation}
+
+An expectation is a distribution-weighted average of a random quantity.
+Let $X$ have probability mass function $p$, and let $f(X)$ be the numerical quantity being averaged.
+For a discrete variable,
+
+$$
+  \mathbb E_p[f(X)]=\sum_x p(x)f(x).
+$$
+
+For a real variable with density $p$, replace the sum with an integral:
+
+$$
+  \mathbb E_p[f(X)]=\int f(x)p(x)\,dx.
+$$
+
+Assume the relevant expectation exists; absolute integrability gives a finite expectation.
+Choosing $f(x)=x$ gives the mean, while choosing a loss or a log probability gives the corresponding expected objective.
+The expectation is determined by the distribution; an observed sample average is an estimator of it.
+See [Deep Learning, Section 3.8](https://www.deeplearningbook.org/contents/prob.html) for expectation and variance.
+
+## Jensen’s inequality {#jensen}
+
+For convex $f$, Jensen's inequality states $f(\mathbb E[X])\leq\mathbb E[f(X)]$, provided the expectations exist.
+The inequality reverses for concave functions, including $\ln$.
+This is the mechanism behind a variational lower bound on log evidence.
+
+[The ELBO](elbo.qmd#deriving-the-bound) applies the concave-log form to latent-variable evidence.
+[KL divergence](entropy.qmd#kl-divergence) uses the convex function $-\ln$ to establish nonnegativity.
+
+## Monte Carlo sample averages {#monte-carlo}
+
+To estimate $\mathbb E_q[f(X)]$, draw $L$ independent samples $X^{(l)}\sim q$ and average $f$ on those samples:
+
+$$
+  \widehat\mu_L=\frac1L\sum_{l=1}^L f(X^{(l)}).
+$$
+
+Under finite variance, this estimator is unbiased and its variance is $\operatorname{Var}_q(f(X))/L$.
+The function being averaged need not itself be a probability.
+VAE training commonly uses Monte Carlo estimates of expectations over latent noise, with a [reparameterised sample](reparameterization.qmd) to obtain a pathwise gradient.
+Random sampling does not categorically forbid gradients; the estimator and dependence on parameters determine how to differentiate.
+
+## Estimating a latent reconstruction term {#latent-expectation}
+
+For a [CVAE](../machine-learning/autoencoders.qmd#conditioning), let $A$ be an observed example, $o$ its context, and $z^{(l)}$ independent draws from the encoder $q_\phi(z\mid A,o)$.
+An expectation over the encoder can be estimated with $L$ independent latent samples:
+
+$$
+  \widehat R=-\frac1L\sum_{l=1}^{L}
+  \log p_\theta(A\mid o,z^{(l)}).
+$$
+
+The factor $1/L$ averages latent samples; an additional minibatch average accounts for training examples.
+Using one sample per example is a Monte Carlo estimator, not an assertion that the posterior is deterministic. [VAE, §§2.2–2.4](https://arxiv.org/pdf/1312.6114#page=3).
+
+## Connections {#connections}
+
+[Probability](probability.qmd) distinguishes random variables, values, masses, densities, and conditioning.
+[Reparameterisation](reparameterization.qmd) lets suitable Monte Carlo samples carry pathwise gradients and gives a training implementation.
+[The ELBO](elbo.qmd) identifies the reconstruction expectation being estimated, while [Gaussian KL](entropy.qmd#gaussian-kl) can be calculated analytically.

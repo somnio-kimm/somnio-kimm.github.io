@@ -1,0 +1,75 @@
+---
+title: "Quantile normalization of physical coordinates"
+description: "Percentile-based affine scaling, inversion, out-of-range values, and the resulting weighting of errors."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+  - Representations
+---
+
+Quantile normalization here means an affine rescaling based on fixed percentiles of the training data.
+It changes the numerical coordinates used by a model, such as the coordinates of a robot action.
+Start with the [representation overview](representations.qmd); compare [activation normalization](normalization.qmd#what-to-check-when-reading-a-model) for transformations inside a network.
+
+## Quantile scaling changes coordinates {#quantile-scaling}
+
+For coordinate $j$, let $l_j$ and $u_j$ be its first and ninety-ninth percentiles, estimated from the training data.
+These are fixed reference values, rather than statistics recomputed from each incoming action chunk.
+The quantile scaling used by [FAST, §V-B](https://arxiv.org/abs/2501.09747), maps these reference points to approximately $-1$ and $1$.
+Writing $r_j=u_j-l_j+\epsilon$ with a small positive numerical stabiliser,
+
+$$
+  \tilde x_j=2\frac{x_j-l_j}{r_j}-1.
+$$
+
+The [OpenPI implementation](https://github.com/Physical-Intelligence/openpi/blob/main/src/openpi/transforms.py) uses $\epsilon=10^{-6}$ and applies no clipping in this operation.
+The lower reference maps exactly to $-1$; the upper maps approximately to $1$ because of $\epsilon$.
+Values beyond the reference interval can remain outside $[-1,1]$.
+Percentiles reduce the influence of extreme samples on the chosen scale; they do not delete those samples.
+
+For nonconstant coordinates, this is an affine change of coordinates: differences are multiplied by the same fixed factor.
+It does not turn a multimodal distribution into a Gaussian.
+A rank-based Gaussian transform instead applies an estimated cumulative distribution function followed by the inverse Gaussian cumulative distribution function, $\Phi^{-1}(\widehat F(x))$.
+That nonlinear operation changes relative spacings between values.
+
+Different robot coordinates need separate statistics because their units and operating ranges differ.
+Scaling also changes the relative weight assigned by [squared loss](loss.qmd#mse): a fixed physical error receives a larger normalised penalty when its reference range is smaller.
+Comparable numerical ranges do not establish comparable physical importance.
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: inversion and the weighting of errors"}
+
+Rearranging the affine map gives
+
+$$
+  x_j=\frac{\tilde x_j+1}{2}r_j+l_j.
+$$
+
+For a prediction $\hat x_j$ and target $x_j$ transformed with identical statistics,
+
+$$
+  \begin{aligned}
+  \hat{\tilde x}_j-\tilde x_j
+  &=\frac{2}{r_j}(\hat x_j-x_j),\\
+  (\hat{\tilde x}_j-\tilde x_j)^2
+  &=\frac{4}{r_j^2}(\hat x_j-x_j)^2.
+  \end{aligned}
+$$
+
+Ignoring the tiny stabiliser, reference values $l=-2$ and $u=6$ send $x=2$ to $0$ and $x=10$ to $2$.
+The inverse maps $0$ back to $2$.
+If a separate operation clips $2$ to $1$, inversion returns $6$, so the original $10$ cannot be recovered.
+Clipping is many-to-one; the unclipped affine map is invertible.
+
+:::
+
+Deployment must use the statistics and coordinate conventions associated with training.
+Re-estimating them from the current scene changes what the same model output means physically.
+For example, normalised zero denotes the midpoint of the chosen reference interval, not necessarily zero joint angle or zero velocity.
+Inverting normalisation also does not undo unrelated transformations such as converting absolute targets into displacements; each transformation needs its own inverse.
+
+## Related Concepts
+
+[Tokenization](representations.qmd#state-bins) explains how a scaled state coordinate can subsequently become a discrete bin and then text IDs.
+The [loss overview](loss.qmd#loss-and-risk) explains why the numerical scale of residuals matters to an optimization objective.
+[FAST](../../literature-review/action/fast.qmd) uses normalized action coordinates before its temporal transform and tokenization.

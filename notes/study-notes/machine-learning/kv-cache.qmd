@@ -1,0 +1,46 @@
+---
+title: "KV caching: prefill and decoding"
+description: "When earlier attention keys and values can be reused, and what still has to be computed for each new query."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Machine Learning
+  - Transformers
+---
+
+A key–value cache stores attention keys and values that can be reused during inference.
+It saves computation only when the inputs and attention structure keep those stored representations valid.
+First read [attention projections](attention.qmd#projections) and [causal masks](attention.qmd#mask-values).
+
+## Prefill, decoding, and the KV cache {#kv-cache}
+
+During autoregressive inference, prefill processes the known prompt and stores each layer's keys and values.
+Decoding then processes newly generated tokens and appends their keys and values to that layer's cache.
+For one new query $q_t$, attention still computes
+
+$$
+  p_t=\operatorname{softmax}\!\left(
+  \frac{q_tK_{\leq t}^{\top}}{\sqrt{d_k}}+m_t\right),
+$$
+
+$$
+  z_t=p_tV_{\leq t}.
+$$
+
+Caching avoids recomputing old representations; it does not remove softmax or turn attention into an unnormalised product of queries, keys, and values.
+Causal masking ensures that appending a future token does not change earlier token representations, assuming fixed model parameters and consistent position handling.
+Full bidirectional attention over a growing sequence does not have that property in general.
+
+At fixed width, standard cached attention reads a number of keys proportional to the available context for each new token.
+This is different from evaluating all query–key pairs for an entire sequence at once.
+The cache is maintained separately for each layer, as explained in the [Transformers cache documentation](https://huggingface.co/docs/transformers/main/cache_explanation).
+
+A fixed image/text prefix can also be cached across action-generation steps when the attention structure makes its representations independent of the changing action tokens.
+Changing an observation or another prefix input requires recomputing the affected prefix.
+See [PaliGemma](../../literature-review/language/paligemma.qmd), [π0](../../literature-review/action/pi0.qmd), and [Mamba's recurrent alternative](../../literature-review/theory/mamba.qmd).
+
+## Related Concepts
+
+[Attention masks](attention.qmd#generation-order) separates the order of attention dependencies from the generation loop.
+[Action queries](attention.qmd#action-positions) explains why noisy action representations change during sampling even when their observation prefix stays fixed.
+[Stop-gradient](../computer-software/stop-gradient.qmd) concerns backpropagation; saving an inference cache does not itself specify a training gradient rule.

@@ -1,0 +1,212 @@
+---
+title: 'π*0.6: Learning from Experience with RECAP'
+description: "How accumulated robot experience trains a distributional value model and an advantage-conditioned VLA, including the differences between rewards, values, and action labels."
+date-modified: 2026-09-10
+draft: false
+categories:
+  - Robotics
+  - Machine Learning
+  - VLA
+  - Reinforcement Learning
+---
+
+Paper: [Amin et al. (2025), π*0.6: a VLA That Learns From Experience](https://arxiv.org/abs/2511.14759).
+The star distinguishes the RECAP-trained model from its supervised base model, π0.6.
+RECAP stands for reinforcement learning with experience and corrections via advantage-conditioned policies.
+
+## Problem
+
+A robot trained on demonstrations may perform the broad steps of a task while repeating mistakes or moving inefficiently during deployment.
+More expert demonstrations do not necessarily cover the difficult states that this particular policy visits.
+RECAP combines demonstrations, autonomous attempts, outcome feedback, and optional human corrections to improve the policy using its actual experience. [§§I and IV](https://www.pi.website/download/pistar06.pdf#page=3).
+
+## Previous Attempts
+
+Imitating expert corrections supplies useful recovery actions, but corrections alone do not evaluate all autonomous behaviour or directly reward faster completion.
+Policy-gradient methods are another route, although applying them efficiently to a large flow-based VLA is challenging because its action likelihood is not readily available in closed form.
+RECAP instead fits a value function and uses the resulting action-quality labels as an additional condition in supervised-style policy training. [§§II and IV-B](https://www.pi.website/download/pistar06.pdf#page=4).
+
+## Proposed Solution
+
+The loop has three operations: collect experience, fit a value model, and train a policy conditioned on an estimated improvement indicator.
+Offline pretraining applies the latter two operations to existing data.
+Task specialisation adds demonstrations and then repeats the loop with newly collected robot attempts. [Algorithm 1 and §V-D](https://www.pi.website/download/pistar06.pdf#page=6).
+
+| Data or label | Role |
+|---|---|
+| Pretraining data | Diverse prior demonstrations and other training tasks. |
+| Task demonstrations | Initialise a specialist for the target behaviour. |
+| Autonomous attempts | Reveal outcomes and states visited by deployed policies. |
+| Human corrections | Supply recovery examples inside difficult rollouts. |
+| Improvement indicator $I_t$ | A derived training label, recomputed using value estimates. |
+
+The accumulated dataset includes failures as well as successes.
+An indicator is not a new sensor measurement or a reward supplied by the environment at every action.
+It is a label computed from experience, except where expert corrections or initial task demonstrations are explicitly assigned a positive label.
+The number of demonstrations and the amount of practice differ by task; the paper does not prescribe a universal 50–100-trajectory initialisation budget. [§V-D and Appendix F](https://www.pi.website/download/pistar06.pdf#page=18).
+
+## Reward, return, and value are different quantities
+
+Let $o_t$ be an observation, $a_t$ an executed command, $\ell$ a task instruction, and $T$ the episode's terminal index.
+The paper derives rewards from an episode-level success label:
+
+$$
+  r_t=
+  \begin{cases}
+  0,&t=T\text{ and success},\\
+  -C_{\mathrm{fail}},&t=T\text{ and failure},\\
+  -1,&t<T.
+  \end{cases}
+$$
+
+The constant $C_{\mathrm{fail}}>0$ makes failure costly.
+The undiscounted return from time $t$ is
+
+$$
+  R_t=\sum_{u=t}^{T}r_u.
+$$
+
+For a successful episode, this is the negative number of remaining nonterminal steps.
+Consequently, faster successful completion earns a larger return.
+A value estimate is an expectation of future return under the behaviour represented in the data, not the observed return from one episode or a guarantee of optimal performance. [§§III and V-C](https://www.pi.website/download/pistar06.pdf#page=7).
+
+## A distribution over return bins
+
+The value model predicts a categorical distribution over $B=201$ return bins, conditioned on the observation and task.
+Let $b_t^*$ be the bin containing the demonstrated return and $p_\phi(b\mid o_t,\ell)$ the predicted probability of bin $b$.
+The training target is a bin label, so its loss is cross-entropy:
+
+$$
+  L_V=\mathbb E_{\mathcal D}
+  [-\log p_\phi(b_t^*\mid o_t,\ell)].
+$$
+
+If $c_b$ is the numerical return represented by bin $b$, the scalar value used in later calculations is
+
+$$
+  V_\phi(o_t,\ell)=
+  \sum_{b=1}^{B}c_b\,p_\phi(b\mid o_t,\ell).
+$$
+
+The model therefore produces a distribution first and takes its expectation when a scalar is needed.
+The paper normalises returns by task length, so rewards, returns, values, and advantage thresholds must use consistent units when implementing these equations. [§IV-A and §V-C](https://www.pi.website/download/pistar06.pdf#page=4).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: what the categorical value objective estimates"}
+
+Fix the observation and task, and let $q_b$ be the true conditional probability of each return bin in the data distribution.
+Expected cross-entropy satisfies
+
+$$
+  H(q,p)=H(q)+D_{\mathrm{KL}}(q\Vert p).
+$$
+
+The entropy $H(q)$ does not depend on the model.
+The KL term is minimised at $p=q$, subject to sufficient model capacity and successful optimisation.
+It is not maximised there.
+Taking the expectation of the bin representatives then approximates the conditional mean return, with additional discretisation error.
+This does not turn the fitted value into the optimal value of all possible policies.
+
+The [cross-entropy note](../../study-notes/mathematics/entropy.qmd#cross-entropy) explains the classification objective, while [loss](../../study-notes/machine-learning/loss.qmd#mse) explains how scalar MSE could instead target a mean directly.
+
+:::
+
+## From value estimates to an improvement indicator
+
+An advantage compares an observed continuation with the value expected at its starting state.
+Write $\widehat{\mathcal A}_t$ for this scalar to distinguish it from an action chunk $A$.
+For a nonterminal $N$-step continuation,
+
+$$
+  \begin{aligned}
+  \widehat{\mathcal A}_t
+  &=\sum_{u=t}^{t+N-1}r_u\\
+  &\quad+V_\phi(o_{t+N},\ell)-V_\phi(o_t,\ell).
+  \end{aligned}
+$$
+
+At a terminal boundary, the continuation uses the terminal outcome rather than bootstrapping beyond the episode.
+The paper uses a shorter lookahead during post-training and an episode-return estimate during pretraining, rather than the same fixed $N$ in every phase. [Appendix F](https://www.pi.website/download/pistar06.pdf#page=18).
+
+For a task-dependent threshold $\varepsilon_\ell$, the ordinary label is
+
+$$
+  I_t=\mathbf 1
+  [\widehat{\mathcal A}_t>\varepsilon_\ell].
+$$
+
+Positive means above this chosen threshold according to the estimate.
+It does not necessarily mean above zero, above the mean, or globally optimal.
+The recipe forces human corrections to have $I_t=1$ and also uses positive labels during the initial task-specific supervised fine-tuning stage. [§IV-B and §V-D](https://www.pi.website/download/pistar06.pdf#page=5).
+
+The paper's threshold wording is inconsistent: §V-D mentions a 30th percentile of predicted values, while Appendix F specifies selecting thresholds so that approximately 30% of pretraining demonstrations receive positive labels.
+Those descriptions are not equivalent.
+This note follows Appendix F's operational description, which also gives different positive fractions for post-training and some tasks; it does not assume a universal 30th-percentile rule.
+
+## How the policy uses the label
+
+Conceptually, the policy learns both an observation-conditioned action distribution and a distribution additionally conditioned on $I_t$.
+Write $c_t=(o_t,\ell)$ for compactness.
+The conceptual negative-log-likelihood objective is
+
+$$
+  \begin{aligned}
+  L_\pi=\mathbb E_{\mathcal D}[&-\log\pi_\theta(a_t\mid c_t)\\
+  &-\alpha\log\pi_\theta(a_t\mid I_t,c_t)].
+  \end{aligned}
+$$
+
+In the implemented model, discrete outputs use token cross-entropy and continuous actions use flow matching; an exact continuous-action log-likelihood is not directly evaluated.
+Randomly omitting the indicator during training supplies the conditioned and unconditioned cases without requiring two explicit likelihood evaluations for every example. [§IV-B, §V-B and Appendix F](https://www.pi.website/download/pistar06.pdf#page=6).
+
+The architecture follows [knowledge insulation](knowledge-insulation.qmd): FAST action supervision trains the backbone while the continuous expert reads its features through a stop-gradient boundary.
+The low-level chunk contains joint-position and gripper commands.
+It should not be described as continuous joint velocities plus a separate autoregressive gripper channel.
+Textual subtask outputs are a distinct high-level prediction. [§V-A and Fig. 5](https://www.pi.website/download/pistar06.pdf#page=7).
+
+The advantage indicator appears after the subtask text and before action outputs in the training sequence.
+Thus it conditions action generation without retroactively conditioning the preceding subtask prediction.
+The continuous expert cannot read the demonstrated FAST action targets. [§V-B](https://www.pi.website/download/pistar06.pdf#page=6).
+
+## Iterative training and deployment
+
+Deploy the current specialist, collect autonomous and corrected episodes, and add them to the task dataset.
+Refit the value model on the accumulated data, obtain updated indicators, and train the next specialist.
+The value model represents a changing mixture of demonstration and robot behaviour, so its estimates and labels can change as the dataset grows.
+The implementation fine-tunes each iteration's value model and policy from the pretrained checkpoints, rather than necessarily continuing from the immediately previous specialist. [§V-D](https://www.pi.website/download/pistar06.pdf#page=7).
+
+At deployment, request the positive-conditioned policy by supplying $I=1$.
+This requests behaviour associated with the positive training subset; it does not force an unreliable model to choose a successful action.
+The value model supplies training labels and need not be evaluated at every control step to choose that fixed input.
+
+Classifier-free guidance is an optional further sharpening mechanism.
+At the density level, define $p_0(a)=\pi_\theta(a\mid c)$ and $p_+(a)=\pi_\theta(a\mid I=1,c)$.
+The paper motivates
+
+$$
+  \widehat p(a)\propto
+  p_0(a)\left[\frac{p_+(a)}{p_0(a)}\right]^\beta.
+$$
+
+With $\beta=1$, this reduces to $p_+$ and direct positive-conditioned sampling suffices.
+Larger $\beta$ uses a guidance construction with conditioned and unconditioned predictions.
+The paper primarily tunes the training threshold and uses moderate extra guidance where useful; strong guidance is not a mandatory step for every rollout. [§IV-B and Appendix E](https://www.pi.website/download/pistar06.pdf#page=17).
+
+## Evidence
+
+The experiments compare supervised pretraining, offline-RL pretraining, task demonstrations, and improvement using on-robot experience.
+They measure success rate and throughput on espresso making, laundry folding, and box assembly, including component ablations and longer deployment evaluations. [§VI](https://www.pi.website/download/pistar06.pdf#page=8).
+These results support the full recipe in the evaluated tasks, rather than attributing every gain to a single loss term or proving monotonic improvement after every iteration.
+
+## Limitations
+
+Value errors, incomplete observations, imperfect corrections, and limited experience can produce misleading advantage labels.
+The paper's theoretical policy-improvement motivation relies on assumptions that are not automatically satisfied by learned approximate values and practical samplers.
+Conditioning on a positive label and increasing guidance therefore provide neither an optimality certificate nor a guarantee of safe actions.
+Outcome annotation and real-robot data collection remain substantive parts of the method. [§VII and Appendix E](https://www.pi.website/download/pistar06.pdf#page=11).
+
+## Connections
+
+[π0.5](pi05.qmd) introduces the hierarchical VLA recipe that π0.6 extends.
+[Knowledge insulation](knowledge-insulation.qmd) explains how the two action-learning objectives update different parameter groups.
+[Generative action models](../../study-notes/machine-learning/generative-models.qmd#questions) distinguishes a flow velocity from the eventual executed command.
+[Classifier-free guidance](../theory/cfg.qmd) develops the conditioned/unconditioned sampling idea.

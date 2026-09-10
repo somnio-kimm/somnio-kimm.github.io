@@ -1,0 +1,13 @@
+---
+title: "Computer Software"
+description: "Programming, algorithms, systems, and computational operations."
+listing-page: true
+listing:
+  contents: "*.qmd"
+  type: default
+  sort: "title"
+  fields: [title, description]
+draft: false
+---
+
+These notes describe computational operations and their behaviour within larger software systems.
