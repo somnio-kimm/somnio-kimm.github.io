@@ -12,6 +12,9 @@ project:
     - images/
     - files/
 
+editor:
+  render-on-save: true
+
 website:
   title: "Deep Chat of Perplexity"
   description: "Soo Min Kimm — research notes, publications, and talks."
