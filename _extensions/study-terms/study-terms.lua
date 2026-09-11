@@ -25,29 +25,10 @@ function Pandoc(doc)
     local label = value(entry.label) or key
     local definition = span.attributes.definition or value(entry.definition)
     if not definition or definition == "" then error("Missing definition for: " .. key) end
-    local href = span.attributes.href or value(entry.href)
-    if href then
-      if not href:match("^/notes/.*%.qmd") then
-        error("Glossary links must point to a /notes/...qmd source: " .. href)
-      end
-      -- make_relative only strips a matching parent; it does not create ../
-      -- paths between sibling subject folders. Build an offset to the site root.
-      local input = pandoc.path.make_relative(quarto.doc.input_file, quarto.project.directory)
-      local directory = pandoc.path.directory(input)
-      local offset = ""
-      if directory ~= "." then
-        for _ in directory:gmatch("[^/\\]+") do offset = offset .. "../" end
-      end
-      href = offset .. href:sub(2)
-    end
     count = count + 1
 
     if not quarto.doc.is_format("html:js") then
       local explanation = pandoc.Inlines({pandoc.Str(label .. ": " .. definition)})
-      if href then
-        explanation:insert(pandoc.Space())
-        explanation:insert(pandoc.Link("Read more", href))
-      end
       local content = span.content:clone()
       content:insert(pandoc.Note({pandoc.Para(explanation)}))
       return content
@@ -56,25 +37,19 @@ function Pandoc(doc)
     local id = "study-definition-" .. count
     local text = pandoc.write(pandoc.Pandoc({pandoc.Plain(span.content)}), "html")
       :gsub("\n$", "")
-    local link = ""
-    if href then
-      href = href:gsub("%.qmd", ".html", 1)
-      link = '<a class="study-term-more" href="' .. escape(href) .. '">Read more'
-        .. '<span class="study-term-sr-only"> about ' .. escape(label) .. '</span></a>'
-    end
     return pandoc.RawInline("html",
       '<span class="study-term" data-term="' .. escape(key) .. '">'
       .. '<span class="study-term-label">' .. text .. '</span>'
       .. '<span class="study-term-definition" id="' .. id .. '">'
       .. '<span class="study-term-heading">' .. escape(label) .. '</span>'
       .. '<span class="study-term-text" id="' .. id .. '-text">' .. escape(definition) .. '</span>'
-      .. link .. '</span></span>')
+      .. '</span></span>')
   end})
 
   if count > 0 and quarto.doc.is_format("html:js") then
     quarto.doc.add_html_dependency({
       name = "study-terms",
-      version = "1.0.0",
+      version = "1.0.1",
       scripts = {{path = "study-terms.js", attribs = {defer = ""}}},
       stylesheets = {"study-terms.css"}
     })

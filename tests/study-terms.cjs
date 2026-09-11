@@ -27,6 +27,8 @@ const { chromium } = require("playwright-core");
       await trigger.scrollIntoViewIfNeeded();
       assert.equal(await trigger.evaluate(el => el.tagName), "BUTTON");
       assert.equal(await panel.isVisible(), false);
+      assert.equal(await page.locator("main .study-term-definition a").count(), 0, "definitions contain no navigation links");
+      assert.equal(await panel.locator(".study-term-text").textContent().then(text => text.trim().length > 0), true);
 
       if (width === 1440) {
         await trigger.hover();
@@ -40,7 +42,7 @@ const { chromium } = require("playwright-core");
         await trigger.focus();
         assert.equal(await panel.isVisible(), true, "keyboard focus opens the definition");
         await page.keyboard.press("Tab");
-        assert.equal(await root.locator(".study-term-more").evaluate(el => el === document.activeElement), true);
+        assert.equal(await root.locator(".study-term-close").evaluate(el => el === document.activeElement), true, "Tab reaches the close button");
         await page.keyboard.press("Escape");
         assert.equal(await panel.isVisible(), false);
         assert.equal(await trigger.evaluate(el => el === document.activeElement), true, "Escape returns focus from the bubble");
@@ -72,25 +74,22 @@ const { chromium } = require("playwright-core");
       await trigger.click();
       await root.locator(".study-term-close").click();
       assert.equal(await panel.isVisible(), false, "explicit close button dismisses it");
-      await trigger.press("Enter");
-      await root.locator(".study-term-more").click();
-      assert.equal(new URL(page.url()).hash, "#feedforward-neural-network");
 
       // Printing includes definitions even after JavaScript has hidden the bubbles.
       await page.emulateMedia({ media: "print" });
       assert.equal(await panel.isVisible(), true, "print retains the short definitions");
 
-      // A definition in Mathematics must also link correctly to an ML note.
+      // Definitions in another subject are also text-only; ordinary note links remain.
       await page.emulateMedia({ media: "screen" });
       await page.goto(`${origin}/notes/study-notes/mathematics/probability.html`, { waitUntil: "networkidle" });
       const crossSubject = page.locator('main .study-term[data-term="latent-variable"]');
       await crossSubject.locator(".study-term-label").click();
-      await crossSubject.locator(".study-term-more").click();
-      assert.equal(new URL(page.url()).pathname, "/notes/study-notes/machine-learning/autoencoders.html");
-      assert.equal(new URL(page.url()).hash, "#vae");
+      assert.equal(await crossSubject.locator(".study-term-definition").isVisible(), true);
+      assert.equal(await page.locator("main .study-term-definition a").count(), 0);
+      assert.ok(await page.locator('main a[href*="autoencoders.html#conditioning"]').count() > 0, "named links in the explanation remain");
       assert.deepEqual(errors, []);
       await context.close();
-      console.log(`PASS ${width}px: hover/focus or touch, dismissal, links, layout, print`);
+      console.log(`PASS ${width}px: definition-only bubbles, hover/focus or touch, dismissal, layout, print`);
     }
 
     const fallback = await browser.newContext({ javaScriptEnabled: false });
@@ -98,9 +97,9 @@ const { chromium } = require("playwright-core");
     await page.goto(url);
     assert.equal(await page.locator("main .study-term-definition").first().isVisible(), true);
     assert.equal(await page.locator("main button.study-term-label").count(), 0);
-    assert.equal(await page.locator("main .study-term-more").first().isVisible(), true);
+    assert.equal(await page.locator("main .study-term-definition a").count(), 0);
     await fallback.close();
-    console.log("PASS no JavaScript: readable definitions and ordinary links");
+    console.log("PASS no JavaScript: readable definitions without navigation links");
   } finally {
     await browser.close();
   }

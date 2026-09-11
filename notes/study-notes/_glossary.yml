@@ -1,49 +1,41 @@
 # Short supporting definitions shared by all study notes.
 # Syntax: [display text]{.term key="entry-key"}
-# Optional attributes: definition="Local wording." href="/notes/...qmd#section"
+# Optional attribute: definition="Local wording."
 # Keep entries to 1-2 plain-text sentences; keep central definitions visible in notes.
 
 absolute-integrability:
   label: Absolute integrability
   definition: A random quantity is absolutely integrable when its expected absolute value is finite. This
     guarantees that its expectation is a finite number.
-  href: /notes/study-notes/mathematics/expectations.qmd#expectation
 action-chunk:
   label: Action chunk
   definition: An ordered sequence of proposed robot commands for several control steps. The controller
     may execute only part of the chunk before replacing it.
-  href: /notes/study-notes/robotics/action-horizons.qmd#horizons
 activation:
   label: Activation
   definition: An intermediate value computed by a network for a particular input, as distinct from a learned
     parameter.
-  href: /notes/study-notes/machine-learning/neural-network.qmd
 affine-map:
   label: Affine map
   definition: A transformation consisting of a linear map followed by a translation. For a scalar coordinate
     it has the form a times x plus b, and is invertible when a is nonzero.
-  href: /notes/study-notes/robotics/quantile-normalization.qmd#quantile-scaling
 automatic-differentiation:
   label: Automatic differentiation
   definition: Computing derivatives of a program by combining the derivative rules of its elementary operations
     through the chain rule. Operations such as stop-gradient can intentionally define special differentiation
     behaviour.
-  href: /notes/study-notes/computer-software/stop-gradient.qmd#stop-gradient
 autoregressive-generation:
   label: Autoregressive generation
   definition: Generating an output sequence by repeatedly predicting the next element conditioned on earlier
     elements and any supplied context.
-  href: /notes/study-notes/machine-learning/generative-models.qmd#factorisation
 autoregressive-model:
   label: Autoregressive model
   definition: A probability model that factorises a joint distribution into conditional distributions,
     each conditioned on earlier variables in a chosen order. The variables may be discrete or continuous.
-  href: /notes/study-notes/machine-learning/generative-models.qmd#factorisation
 behavioural-cloning:
   label: Behavioural cloning
   definition: Learning a policy from demonstrated observations and actions using a supervised learning
     objective.
-  href: /notes/study-notes/robotics/policies.qmd#policies
 bounding-box:
   label: Bounding box
   definition: A rectangle used to specify the location and extent of a region in an image, under a stated
@@ -53,24 +45,20 @@ chain-rule:
   definition: The rule for differentiating a composition of functions by multiplying the appropriate local
     derivatives or Jacobians. Contributions are added when several graph paths connect an input to an
     output.
-  href: /notes/study-notes/mathematics/entropy.qmd#binary-logit-gradient
 clipping:
   label: Clipping
   definition: Replacing values outside a specified interval by its nearest endpoint. Several distinct
     original values can then share the same result, so clipping generally cannot be inverted.
-  href: /notes/study-notes/robotics/quantile-normalization.qmd#quantile-scaling
 conditional-distribution:
   label: Conditional distribution
   definition: A distribution describing a random quantity given specified information, on conditioning
     events or values for which it is defined. It may retain uncertainty or assign all probability to a
     single outcome.
-  href: /notes/study-notes/mathematics/probability.qmd#conditional-and-marginal
 conditional-expectation:
   label: Conditional expectation
   definition: The average of a random quantity under the distribution remaining after specified information
     is given. With squared-error loss and finite second moments, it is the best unrestricted predictor
     from that information.
-  href: /notes/study-notes/machine-learning/loss.qmd#conditional-mean
 confidence-score:
   label: Confidence score
   definition: A numerical score used to rank or select a model prediction. Its interpretation as a probability
@@ -80,7 +68,6 @@ convex-function:
   definition: A function on a convex domain whose value at a weighted average of two inputs is no greater
     than the same weighted average of their function values. Its graph lies below the line segment joining
     any two points on the graph.
-  href: /notes/study-notes/mathematics/optimization.qmd#subgradients
 cosine-similarity:
   label: Cosine similarity
   definition: The dot product of two nonzero vectors divided by the product of their Euclidean lengths.
@@ -94,19 +81,16 @@ discounted-return:
   label: Discounted return
   definition: A sum of rewards along a trajectory in which later rewards are multiplied by progressively
     higher powers of a discount factor. Its expectation is one common reinforcement-learning objective.
-  href: /notes/study-notes/robotics/policies.qmd#policies
 dynamics:
   label: Environment dynamics
   definition: The rule or probability law by which a system’s state evolves, potentially depending on
     the current state and action. It describes the environment’s evolution rather than the policy’s action
     selection.
-  href: /notes/study-notes/robotics/policies.qmd#policies
 encoder:
   label: Encoder
   definition: A function or model component that maps an input into a representation used by subsequent
     computation. Its architecture and training objective determine what information the representation
     carries.
-  href: /notes/study-notes/machine-learning/representations.qmd
 euclidean-norm:
   label: Euclidean norm
   definition: The square root of the sum of squared magnitudes of a vector’s coordinates. It is the usual
@@ -115,32 +99,26 @@ feedback:
   label: Feedback
   definition: Information measured from a system and used to update subsequent decisions about that system.
     In control, the relevant feedback level may be task planning or a lower-level motor loop.
-  href: /notes/study-notes/robotics/action-horizons.qmd#horizons
 gaussian-distribution:
   label: Gaussian distribution
   definition: A probability distribution specified by a mean and covariance; in one dimension with positive
     variance its density is bell-shaped. A standard multivariate Gaussian has zero mean and identity covariance.
-  href: /notes/study-notes/mathematics/probability.qmd
 geometric-decay:
   label: Geometric decay
   definition: A sequence of nonnegative weights in which each successive weight is multiplied by the same
     factor smaller than one. In an EMA, this factor determines how quickly older observations lose weight.
-  href: /notes/study-notes/mathematics/exponential-moving-average.qmd#weights
 gradient-ascent:
   label: Gradient ascent
   definition: An iterative optimisation method that moves parameters or inputs in the direction of a function’s
     gradient to increase its value locally. The step size determines how far each update moves.
-  href: /notes/study-notes/mathematics/optimization.qmd
 homogeneous-response:
   label: Homogeneous response
   definition: The part of a dynamical system response generated by its initial state when the external
     input is zero.
-  href: /notes/study-notes/mathematics/matrix-dynamics.qmd
 independent-samples:
   label: Independent samples
   definition: Random samples whose joint distribution factors into the product of their individual distributions.
     Independence alone does not say that they have the same distribution.
-  href: /notes/study-notes/mathematics/probability.qmd#conditional-and-marginal
 inference:
   label: Inference
   definition: Using a trained model to compute predictions or generate outputs from supplied inputs. Ordinary
@@ -149,27 +127,22 @@ latent-variable:
   label: Latent variable
   definition: A variable included in a model but not directly observed in the example being explained.
     Its coordinates need not correspond to identifiable physical causes.
-  href: /notes/study-notes/machine-learning/autoencoders.qmd#vae
 learned-feature-vector:
   label: Learned feature vector
   definition: A numerical description whose coordinates are produced or adjusted through learning for
     an objective. The coordinates need not each correspond to a named human-interpretable property.
-  href: /notes/study-notes/machine-learning/representation-learning.qmd#representations
 marginal-distribution:
   label: Marginal distribution
   definition: The distribution of selected variables obtained from a joint distribution by summing or
     integrating over the other variables.
-  href: /notes/study-notes/mathematics/probability.qmd#conditional-and-marginal
 marginalisation:
   label: Marginalisation
   definition: Summing or integrating a joint distribution over variables that are not retained. The result
     describes the remaining variables while accounting for the possible values of the removed variables.
-  href: /notes/study-notes/mathematics/probability.qmd#conditional-and-marginal
 matrix-exponential:
   label: Matrix exponential
   definition: The matrix function defined by the power series I + A + A squared divided by 2 factorial,
     and so on. It propagates a constant-coefficient homogeneous linear differential equation.
-  href: /notes/study-notes/mathematics/matrix-dynamics.qmd
 measurable-function:
   label: Measurable function
   definition: A function whose preimage of every measurable output set is a measurable input event. This
@@ -181,73 +154,59 @@ nat:
   label: Nat
   definition: The unit of information obtained when logarithms use base e. Changing the logarithm base
     changes the unit and rescales the numerical information value.
-  href: /notes/study-notes/mathematics/entropy.qmd#entropy
 normalising-constant:
   label: Normalising constant
   definition: A sum or integral of unnormalised weights used to make their total probability equal one.
     It must be positive and finite for the resulting distribution to be well defined.
-  href: /notes/study-notes/machine-learning/energy-based-models.qmd#energy-and-score
 numerical-solver:
   label: Numerical solver
   definition: An algorithm that approximates the solution to a mathematical problem. For an ordinary differential
     equation, it computes successive approximate states from a derivative field.
-  href: /notes/study-notes/machine-learning/flow-matching.qmd#flow-matching
 parameter:
   label: Model parameter
   definition: A value that selects a model's behaviour, such as a learned weight or bias. It is held fixed
     during an ordinary prediction, unlike the input.
-  href: /notes/study-notes/machine-learning/neural-network.qmd#layer-composition
 parameterised-function:
   label: Parameterised function
   definition: A family of functions indexed by parameters. Fixing the parameters selects the function
     applied to an input.
-  href: /notes/study-notes/machine-learning/neural-network.qmd#feedforward-neural-network
 policy:
   label: Policy
   definition: A rule for choosing actions from available information, such as a state, observation, or
     history. It may return an action directly or specify a distribution from which an action is selected.
-  href: /notes/study-notes/robotics/policies.qmd#policies
 posterior:
   label: Posterior distribution
   definition: The conditional distribution of unknown parameters or latent variables after incorporating
     specified observations under a model. It combines the likelihood of those observations with the prior.
-  href: /notes/study-notes/mathematics/likelihood-and-estimation.qmd#map-estimation
 prior:
   label: Prior distribution
   definition: A distribution specified before incorporating the observation currently being explained.
     It may describe parameters or latent variables and may already condition on other supplied context.
-  href: /notes/study-notes/mathematics/likelihood-and-estimation.qmd#map-estimation
 probability-mass-function:
   label: Probability mass function
   definition: A function assigning the probability of each value of a discrete random variable. Its values
     are nonnegative and sum to one.
-  href: /notes/study-notes/mathematics/probability.qmd#random-variables
 probability-path:
   label: Probability path
   definition: A family of probability distributions indexed by a time-like variable. A generative flow
     chooses such a family to connect a simple starting distribution to a data distribution.
-  href: /notes/study-notes/machine-learning/flow-matching.qmd#flow-matching
 pseudorandom-seed:
   label: Pseudorandom seed
   definition: A value used to initialise a deterministic random-number generator. Reusing it with the
     same algorithm and draw sequence reproduces the same sequence; successive draws within that sequence
     can still differ.
-  href: /notes/study-notes/robotics/generative-sampling.qmd#randomness
 quantile:
   label: Quantile
   definition: A threshold associated with a chosen cumulative probability level. A percentile is a quantile
     whose level is expressed as a percentage; finite-sample estimation conventions can differ.
-  href: /notes/study-notes/robotics/quantile-normalization.qmd#quantile-scaling
 random-variable:
   label: Random variable
   definition: A measurable function assigning a value to each outcome of a probability model. Its distribution
     describes the probabilities of those values, while a realisation is one value it takes.
-  href: /notes/study-notes/mathematics/probability.qmd#random-variables
 recurrence:
   label: Recurrence
   definition: A rule defining each value of a sequence using earlier values and, when applicable, new
     inputs. Initial values are needed to determine the sequence.
-  href: /notes/study-notes/mathematics/exponential-moving-average.qmd#ema
 regularisation-penalty:
   label: Regularisation penalty
   definition: An additional objective term that penalizes specified properties of parameters or predictions,
@@ -256,63 +215,51 @@ representation:
   label: Representation
   definition: An encoding of information used by a model or computation. Its form and usefulness depend
     on what later operations need to do with it.
-  href: /notes/study-notes/machine-learning/representations.qmd
 sampler:
   label: Sampler
   definition: A procedure for producing draws from, or approximating draws from, a specified distribution.
     It includes the random inputs and numerical update rules, not only the trained network.
-  href: /notes/study-notes/robotics/generative-sampling.qmd
 score:
   label: Score of a density
   definition: The gradient of log density with respect to the sample coordinates. It indicates the local
     direction and rate of increase of log density, and differs from a gradient with respect to model parameters.
-  href: /notes/study-notes/machine-learning/energy-based-models.qmd#energy-and-score
 second-moment:
   label: Second moment
   definition: The expectation of a squared scalar random variable, or of a squared norm for a random vector.
     A finite second moment means that this expectation is finite.
-  href: /notes/study-notes/mathematics/probability.qmd
 softmax:
   label: Softmax
   definition: A function that exponentiates scores and divides each exponential by their sum, producing
     positive values that sum to one for finite scores.
-  href: /notes/study-notes/mathematics/entropy.qmd#softmax
 standard-deviation:
   label: Standard deviation
   definition: The nonnegative square root of a variance. It measures spread in the same units as the random
     quantity.
-  href: /notes/study-notes/mathematics/reparameterization.qmd#implementation
 state-vector:
   label: State vector
   definition: Coordinates representing the information a dynamical model uses to specify subsequent evolution,
     or its probability law, given future inputs. The entries may describe physical quantities or an internal
     model representation.
-  href: /notes/study-notes/machine-learning/state-space-models.qmd#continuous-system
 stationary-point:
   label: Stationary point
   definition: A point at which a differentiable scalar objective has zero gradient. It can be a minimum,
     a maximum, or a point that is neither.
-  href: /notes/study-notes/mathematics/optimization.qmd#step-size-example
 teacher-forcing:
   label: Teacher forcing
   definition: Training a sequence predictor using the observed earlier outputs as context for later predictions.
     Generation usually supplies the model’s own earlier outputs instead.
-  href: /notes/study-notes/machine-learning/generative-models.qmd#factorisation
 token:
   label: Token
   definition: A sequence element processed by a model. Depending on the input path, it may originate from
     a discrete vocabulary item or a continuous feature vector.
-  href: /notes/study-notes/machine-learning/representations.qmd#visual-tokens
 training-objective:
   label: Training objective
   definition: A scalar-valued function of model parameters that the training procedure seeks to optimize,
     often combining data loss and additional penalties.
-  href: /notes/study-notes/machine-learning/loss.qmd#loss-and-risk
 transformer:
   label: Transformer
   definition: A neural-network architecture built from blocks that combine attention with positionwise
     transformations, typically using residual connections and normalization.
-  href: /notes/study-notes/machine-learning/attention.qmd
 variance:
   label: Variance
   definition: The expected squared deviation of a random quantity from its mean, when this quantity exists.
@@ -322,9 +269,7 @@ variational-distribution:
   definition: A distribution from a chosen family with adjustable parameters, used to approximate a posterior
     that is difficult to work with directly. Optimising its parameters does not guarantee equality with
     the true posterior.
-  href: /notes/study-notes/mathematics/elbo.qmd#posterior-gap
 velocity-field:
   label: Velocity field
   definition: A function assigning a local direction and rate of change to each position and time. In
     flow generation, it changes a sample with respect to internal generative time.
-  href: /notes/study-notes/machine-learning/flow-matching.qmd#flow-matching

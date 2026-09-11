@@ -9,15 +9,15 @@ An unknown key or missing definition fails the render so an author cannot silent
 [parameter]{.term key="parameter" definition="Here, a learned weight held fixed during prediction."}
 ```
 
-Each glossary entry has a `label`, a short plain-text `definition`, and an optional `href` to a root-relative source note such as `/notes/study-notes/mathematics/probability.qmd#random-variables`.
-The optional `definition` and `href` attributes override that entry for the local context.
+Each glossary entry has a `label` and a short plain-text `definition`.
+The optional `definition` attribute overrides that entry for the local context.
+Bubbles contain only definitions; place links to full explanations in the surrounding note prose or Connections section.
 Use annotations only on supporting prose terms, never inside another link, a heading, code, or an equation.
 The main concept and assumptions belong in the visible explanation.
 See the study-note template for the content structure and authoring guidance.
 
-The filter emits readable text and links before JavaScript runs.
+The filter emits readable definition text before JavaScript runs.
 JavaScript enhances the labels into buttons with nonmodal definition panels, supporting hover, focus, tap, Escape, outside dismissal, and an explicit close button.
-The panels contain ordinary links and therefore do not use the noninteractive ARIA tooltip role.
 Definitions remain inline for printing or when JavaScript is disabled; non-HTML exports use footnotes.
 The CSS follows Quarto's light/dark body classes and does not animate the panels.
 
@@ -33,4 +33,4 @@ node tests/study-terms.cjs http://127.0.0.1:8765
 ```
 
 Set `NODE_PATH` if the package is installed outside this repository and `PLAYWRIGHT_CHROMIUM_EXECUTABLE` if Chromium is outside Playwright's default cache.
-The test covers desktop and touch interactions, keyboard access to links, dismissal and focus restoration, viewport placement, light/dark styling hooks, print, and no-JavaScript fallback.
+The test covers desktop and touch interactions, keyboard operation, dismissal and focus restoration, viewport placement, light/dark styling hooks, print, and no-JavaScript fallback.

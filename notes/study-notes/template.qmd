@@ -55,8 +55,8 @@ Add a reusable entry in notes/study-notes/_glossary.yml, then write:
 Use the displayed wording that fits the sentence; the key selects the definition.
 For a context-specific reminder, override the text:
 [parameter]{.term key="parameter" definition="Here, a learned weight or bias held fixed during prediction."}
-An optional href attribute overrides the glossary's link to a full source note.
-Use root-relative source links such as /notes/study-notes/mathematics/probability.qmd.
+Bubbles contain only the short definition.
+Keep links to full explanations in the surrounding prose or Connections section.
 Keep definitions to one or two plain-text sentences; put equations in the main explanation.
 Annotate useful first occurrences, not every repetition, heading, equation, code span, or existing link.
 The main definition and any assumption required to understand a result must remain visible.

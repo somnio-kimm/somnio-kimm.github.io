@@ -1,4 +1,4 @@
-/* Progressive enhancement: the source HTML contains every definition and link. */
+/* Progressive enhancement: the source HTML contains every definition. */
 (() => {
   let active = null;
   let closeTimer;

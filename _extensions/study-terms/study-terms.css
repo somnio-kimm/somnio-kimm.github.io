@@ -16,18 +16,6 @@
 .study-term-definition::after { content: ")"; }
 .study-term-heading { font-weight: 600; }
 .study-term-heading::after { content: ": "; }
-.study-term-more { margin-left: 0.35em; }
-.study-term-sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
 .quarto-dark .study-term-label {
   background: #4a405b;
   color: #f2edf9;
@@ -70,11 +58,6 @@
   .study-term-ready .study-term-heading,
   .study-term-ready .study-term-text { display: block; }
   .study-term-ready .study-term-heading { margin-bottom: 0.25rem; }
-  .study-term-ready .study-term-more {
-    display: inline-block;
-    margin: 0.45rem 0 0;
-    padding-block: 0.15rem;
-  }
   .study-term-close {
     position: absolute;
     top: 0.35rem;
@@ -90,8 +73,7 @@
     font-size: 1.3rem;
     cursor: pointer;
   }
-  .study-term-close:focus-visible,
-  .study-term-more:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+  .study-term-close:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
   .quarto-dark .study-term-ready > .study-term-label:hover,
   .quarto-dark .study-term-ready > .study-term-label[aria-expanded="true"] { background: #605174; }
   .quarto-dark .study-term-ready > .study-term-definition {
@@ -99,7 +81,6 @@
     background: #302a39;
     border-color: #9380ad;
   }
-  .quarto-dark .study-term-more { color: #bcceff; }
 }
 @media print {
   .study-term-label { background: none; border: 0; padding: 0; }
