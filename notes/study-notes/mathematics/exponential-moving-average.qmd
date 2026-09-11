@@ -1,7 +1,7 @@
 ---
 title: "Exponential moving averages"
 description: "Track geometrically weighted history while keeping the averaged object and time index explicit."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Mathematics
@@ -11,17 +11,20 @@ categories:
 
 An exponential moving average updates a running value using a fixed fraction of the new observation.
 The update has the same algebra for different objects, but its interpretation depends on what is being averaged.
+It is useful when recent history should influence a running estimate without storing every past value.
 
 ## The update and its object {#ema}
 
-An EMA of values $v_t$ uses
+An EMA is a [recurrence]{.term key="recurrence"} defining a new sequence $m_t$ from observations $v_t$ and an initial value $m_0$.
+All values must have compatible dimensions and represent the same quantity.
+For a fixed decay coefficient $\rho$, it uses
 
 $$
   m_t=\rho m_{t-1}+(1-\rho)v_t,
   \qquad 0\leq\rho<1.
 $$
 
-Older observations receive geometrically decaying weights, with an initialisation contribution until it decays or is corrected.
+Older observations receive [geometrically decaying weights]{.term key="geometric-decay"}, with an initialisation contribution until it decays or is corrected.
 The averaged object matters: model weights, a teacher's weights, losses, and action predictions are different objects.
 [DINO](../../literature-review/vision/dino.qmd) averages teacher parameters.
 [ACT temporal ensembling](../../literature-review/action/act.qmd#temporal-ensembling-uses-a-common-target-time) combines predictions for a common execution time and uses its own age convention.
@@ -54,3 +57,19 @@ Repeating the substitution back to $m_0$ yields the visible sum.
 The data weights sum to $1-\rho^t$, while the initialisation contributes the remaining weight $\rho^t$.
 
 :::
+
+## Interpreting an average in practice {#example}
+
+With $\rho=0.9$, $m_0=0$, and a first observation $v_1=10$, the update gives $m_1=1$.
+The result retains the initial value's weight; it does not imply that the first observation was close to one.
+For a constant sequence $v_t=10$, the expansion gives $m_t=10(1-0.9^t)$.
+If $m_0=0$, dividing by $1-\rho^t$ normalises the accumulated observation weights; this correction depends on that initialisation and the fixed-decay convention.
+
+At $\rho=0$, the running value is simply the latest observation.
+A value closer to one retains more history and responds more slowly to changes.
+The index must be identified before comparing methods: training steps, arrival times, and a shared future execution time are not interchangeable.
+
+## Connections {#connections}
+
+An EMA of model parameters combines points along an [optimisation trajectory](optimization.qmd#gradient-descent), whereas an EMA of losses combines scalar measurements.
+[DINO's teacher update](../../literature-review/vision/dino.qmd) uses the former, and [action horizons](../robotics/action-horizons.qmd) explains why overlapping action predictions need a specified execution time.

@@ -1,7 +1,7 @@
 ---
 title: "Probability: variables, distributions, and conditioning"
 description: "Random variables, probability masses and densities, joint distributions, marginalisation, and Bayes’ rule."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Mathematics
@@ -11,10 +11,11 @@ categories:
 Probability describes uncertainty about values, and its notation distinguishes the uncertain quantity from the values it can take.
 Before manipulating an expression, identify the random quantity, its possible values, and what information is held fixed.
 Joint, conditional, and marginal distributions then describe different views of that same uncertainty.
+A probability model is a mathematical description of uncertainty; a random variable, its observed value, and the probability assigned to that value are different objects.
 
 ## Random variables and distributions {#random-variables}
 
-A random variable $X$ is a measurable function from outcomes of an experiment to a space of values.
+A random variable $X$ is a [measurable function]{.term key="measurable-function"} from outcomes of an experiment to a space of values.
 A realisation $x$ is one value it takes.
 The distribution specifies how probability is assigned to those values.
 In $P(X=1)=0.8$, the value is $1$ and its probability is $0.8$.
@@ -45,14 +46,37 @@ $$
   p(x)=\sum_y p(x,y)=\sum_y p(x\mid y)p(y).
 $$
 
+Two discrete variables are independent when $p(x,y)=p(x)p(y)$ for all their values.
+Where the conditioning probability is positive, independence means observing one variable does not change the other's distribution.
+Independence does not require the two variables to have the same distribution.
+
 “Conditional” does not mean one data point, and “marginal” does not mean many data points.
 For example, $p(A\mid o)$ can have several action modes even for one fixed observation.
-Integrating over latent variables gives the action distribution in a [CVAE](../machine-learning/autoencoders.qmd#conditioning).
+Integrating over [latent variables]{.term key="latent-variable"} gives the action distribution in a [CVAE](../machine-learning/autoencoders.qmd#conditioning).
 Bayes' rule changes the direction of conditioning, where $p(x)>0$:
 
 $$
   p(z\mid x)=\frac{p(x\mid z)p(z)}{p(x)}.
 $$
+
+## Using the model and checking its limits {#using-probability}
+
+Suppose a robot encounters clutter with probability $0.25$, succeeds with probability $0.6$ in clutter, and succeeds with probability $0.9$ otherwise.
+Marginalising the scene condition gives the overall success probability:
+
+$$
+  \begin{aligned}
+  P(\text{success})&=0.25(0.6)+0.75(0.9)\\
+  &=0.825.
+  \end{aligned}
+$$
+
+The conditional probability $0.6$ answers the question after learning that the scene is cluttered; $0.825$ answers it before learning the scene condition.
+Both describe the same joint model, and neither number is itself an observed success or failure.
+The calculation assumes these two scene conditions are mutually exclusive and cover all possibilities in the model.
+A changed scene mixture changes the marginal success probability even if both conditional success probabilities stay fixed.
+
+A distribution also does not by itself specify how to act: an action choice additionally needs an objective or a rule, as in a [policy](../robotics/policies.qmd).
 
 ## Connections {#connections}
 

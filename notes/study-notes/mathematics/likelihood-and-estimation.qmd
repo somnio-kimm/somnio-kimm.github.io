@@ -1,7 +1,7 @@
 ---
 title: "Likelihood and estimation: MLE and MAP"
 description: "Likelihood as a parameter function, its classification cross-entropy objective, and the effect of a parameter prior."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Mathematics
@@ -10,10 +10,11 @@ categories:
 
 A distribution assigns probabilities or densities to possible data; a likelihood evaluates the observed data as a function of model parameters.
 Maximum likelihood and maximum a posteriori estimation use that likelihood to choose one parameter value, with different treatment of prior information.
+The practical question is which parameter setting best accounts for the observations within the chosen model family; the optimisation does not itself establish that the family describes reality.
 
 ## Likelihood and maximum likelihood {#estimation}
 
-For fixed observations $\mathcal D=\{x_i\}_{i=1}^n$ and an independent-sample model, the likelihood is
+For fixed observations $\mathcal D=\{x_i\}_{i=1}^n$ and an [independent-sample]{.term key="independent-samples"} model, the likelihood is
 
 $$
   \mathcal L(\theta;\mathcal D)=\prod_{i=1}^n p_\theta(x_i).
@@ -98,8 +99,8 @@ The factor $1/n$ is a positive constant, so it does not change the minimizers.
 ## Maximum a posteriori estimation {#map-estimation}
 
 Return to the notation $\mathcal D=\{x_i\}_{i=1}^n$ and $\mathcal L(\theta;\mathcal D)$ for the fixed dataset and its likelihood.
-Maximum a posteriori (MAP) estimation specifies a prior density or mass function $p(\theta)$.
-The posterior satisfies $p(\theta\mid\mathcal D)\propto\mathcal L(\theta;\mathcal D)p(\theta)$.
+Maximum a posteriori (MAP) estimation specifies a [prior]{.term key="prior"} density or mass function $p(\theta)$.
+The [posterior]{.term key="posterior"} satisfies $p(\theta\mid\mathcal D)\propto\mathcal L(\theta;\mathcal D)p(\theta)$.
 Assume the observations are independent under the model for a fixed $\theta$, so the likelihood is $\prod_i p_\theta(x_i)$.
 MAP then minimises the negative log posterior up to a constant:
 
@@ -109,6 +110,34 @@ $$
 
 For example, a zero-mean isotropic Gaussian parameter prior contributes a squared parameter penalty.
 A MAP point estimate is not the full posterior and does not retain all its uncertainty.
+
+## A Bernoulli estimate and its interpretation {#example}
+
+Suppose four independent trials share one success probability $\theta$, and the observed sequence has three successes and one failure.
+The sequence likelihood is $\mathcal L(\theta)=\theta^3(1-\theta)$ for $0\leq\theta\leq1$, and its maximum occurs at $\hat\theta=3/4$.
+The estimate is a parameter value selected using the data, while the likelihood is the entire function used to select it.
+The estimate alone does not give a probability that the unknown parameter equals $3/4$.
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: the Bernoulli maximum-likelihood estimate"}
+
+For $0<\theta<1$, the log-likelihood and derivative are
+
+$$
+  \begin{aligned}
+  \log\mathcal L(\theta)&=3\log\theta+\log(1-\theta),\\
+  \frac{d}{d\theta}\log\mathcal L(\theta)
+  &=\frac{3-4\theta}{\theta(1-\theta)}.
+  \end{aligned}
+$$
+
+The derivative is positive below $3/4$ and negative above it.
+Both endpoints give zero likelihood for this mixed success-and-failure sequence, so $3/4$ is its global maximum.
+
+:::
+
+The calculation relies on a shared success probability and independence across trials.
+If those assumptions change, the product model and the meaning of its estimate must be reconsidered.
+For continuous observations, likelihood factors are densities, so their numerical values need not lie below one and do not represent probabilities of exact observed points.
 
 ## Connections {#connections}
 

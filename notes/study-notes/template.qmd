@@ -8,7 +8,7 @@ categories:
 ---
 
 <!-- Use this template for one connected family of ideas.
-Choose a home in mathematics/, machine-learning/, physics/,
+Choose a home in mathematics/, machine-learning/, robotics/, physics/,
 computer-hardware/, or computer-software/.
 Place electrical engineering material directly in physics/.
 Use lowercase, hyphen-separated filenames that name the family.
@@ -22,27 +22,55 @@ Use Derivation for a calculation and Proof for an argument establishing a claim.
 Keep the full explanation in one main note and link to its sections from related notes.
 Include a short definition or result locally when a reader needs it to follow the argument.
 Do not force the reader to leave the page for every prerequisite reminder.
+Use the reading route why -> what -> how -> use -> relationships.
+These headings are a guide, not a requirement to repeat six headings for every family member.
+Combine short sections and give substantial family members descriptive level-two headings.
+Distinguish a definition, theorem, modelling assumption, approximation, and empirical claim.
 Remove unused sections and replace the metadata placeholders before publishing.
 -->
 
-## Question
+## Motivation {#motivation}
 
 <!-- What connected question does this family explain, and why is it needed?
-Give a short reading path through the page and link to substantial prerequisites.
+Start with a concrete situation or confusion that the note resolves.
+Give a short reading path through the page when its length warrants one.
 -->
 
-## Definition
+## Definition and meaning {#definition}
 
-<!-- Define the objects, notation, and assumptions before using them.
+<!-- What kind of thing is the concept: function, distribution, property, procedure, or relationship?
+Give its precise definition, then interpret each important clause in plain language.
+State its inputs, outputs, domains, units, notation, and necessary assumptions.
+Distinguish the mathematical object from its representation, estimate, or implementation.
+Define essential prerequisites briefly here and link to substantial supporting notes.
 Replace these generic headings with topic-specific level-two sections.
 For example, an Autoencoders note can have Autoencoders, VAE, and Conditional VAE sections.
 Give important sections stable IDs such as {#vae} for links from other pages.
 -->
 
-## Main result
+<!-- Short supporting definitions
+Pastel-highlighted terms show a definition on hover, keyboard focus, or tap.
+Add a reusable entry in notes/study-notes/_glossary.yml, then write:
+[random variable]{.term key="random-variable"}
+Use the displayed wording that fits the sentence; the key selects the definition.
+For a context-specific reminder, override the text:
+[parameter]{.term key="parameter" definition="Here, a learned weight or bias held fixed during prediction."}
+An optional href attribute overrides the glossary's link to a full source note.
+Use root-relative source links such as /notes/study-notes/mathematics/probability.qmd.
+Keep definitions to one or two plain-text sentences; put equations in the main explanation.
+Annotate useful first occurrences, not every repetition, heading, equation, code span, or existing link.
+The main definition and any assumption required to understand a result must remain visible.
+Without JavaScript or when printed, the short definitions are included inline.
+For non-HTML exports, they become footnotes.
+-->
 
-<!-- State the result and its meaning outside the toggle.
-Copy this block for each derivation or proof and give it a specific title.
+## Mechanism and results {#mechanism}
+
+<!-- Explain how the parts interact and why the result follows at a conceptual level.
+State each result, its conditions, and its interpretation outside the toggle.
+Say whether it is exact, approximate, or supported empirically.
+Copy the following block only when there is a useful derivation or proof.
+Place it immediately after the visible result and give it a specific title.
 -->
 
 ::: {.callout-note collapse="true" icon="false" title="Derivation: name the result"}
@@ -50,23 +78,35 @@ Copy this block for each derivation or proof and give it a specific title.
 Write the derivation or proof here, defining any additional notation before using it.
 
 <!-- Explain each step here.
+State which definition, assumption, or theorem justifies a non-obvious step.
 Use $$ on separate lines for display math and indent the math inside them.
 For a proof, change the title to Proof: name the claim.
 -->
 
 :::
 
-## Example
+## Examples and applications {#examples}
 
-<!-- Work through a concrete example and explain when the result applies. -->
+<!-- Develop an example far enough to show the definition or mechanism in use.
+What information is available, what operation is performed, and what is obtained?
+Explain what can be observed or estimated and how it differs from the ideal object.
+Include a non-example, limiting case, or qualitative prediction when it clarifies the concept.
+Prefer conceptual reconstruction to arithmetic that adds no explanatory value.
+-->
 
-## Connections
+## Connections and boundaries {#connections}
 
-<!-- Link to related notes and explain each relationship.
-Link to a prerequisite, a related concept, and an application when relevant.
-If this is a navigation page, keep comparisons brief and link to the main explanations.
+<!-- Explain relationships: requires, generalises, is a special case of, approximates, implies, or differs from.
+Link to exact sections when that saves searching.
+Distinguish the nearest commonly confused concept and explain a counterexample.
+Which assumptions can fail, and what conclusion would then stop following?
+Separate necessary from sufficient conditions; do not silently reverse an implication.
+Record a precise unresolved question if one remains, rather than filling the gap with speculation.
 -->
 
 ## References
 
-<!-- Link to the sources used for definitions, derivations, and claims. -->
+<!-- Cite sources near significant claims and collect the main references here.
+Prefer a specific section, equation, or page over a bare paper title.
+Separate a source's claim from your interpretation or worked example.
+-->

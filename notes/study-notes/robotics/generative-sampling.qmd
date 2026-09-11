@@ -1,7 +1,7 @@
 ---
 title: "Generative sampling and randomness"
 description: "Separate internal generative time, random inputs, deterministic computation, and repeated sampling."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 aliases:
   - /notes/study-notes/machine-learning/generative-sampling.html
@@ -11,8 +11,11 @@ categories:
   - Robotics
 ---
 
-A trained network and its sampling procedure are separate parts of a generative model.
+## Motivation
+
+A trained network and its [sampling procedure]{.term key="sampler"} are separate parts of a generative model.
 A deterministic computation can produce a random output distribution when its input is random.
+This distinction explains how fixed model parameters can produce several possible actions and what a repeated seed actually controls.
 
 ## Distinguish physical and generative time {#objects}
 
@@ -53,14 +56,23 @@ $$
 This deterministic function generates two equally likely values because its input is random.
 It illustrates randomness propagation, not a proposed smooth flow model.
 
-ODE flow sampling and DDIM with its stochasticity parameter set to zero can be deterministic conditional on their initial noise.
+ODE flow sampling with a fixed [numerical solver]{.term key="numerical-solver"} and DDIM with its stochasticity parameter set to zero can be deterministic conditional on their initial noise.
 Other diffusion samplers inject additional noise during reverse steps, so fixing only the initial sample is insufficient.
 [DDIM, Section 4](https://arxiv.org/abs/2010.02502) distinguishes its deterministic case from the wider sampling family.
 
 Reusing the same initial noise on every call, with deterministic sampling, chooses one repeatable mapping from observations to chunks.
-Seeding a random-number generator once instead produces a reproducible sequence of draws; successive calls can still receive different noise.
+Setting a [pseudorandom seed]{.term key="pseudorandom-seed"} once instead produces a reproducible sequence of draws; successive calls can still receive different noise.
 It does not prove that the learned model has only one possible mode.
 It also does not guarantee compatible chunks when the observation changes between replanning steps.
+
+## Assumptions and boundaries
+
+The deterministic statement holds only after fixing every input that affects the computation, including any later noise draws and the numerical procedure.
+The generator is a map, the initial noise is a random variable, and the output distribution is the distribution induced by applying that map to its random input.
+Repeated calls with one fixed input reveal one output of the map, not its entire output distribution.
+
+For an action policy, reproducibility and continuity answer different questions.
+Replaying the same noise under the same conditions tests repeatability; comparing chunks under changing observations tests how the policy responds to new information.
 
 ## Generation and execution are different stages {#execution}
 
@@ -69,3 +81,8 @@ Only a final prediction is considered for execution, and an [execution horizon](
 Reusing noise can make a deterministic sampler repeatable, but it does not ensure compatible chunks as observations change.
 The [action-horizon note](action-horizons.qmd#execution) explains why switching between valid chunks requires its own mechanism.
 Compare the [diffusion](../machine-learning/diffusion.qmd) and [flow-matching](../machine-learning/flow-matching.qmd) training targets before interpreting a paper's sampler.
+
+## References
+
+[Song et al., Denoising Diffusion Implicit Models, §4](https://arxiv.org/abs/2010.02502) specifies the deterministic sampling case and its stochastic generalisation.
+[Lipman et al., Flow Matching for Generative Modeling](https://arxiv.org/abs/2210.02747) describes generation by integrating a learned vector field.

@@ -1,25 +1,35 @@
 ---
 title: "Object detection metrics"
 description: "Interpret IoU, precision, recall, and average precision under a specified matching protocol."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Machine Learning
   - Computer Vision
 ---
 
+## Motivation {#motivation}
+
+A detector can name the correct class while placing its box incorrectly, or find one object several times while missing another.
 A detection result must identify both where an object is and which class it belongs to.
 Its evaluation depends on matching predicted detections to reference objects under a stated protocol.
 
-## Overlap, matching, and average precision {#detection-metrics}
+## Overlap and matching {#detection-metrics}
 
-Intersection over union compares a predicted box $B$ with a reference $G$:
+A detection metric is a numerical summary of predictions and reference annotations under an evaluation protocol.
+It measures performance on that annotated dataset, rather than a property of a detector independent of the data and protocol.
+Intersection over union compares a predicted [bounding box]{.term key="bounding-box"} $B$ with a reference $G$:
 
 $$
   \operatorname{IoU}(B,G)=\frac{|B\cap G|}{|B\cup G|}.
 $$
 
-Precision and recall depend on which detections are matched to references:
+Here $|\cdot|$ denotes area, both boxes use the same coordinate system, and the union must have positive area.
+IoU is a geometric overlap ratio; it contains no class-label or confidence information.
+
+Precision and recall depend on which detections are matched to references.
+Under a simple one-to-one, same-class matching protocol, a matched prediction is a true positive ($TP$), an unmatched prediction is a false positive ($FP$), and an unmatched reference is a false negative ($FN$).
+The counts give
 
 $$
   \begin{aligned}
@@ -28,10 +38,30 @@ $$
   \end{aligned}
 $$
 
+These ratios require nonzero denominators; empty cases need the benchmark's stated convention.
+
+## From ranked detections to average precision {#average-precision}
+
+Detections are ranked by their [confidence scores]{.term key="confidence-score"}.
+Admitting more predictions as the score threshold decreases produces different precision–recall points.
 For one class, average precision summarises a precision–recall curve under a specified interpolation and matching protocol.
 Mean AP averages over classes and, in some benchmarks, additional IoU thresholds.
 VOC-style AP at IoU $0.5$ and COCO AP averaged over thresholds $0.50$ through $0.95$ are different metrics.
 Do not compare numbers without their protocol; see the [COCO evaluation specification](https://cocodataset.org/#detection-eval).
+
+## Example and evaluation boundaries {#applications}
+
+Suppose an image contains three annotated objects of one class, and a detector returns three boxes.
+With one-to-one matching at the chosen IoU threshold, suppose two boxes match different objects and the third duplicates the first object.
+Then $TP=2$, $FP=1$, and $FN=1$, so precision and recall are both $2/3$.
+The duplicate does not recover the missed object, even if its box overlaps an already matched object perfectly.
+This example assumes ordinary objects without ignored or crowd annotations; the [COCO evaluator](https://github.com/cocodataset/cocoapi/blob/master/PythonAPI/pycocotools/cocoeval.py) includes additional matching and exclusion rules.
+
+A single precision–recall point is not AP.
+Report the matching threshold, class averaging, dataset split, and any size or maximum-detection restrictions alongside an AP value.
+A detector with a higher AP need not have higher recall at every score threshold, so the deployed operating point still needs evaluation.
+
+## Connections {#connections}
 
 Two-stage detectors first propose regions and then classify and refine them, as in [Faster R-CNN](../../literature-review/vision/faster-r-cnn.qmd).
 One-stage detectors produce detection predictions without that separate region-proposal stage, as in [YOLO](../../literature-review/vision/yolo.qmd) and [SSD](../../literature-review/vision/ssd.qmd).

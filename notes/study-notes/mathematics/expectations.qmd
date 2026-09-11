@@ -1,7 +1,7 @@
 ---
 title: "Expectations, Jensen’s inequality, and Monte Carlo estimation"
 description: "Distribution-weighted averages, convexity, sample estimators, and latent reconstruction expectations."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Mathematics
@@ -10,6 +10,7 @@ categories:
 
 Expectations connect a probability distribution to an average quantity of interest.
 Jensen’s inequality compares transformations of those averages, while Monte Carlo estimation approximates them from samples.
+This distinction matters whenever a desired average, such as expected prediction loss, is defined over a distribution but only sampled observations are available.
 
 ## Expectation of a function {#expectation}
 
@@ -27,16 +28,42 @@ $$
   \mathbb E_p[f(X)]=\int f(x)p(x)\,dx.
 $$
 
-Assume the relevant expectation exists; absolute integrability gives a finite expectation.
+Assume the relevant expectation exists; [absolute integrability]{.term key="absolute-integrability"} gives a finite expectation.
 Choosing $f(x)=x$ gives the mean, while choosing a loss or a log probability gives the corresponding expected objective.
 The expectation is determined by the distribution; an observed sample average is an estimator of it.
 See [Deep Learning, Section 3.8](https://www.deeplearningbook.org/contents/prob.html) for expectation and variance.
 
 ## Jensen’s inequality {#jensen}
 
-For convex $f$, Jensen's inequality states $f(\mathbb E[X])\leq\mathbb E[f(X)]$, provided the expectations exist.
+For [convex]{.term key="convex-function"} $f$, Jensen's inequality states $f(\mathbb E[X])\leq\mathbb E[f(X)]$, provided the expectations exist.
 The inequality reverses for concave functions, including $\ln$.
 This is the mechanism behind a variational lower bound on log evidence.
+For a differentiable convex function, a supporting tangent line gives a short proof; Jensen's inequality itself also applies to nondifferentiable convex functions.
+
+::: {.callout-note collapse="true" icon="false" title="Proof: Jensen's inequality for differentiable convex functions"}
+
+Let $m=\mathbb E[X]$ lie in the function's domain and assume the displayed expectations are finite.
+Convexity implies that the tangent line at $m$ lies below the graph:
+
+$$
+  f(x)\geq f(m)+f'(m)(x-m).
+$$
+
+Taking expectations on both sides gives
+
+$$
+  \begin{aligned}
+  \mathbb E[f(X)]
+  &\geq f(m)+f'(m)(\mathbb E[X]-m)\\
+  &=f(m).
+  \end{aligned}
+$$
+
+The linear term vanishes by the definition of $m$.
+For a concave function, apply the same argument to its convex negative and reverse the inequality.
+The [subgradient definition](optimization.qmd#subgradients) generalises the supporting-line idea beyond ordinary derivatives.
+
+:::
 
 [The ELBO](elbo.qmd#deriving-the-bound) applies the concave-log form to latent-variable evidence.
 [KL divergence](entropy.qmd#kl-divergence) uses the convex function $-\ln$ to establish nonnegativity.
@@ -49,10 +76,21 @@ $$
   \widehat\mu_L=\frac1L\sum_{l=1}^L f(X^{(l)}).
 $$
 
-Under finite variance, this estimator is unbiased and its variance is $\operatorname{Var}_q(f(X))/L$.
+Under finite [variance]{.term key="variance"}, this estimator is unbiased and its variance is $\operatorname{Var}_q(f(X))/L$.
 The function being averaged need not itself be a probability.
 VAE training commonly uses Monte Carlo estimates of expectations over latent noise, with a [reparameterised sample](reparameterization.qmd) to obtain a pathwise gradient.
 Random sampling does not categorically forbid gradients; the estimator and dependence on parameters determine how to differentiate.
+
+## An average before or after squaring {#example}
+
+Let $X$ equal $-1$ or $1$ with equal probabilities, and take $f(x)=x^2$.
+Then $\mathbb E[X]=0$, so $(\mathbb E[X])^2=0$, while $\mathbb E[X^2]=1$.
+The mean cancels opposite signs; the mean square retains their magnitude.
+This is a concrete instance of Jensen's inequality and explains why a mean residual can vanish while mean squared error remains positive.
+
+A sample average of $X$ can fluctuate around zero, but every sample average of $X^2$ in this example is exactly one.
+The target expectation is a fixed number once the distribution and function are specified; a Monte Carlo estimator is a random quantity before its samples are drawn.
+Increasing the number of independent samples reduces sampling variance, but it does not correct sampling from the wrong distribution.
 
 ## Estimating a latent reconstruction term {#latent-expectation}
 

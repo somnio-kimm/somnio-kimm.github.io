@@ -1,12 +1,15 @@
 ---
 title: "Loss functions: MSE, MAE, and Huber"
 description: "Per-example loss, empirical risk, and the mean, median, and robust penalties favoured by common regression objectives."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Machine Learning
 ---
 
+## Motivation {#motivation}
+
+Training needs a rule for comparing predictions that make different kinds or sizes of mistakes.
 A loss function measures how a prediction compares with its target.
 The choice of loss determines which errors receive larger penalties and influences the predictions favoured by training.
 
@@ -28,9 +31,9 @@ $$
   L(\mathbf w)=\frac1n\sum_{i=1}^{n}\ell(f_{\mathbf w}(x_i),y_i).
 $$
 
-The inputs and targets are fixed; changing the parameters $\mathbf w$ changes the predictions and therefore the empirical risk.
+The inputs and targets are fixed; changing the [parameters]{.term key="parameter"} $\mathbf w$ changes the predictions and therefore the empirical risk.
 A training objective is a scalar-valued function of the model parameters that training seeks to minimise.
-It can be the empirical risk itself or include additional terms, such as a regularisation penalty.
+It can be the empirical risk itself or include additional terms, such as a [regularisation penalty]{.term key="regularisation-penalty"}.
 In this note, the objective is $L$.
 
 A parameter value $\mathbf w^*$ is a global minimiser of $L$ if
@@ -109,7 +112,7 @@ $$
   f^*(o)=\mathbb E[A\mid o].
 $$
 
-This statement assumes finite second moments and optimisation over all measurable point predictors.
+This statement assumes finite [second moments]{.term key="second-moment"} and optimisation over all measurable point predictors.
 A finite neural network trained on finite data need not reach that ideal.
 The sample-mean result above is the finite-data case when one number is shared across examples.
 
@@ -243,11 +246,19 @@ Differentiating the two branches gives the derivative above, with both formulas 
 
 ## Using the objective {#using-the-objective}
 
+For the same two scalar errors $1$ and $3$, MSE is $(1+9)/2=5$ and MAE is $(1+3)/2=2$.
+The larger error contributes nine times the smaller error's squared penalty, but only three times its absolute penalty.
+This comparison concerns how each loss weights errors; the numerical values of two different losses are not themselves interchangeable quality scores.
+
+MSE has squared target units, while MAE has the target's units.
+The Huber threshold must be chosen relative to the scale of the error, so changing the coordinate normalization changes what a fixed threshold means.
+Low training loss alone does not establish good deployment performance or physical feasibility.
+
 [Gradient descent](../mathematics/optimization.qmd#gradient-descent) uses derivatives to update parameters.
 [Subgradients](../mathematics/optimization.qmd#subgradients) describe supporting slopes for convex losses at corners.
 A loss name alone does not identify which parameters receive its gradients; [knowledge insulation](../../literature-review/action/knowledge-insulation.qmd) makes this distinction explicit.
 
-## Connections {#connections}
+## Connections and boundaries {#connections}
 
 [Cross-entropy](../mathematics/entropy.qmd#cross-entropy) penalises predicted class probabilities, while [zero-one loss](../mathematics/entropy.qmd#zero-one-loss) counts incorrect class predictions.
 [The ELBO](../mathematics/elbo.qmd) combines reconstruction likelihood and a latent-distribution penalty.

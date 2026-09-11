@@ -1,12 +1,16 @@
 ---
 title: 'Representations, tokens, and embeddings'
 description: "How physical coordinates, text, and images become the numerical inputs to a model."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Machine Learning
 ---
 
+## Motivation {#motivation}
+
+An instruction, an image, and a joint angle must be encoded into objects that a numerical computation can use.
+A representation is that encoding of an object or quantity, with meaning supplied by the mapping that produced it.
 A model receives numerical representations of an instruction, an image, or a joint angle.
 To understand its inputs, separate the original quantity, the operation that represents it, and the objective used to learn from it.
 An ID, an embedding vector, and a physical coordinate have different roles even when a model processes them in one sequence.
@@ -17,7 +21,7 @@ An ID, an embedding vector, and a physical coordinate have different roles even 
 |---|---|---|
 | [Quantile normalization](../robotics/quantile-normalization.qmd) | Physical coordinate | Scaled continuous number |
 | [Text tokenization](representations.qmd#sentencepiece) | String | Discrete vocabulary IDs |
-| [Embedding lookup](representations.qmd#embeddings) | Vocabulary ID | Learned vector |
+| [Embedding lookup](representations.qmd#embeddings) | Vocabulary ID | [Learned vector]{.term key="learned-feature-vector"} |
 | [Visual encoding](representations.qmd#visual-tokens) | Image patches | Continuous feature vectors |
 
 An ID identifies an entry in a finite vocabulary; an embedding is a vector used in computation.
@@ -42,7 +46,7 @@ $$
 $$
 
 The ID is an index, so subtracting two IDs does not measure semantic distance.
-The embedding has learned coordinates, which are subsequently modified by the Transformer.
+The embedding has learned coordinates, which are subsequently modified by the [Transformer]{.term key="transformer"}.
 Tokenisation and contextual representation learning are distinct stages.
 
 ## State Bins Serialized as Text {#state-bins}
@@ -66,6 +70,14 @@ These are architectural statements from [PaliGemma, §3.1 and Figure 2](https://
 The word *token* describes a sequence element here.
 It does not imply discrete quantisation, next-token prediction, or one named object per element.
 
+## Example: an identifier is not a magnitude {#identifier-example}
+
+Suppose a vocabulary assigns ID $7$ to one piece and ID $12$ to another.
+The numerical difference $12-7=5$ describes their row positions in the vocabulary table, not a physical or semantic separation.
+If the vocabulary IDs and embedding rows are permuted together consistently, each piece still retrieves the same vector.
+By contrast, subtracting two joint-angle measurements in the same coordinate convention has a physical interpretation.
+The numerical data type alone cannot tell these roles apart.
+
 ## Follow the Learning Objective {#follow-the-learning-objective}
 
 [Contrastive image–text learning](representation-learning.qmd#clip-and-siglip) explains CLIP and SigLIP's paired-image-and-text objectives.
@@ -78,7 +90,11 @@ Its [pretraining discussion](representation-learning.qmd#representation-pretrain
 [FAST](../../literature-review/action/fast.qmd) converts continuous action trajectories into discrete targets.
 [π0.5](../../literature-review/action/pi05.qmd) shows why a physical state coordinate, its quantized bin, and the text IDs representing that bin must be distinguished.
 
-## Connections {#connections}
+## Connections and boundaries {#connections}
+
+An encoding can discard information, so recovering the original input is not guaranteed.
+Binning many continuous values into one state bin is an example: the bin identifies a range rather than the exact original coordinate.
+An embedding's dimension also does not identify how many words, physical quantities, or named objects it represents.
 
 [Quantile normalization](../robotics/quantile-normalization.qmd) develops continuous coordinate scaling and its inverse.
 [Attention](attention.qmd#projections) updates representations using permitted positions; [activation normalization](normalization.qmd#what-to-check-when-reading-a-model) transforms their internal statistics.

@@ -1,7 +1,7 @@
 ---
 title: "Flow matching and local velocity prediction"
 description: "Construct a probability path, regress its velocity, and understand why local averages can generate multiple modes."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Machine Learning
@@ -9,13 +9,16 @@ categories:
   - Robotics
 ---
 
-Flow matching learns a velocity field that transports a distribution of initial samples toward a data distribution.
+## Motivation
+
+Flow matching learns a [velocity field]{.term key="velocity-field"} that transports a distribution of initial samples toward a data distribution.
 For the action example, $A$ is a demonstrated chunk, $o$ is its observation, and $\epsilon$ is Gaussian noise of the same shape.
+The central question is why regressing local velocities can model several possible outcomes without predicting a single average final action.
 
 ## Choose a path and its velocity {#flow-matching}
 
 Use the convention $\tau=0$ for noise and $\tau=1$ for clean data.
-For an independently sampled demonstration and noise, a simple straight training path is
+For an independently sampled demonstration and noise, a simple straight training path within a [probability path]{.term key="probability-path"} is
 
 $$
   A^\tau=(1-\tau)\epsilon+\tau A.
@@ -33,6 +36,7 @@ $$
 
 The target $u$ comes from the known training pair.
 At inference, the target action is unavailable; the network predicts a velocity from the current sample and conditioning.
+A [numerical solver]{.term key="numerical-solver"} converts these local predictions into successive states of the generated sample.
 Starting at $A^0=\epsilon$, generation integrates
 
 $$
@@ -84,6 +88,10 @@ Two samples at different locations $x$ need not receive the same velocity.
 The conditional mean here describes the net movement of probability mass at one location and time.
 It does not require every initial sample to end at the mean demonstrated action.
 
+The distribution-level statement below assumes smooth densities and fields, valid continuity equations, and enough regularity to exchange differentiation and integration.
+The averaged velocity is defined where the marginal density is positive.
+These are conditions for the mathematical marginalisation argument; finite data, a trained network, and a numerical solver introduce additional approximation errors.
+
 ::: {.callout-note collapse="true" icon="false" title="Proof sketch: averaging probability flux preserves the marginal path"}
 
 Hold the observation fixed and consider smooth conditional densities $p_\tau(x\mid c)$ with velocities $u_\tau(x\mid c)$.
@@ -126,9 +134,24 @@ This construction allows multimodal distributions; it does not guarantee that ev
 Data imbalance, approximation error, optimisation, and inaccurate numerical integration can still remove or distort modes.
 Mode averaging by a point predictor and mode dropping by a generator are distinct failure mechanisms.
 
+## Example and interpretation
+
+For a chunk of joint-position commands, every coordinate of $A^\tau$ is a proposed position at a future robot step.
+The field describes how those proposed positions change as the internal generation variable $\tau$ advances.
+Several solver steps may refine the same future command before the robot executes anything.
+Thus a vector with the numerical shape of a joint-velocity command can still represent a different mathematical object: change per unit of generative time.
+
+If two initial noise draws follow different regions of the field, they may reach different action strategies under the same observation.
+This permits multimodality, but a badly fitted field can still lead both draws toward the same region.
+
 ## Connect the field to a sampler {#connections}
 
 A [generative sampler](../robotics/generative-sampling.qmd) integrates the predicted field from an initial noise draw.
 [Direct MSE regression](loss.qmd#conditional-mean) instead predicts one final answer for an observation.
 The [flow-matching paper review](../../literature-review/theory/flow-matching.qmd) derives Gaussian conditional paths and the equality of conditional and marginal objective gradients.
 [π0](../../literature-review/action/pi0.qmd) applies flow matching to observation-conditioned robot actions.
+
+## References
+
+[Lipman et al., Flow Matching for Generative Modeling, §3 and Appendix A](https://arxiv.org/abs/2210.02747) defines probability paths and the conditional-to-marginal field construction.
+[Black et al., π0](https://arxiv.org/abs/2410.24164) supplies an observation-conditioned action application.

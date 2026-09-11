@@ -1,12 +1,16 @@
 ---
 title: 'State-space models'
 description: "Continuous dynamics, discretisation, recurrence and convolution, polynomial memory, and selective sequence layers."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Machine Learning
 ---
 
+## Motivation {#motivation}
+
+A sequence model can carry information forward in a state instead of revisiting every earlier input at each step.
+A state-space model specifies how that state evolves with inputs and how outputs are read from it.
 A state summarises the past information that a model uses to update its future predictions.
 The state need not be the smallest possible representation or a directly measurable physical quantity.
 This note follows the construction from continuous dynamics to a discrete sequence layer, then explains how the state can represent history.
@@ -26,7 +30,7 @@ $$
 The matrices have compatible shapes: $A$ is $N\times N$, $B$ is $N\times m$, $C$ is $p\times N$, and $D$ is $p\times m$.
 The feedthrough term $Du$ bypasses the state and can act like a learned skip connection.
 If these matrices are constant, the dynamics are linear and time-invariant.
-The zero-initial-state input–output map obeys superposition and commutes with time shifts; a fixed nonzero initial state adds a homogeneous response.
+The zero-initial-state input–output map obeys superposition and commutes with time shifts; a fixed nonzero initial state adds a [homogeneous response]{.term key="homogeneous-response"}.
 See [Mamba, Section 2](https://arxiv.org/abs/2312.00752) for this construction as a sequence layer.
 
 ## Discretisation and the meaning of a step {#discretisation}
@@ -41,6 +45,7 @@ $$
   \bar B=\left(\int_0^\Delta e^{sA}\,ds\right)B.
 $$
 
+Here $e^{\Delta A}$ is the [matrix exponential]{.term key="matrix-exponential"}, rather than applying a scalar exponential separately to each entry.
 The integral formula remains valid when $A$ is singular.
 For invertible $A$, it becomes $\bar B=A^{-1}(e^{\Delta A}-I)B$.
 In a sequence model, $\Delta$ can be a learned parameter; it is not automatically a physical sensor's sampling interval.
@@ -123,6 +128,14 @@ Convolution becomes multiplication after a compatible Fourier or $z$ transform.
 The relation uses time-invariance; input-dependent state transitions generally require another computation.
 
 :::
+
+## Example: a scalar memory {#scalar-memory}
+
+Take $h_k=\tfrac12h_{k-1}+u_k$, $y_k=h_k$, and $h_{-1}=0$.
+For an input equal to $1$ at $k=0$ and $0$ afterward, the outputs are $1,\tfrac12,\tfrac14,\ldots$.
+The state retains a decaying contribution from the earlier input, and the same sequence gives the layer's convolution kernel.
+This example exposes the memory timescale directly: changing the multiplier changes how rapidly a past contribution shrinks.
+It also shows why a state value need not be a physical measurement; here it is an accumulated summary chosen by the recurrence.
 
 ## Polynomial projection and HiPPO {#hippo}
 
@@ -227,7 +240,11 @@ At fixed model width and state size, recurrent SSM inference stores a state whos
 For standard attention with a KV cache, each new token reads a growing set of stored keys and values.
 Whole-sequence attention cost and cost per generated token are different quantities; hardware, model dimensions, and implementation must be specified for a numerical speed comparison.
 
-## Connections {#connections}
+## Connections and boundaries {#connections}
+
+The recurrence–convolution equivalence above assumes fixed coefficients and the stated initial condition.
+State-space notation alone does not establish linearity, time-invariance, stability, or an exact representation of the full history.
+Those properties depend on the update rule, parameter constraints, and the information retained in the state.
 
 [Matrix structure and dynamics](../mathematics/matrix-dynamics.qmd) explains normality, long-time stability, transient amplification, and low-rank inverse corrections.
 [Loss](loss.qmd#loss-and-risk) explains the squared-error objective used in polynomial approximation.

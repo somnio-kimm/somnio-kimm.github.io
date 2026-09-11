@@ -1,19 +1,24 @@
 ---
 title: 'Representation learning and adaptation'
 description: "Learned features, task adaptation, contrastive image–text objectives, and downstream policy training."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Machine Learning
 ---
 
+## Motivation {#motivation}
+
+The same image can support classification, retrieval, or a robot policy, but each use may need different information from it.
 A representation is an internal description used by a model or a later task.
 To interpret a representation-learning claim, identify what is optimised, what is frozen, and what information the representation can access.
 CLIP and SigLIP provide concrete examples of learning encoders from paired images and text.
 
 ## Learning representations and adapting to tasks {#representations}
 
-Representation learning produces features useful for some objective or later use.
+Representation learning is a learning process that adjusts a feature-producing map, such as an [encoder]{.term key="encoder"}, using a specified objective.
+The map's outputs are the representations; the map's parameters and the procedure that learns them are different objects.
+Whether the learned features are useful is evaluated relative to an objective or later use.
 Task-specific learning optimises performance on a particular prediction or control problem.
 Both can occur in the same end-to-end model.
 Task learning is not a synonym for in-context learning or zero-shot generalisation.
@@ -25,7 +30,7 @@ Task learning is not a synonym for in-context learning or zero-shot generalisati
 | Zero-shot evaluation | Evaluate the stated task without task-specific training examples or parameter updates, under the paper's protocol. |
 | In-context learning | Provide examples or instructions in the input context, ordinarily without updating model parameters. |
 
-An end-to-end training objective connects inputs to task outputs through a shared optimisation process.
+An end-to-end [training objective]{.term key="training-objective"} connects inputs to task outputs through a shared optimisation process.
 A modular system splits responsibilities into components; some modular systems are still trained jointly.
 Late fusion processes modalities separately before combining representations or scores.
 These properties should be established from the actual computation and gradient paths.
@@ -48,7 +53,7 @@ See [attention](attention.qmd#projections), [representations](representations.qm
 
 Both methods train image and text encoders using paired examples.
 For a batch of $B$ pairs, let $u_i$ and $v_j$ be unit-normalised image and text embeddings.
-The dot product $u_i^\top v_j$ measures their cosine similarity.
+The dot product $u_i^\top v_j$ measures their [cosine similarity]{.term key="cosine-similarity"}.
 The original pairing provides positive labels when $i=j$; other pairings provide negatives, even though some can also be semantically compatible.
 
 CLIP uses scores $s_{ij}=t\,u_i^\top v_j$, with learned positive scale $t$.
@@ -108,6 +113,14 @@ The [binary and categorical cross-entropy note](../mathematics/entropy.qmd#cross
 
 :::
 
+## Example: what a linear probe tests {#linear-probe-example}
+
+Suppose an image encoder produces a feature vector and a linear classifier predicts an object category from that vector.
+With a linear probe, only the classifier's parameters are fitted; the encoder is held fixed.
+The experiment asks whether a linear readout can use the fixed representation for that labeled task.
+Fine-tuning the encoder asks a different question because the representation itself can change in response to the task labels.
+A successful probe therefore does not establish that the encoder will support every task or every possible readout equally well.
+
 ## Representation pretraining and policy training {#representation-pretraining-and-policy-training}
 
 Using a SigLIP-initialised encoder does not mean a robot policy trains with SigLIP's image-text matching loss.
@@ -118,7 +131,11 @@ In the [$\pi_{0.5}$ paper, §IV-B](https://arxiv.org/abs/2504.16054), discrete a
 [Generative action models](generative-models.qmd#questions) explains noisy continuous inputs and velocity targets.
 The [$\pi_{0.5}$](../../literature-review/action/pi05.qmd) and [knowledge insulation](../../literature-review/action/knowledge-insulation.qmd) notes connect these representations to the branches that receive their gradients.
 
-## Connections {#connections}
+## Connections and boundaries {#connections}
+
+A representation-learning objective specifies which distinctions training rewards, not a guarantee that every useful distinction will be retained.
+When comparing transfer results, specify the downstream data, readout, and parameters allowed to change.
+The same encoder can give different results under a frozen probe, full fine-tuning, or a different input distribution.
 
 [Input representations](representations.qmd) distinguishes token identifiers, embeddings, image patches, and numerical scaling.
 [Cross-entropy](../mathematics/entropy.qmd#cross-entropy) derives the binary and categorical loss forms used above.

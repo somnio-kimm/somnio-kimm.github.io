@@ -1,36 +1,58 @@
 ---
 title: "Distribution shift and confounding"
 description: "Distinguish changed distributions, policy-induced observation shift, and causal explanations for associations."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Machine Learning
   - Learning Regimes
 ---
 
+## Motivation {#motivation}
+
+A model can make accurate predictions on held-out training-style examples and still encounter different cases after deployment.
 Training and deployment may expose a model to different distributions.
 Identifying the changed distribution and the assumed causal relationships prevents several different issues from being called the same thing.
 
 ## Which distribution changes? {#distribution-shift}
 
-Distribution shift means that training and deployment distributions differ.
+Distribution shift is a relation between two probability distributions: the training distribution and the deployment distribution differ.
+For supervised prediction, the relevant object is often the joint distribution of input $x$ and target $y$.
+A finite dataset provides observations from a distribution; a difference between two finite samples alone does not prove that their underlying distributions differ.
+
 Covariate shift is the more specific assumption that $p_{\mathrm{train}}(x)\ne p_{\mathrm{test}}(x)$ while $p(y\mid x)$ stays the same.
+Here $p(x)$ is the input [marginal distribution]{.term key="marginal-distribution"}, whereas $p(y\mid x)$ is the target's [conditional distribution]{.term key="conditional-distribution"}.
 A change in the full joint distribution alone does not establish that assumption.
 
-In behavioural cloning, the learner's actions affect which observations it later visits.
+For example, suppose training contains equal numbers of bright and dark scenes, while deployment contains mostly dark scenes.
+If the target distribution for each given scene stays unchanged, this is a covariate-shift example.
+If a changed labeling rule also changes the target for the same input, the stated covariate-shift assumption no longer holds.
+These are hypotheses about the data-generating distributions, not conclusions established merely by observing a performance drop.
+
+## Policy-induced observation shift {#policy-induced-shift}
+
+In [behavioural cloning]{.term key="behavioural-cloning"}, the learner's actions affect which observations it later visits.
 Errors can therefore move the learner away from the expert's training distribution.
 [DAgger](https://arxiv.org/abs/1011.0686) addresses this by obtaining expert supervision on states induced by the learner.
+
+## Confounding is a causal claim {#confounding}
 
 A confounder, in a causal analysis, influences both a putative cause and an outcome and can create a misleading association between them.
 For example, suppose a scene variable determines both the background colour and which task a demonstrator is assigned.
 That scene variable can confound the association between background colour and demonstrated action; the colour itself is not automatically the confounder.
 Correlation alone does not establish this causal structure.
 
+## Internal activation changes {#internal-covariate-shift}
+
 “Internal covariate shift” names the explanation proposed in the original [batch normalisation paper](https://arxiv.org/abs/1502.03167).
 Batch normalisation standardises activations using batch statistics and then applies a learned scale and shift, so final activations need not have mean zero or variance one.
 [Santurkar et al.](https://arxiv.org/abs/1805.11604) provide evidence that smoother optimisation, rather than reduced internal distribution shift alone, is important to its effectiveness.
 
-## Apply the distinction {#connections}
+## Applications, connections, and boundaries {#connections}
+
+When performance changes, first state which inputs and targets are being compared and how each dataset was collected.
+Then separate evidence of changed distributions from the stronger claim that a particular causal mechanism explains the failure.
+Distribution shift can occur without the background-variable confounding described above, and such confounding can persist even when the training and deployment distributions are the same.
 
 [Behavioural cloning](../robotics/policies.qmd#policies) learns from demonstrated observations and actions, while the deployed policy helps determine its future observations.
 [Action horizons and feedback](../robotics/action-horizons.qmd) describe when the controller can respond to those observations.

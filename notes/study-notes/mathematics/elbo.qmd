@@ -1,20 +1,24 @@
 ---
 title: "Evidence lower bound"
 description: "The reconstruction-plus-KL objective and the separate posterior KL that forms its likelihood gap."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Mathematics
   - Generative Models
 ---
 
-The evidence lower bound (ELBO) is a tractable objective for a latent-variable model whose marginal likelihood is difficult to compute.
+The evidence lower bound (ELBO) supplies an alternative objective when a [latent-variable]{.term key="latent-variable"} model has a marginal likelihood that is difficult to compute.
+For fixed observed data, it is a scalar function of the model and variational parameters that bounds the log evidence from below.
+It is a bound on a log probability or density, not a probability distribution or a reconstruction error alone.
 For the conditional version, let $A$ be an observed example, $o$ fixed context, and $z$ a latent variable.
-The model has prior $p(z\mid o)$, decoder $p_\theta(A\mid o,z)$, and approximate posterior $q_\phi(z\mid A,o)$.
+The model has prior $p(z\mid o)$, decoder $p_\theta(A\mid o,z)$, and [approximate posterior]{.term key="variational-distribution"} $q_\phi(z\mid A,o)$.
 
 ## Reconstruction and prior KL {#objective}
 
 For compactness, write $q_A=q_\phi(z\mid A,o)$ and $p_o=p(z\mid o)$.
+Assume the model evidence is positive, all distributions are normalised, and the displayed expectations and KL terms are well defined.
+For a finite objective, $q_A$ must place no probability mass where the prior or the observed example's likelihood is zero, apart from sets of probability zero.
 The negative conditional evidence lower bound has two terms:
 
 $$
@@ -37,7 +41,7 @@ $$
   B=-J\leq\log p_\theta(A\mid o).
 $$
 
-The right side is the conditional log evidence after integrating out $z$.
+The right side is the conditional log evidence after [marginalising]{.term key="marginalisation"} $z$.
 Maximising $B$ is equivalent to minimising $J$.
 
 ## Deriving the bound {#deriving-the-bound}
@@ -83,6 +87,18 @@ $$
 For fixed $\theta$, maximising the ELBO over $\phi$ minimises this posterior approximation gap.
 When $\theta$ changes too, both the evidence and the true posterior change.
 An increase in the ELBO alone therefore does not prove that this KL gap decreased.
+
+## Reading the objective during training {#example}
+
+Suppose two parameter settings give reconstruction and prior-KL terms $(R,K)=(8,1)$ and $(7,3)$ for the same example.
+The second setting improves reconstruction, but $J$ increases from $9$ to $10$, so its ELBO decreases from $-9$ to $-10$.
+A reconstruction improvement alone therefore need not improve the training objective.
+The numerical comparison uses the unweighted objective $J=R+K$; changing the KL weight changes that tradeoff.
+
+Likewise, the prior KL used in $J$ and the posterior KL measuring the bound's gap compare different pairs of distributions.
+A small prior KL does not establish that the variational posterior is close to the true posterior.
+If the variational distribution equals the true posterior, the posterior gap is zero and the ELBO equals the log evidence.
+Computational usefulness additionally depends on being able to evaluate or estimate the objective and its gradients, as explained by [Monte Carlo estimation](expectations.qmd#latent-expectation) and [reparameterisation](reparameterization.qmd).
 
 ## Connections {#connections}
 

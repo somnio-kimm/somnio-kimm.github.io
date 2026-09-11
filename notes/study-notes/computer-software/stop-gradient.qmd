@@ -1,7 +1,7 @@
 ---
 title: "Stop-gradient"
 description: "An unchanged forward value with a blocked derivative path, including detached context and the chain rule."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Computer Software
@@ -9,11 +9,13 @@ categories:
   - Transformers
 ---
 
-Stop-gradient is an automatic-differentiation operation that preserves a value in the forward computation and assigns zero derivative through that edge during backpropagation.
+## Motivation
+
+Stop-gradient is an [automatic-differentiation]{.term key="automatic-differentiation"} operation that preserves a value in the forward computation and assigns zero derivative through that edge during backpropagation.
 It lets one component use another component's output without this particular path training the producer.
 For the attention example below, first read [keys and values](../machine-learning/attention.qmd#projections) and [attention masks](../machine-learning/attention.qmd#masks-and-gradients).
 
-## Forward Value and Backward Rule {#stop-gradient}
+## Forward value and backward rule {#stop-gradient}
 
 Stop-gradient controls derivatives during backpropagation.
 For the operation $\operatorname{sg}$,
@@ -27,6 +29,8 @@ $$
 
 The forward numerical value remains available.
 Its producer receives no gradient through that particular edge.
+This is a custom differentiation rule in a computational graph, not the ordinary derivative of the mathematical identity function, whose derivative is one.
+[JAX documentation](https://docs.jax.dev/en/latest/_autosummary/jax.lax.stop_gradient.html) specifies the unchanged value and the blocked automatic-differentiation path.
 
 For example, an action stream may use $\operatorname{sg}(K_{\mathrm{VLM}})$ and $\operatorname{sg}(V_{\mathrm{VLM}})$ as context.
 Its predictions can still depend on the pretrained representations, while the action loss cannot update their producer through those detached paths.
@@ -42,7 +46,7 @@ $$
 $$
 
 Here, $x$ is another input to the action branch and $L$ is a loss on $\hat a$.
-Along this detached path, the chain rule includes the factor
+Along this detached path, the [chain rule]{.term key="chain-rule"} includes the factor
 
 $$
   \frac{\partial\operatorname{sg}(h)}{\partial h}=0.
@@ -54,11 +58,26 @@ If $\phi$ also reaches the loss through another path, that separate contribution
 
 :::
 
+## Example and boundaries
+
+Consider $y=w\,\operatorname{sg}(x)$.
+Its forward value is $wx$, while automatic differentiation returns $\partial y/\partial x=0$ and $\partial y/\partial w=x$ along the displayed graph.
+The consumer can therefore learn how to use a value whose producer receives no gradient through that use.
+Changing $x$ between forward evaluations can still change $y$; a blocked derivative path is not a claim of numerical independence.
+
+The conclusion concerns the specified graph path.
+Other paths, other losses, or an explicit parameter update can still change the producer.
+
 A mask that prevents the prefix from reading actions does not, by itself, stop an action loss from backpropagating through the prefix keys and values that actions read.
 Forward direction and gradient direction must be traced separately.
 
-## Related Concepts
+## Connections {#related-concepts}
 
 [Knowledge insulation](../../literature-review/action/knowledge-insulation.qmd) uses detached context to separate action-expert learning from selected backbone gradient paths.
 [DINO](../../literature-review/vision/dino.qmd) stops gradients through the teacher target while updating teacher parameters by a moving average.
 The [loss overview](../machine-learning/loss.qmd#loss-and-risk) distinguishes a per-example penalty from the objective whose gradients update parameters.
+
+## References
+
+[JAX, stop_gradient](https://docs.jax.dev/en/latest/_autosummary/jax.lax.stop_gradient.html) gives the operation's forward and differentiation semantics.
+The [knowledge-insulation review](../../literature-review/action/knowledge-insulation.qmd) traces detached context in a vision-language-action model.

@@ -1,7 +1,7 @@
 ---
 title: "Quantile normalization of physical coordinates"
 description: "Percentile-based affine scaling, inversion, out-of-range values, and the resulting weighting of errors."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 aliases:
   - /notes/study-notes/machine-learning/quantile-normalization.html
@@ -11,7 +11,9 @@ categories:
   - Representations
 ---
 
-Quantile normalization here means an affine rescaling based on fixed percentiles of the training data.
+## Motivation
+
+Quantile normalization here means an [affine rescaling]{.term key="affine-map"} based on fixed [percentiles]{.term key="quantile"} of the training data.
 It changes the numerical coordinates used by a model, such as the coordinates of a robot action.
 Start with the [representation overview](../machine-learning/representations.qmd); compare [activation normalization](../machine-learning/normalization.qmd#what-to-check-when-reading-a-model) for transformations inside a network.
 
@@ -26,7 +28,7 @@ $$
   \tilde x_j=2\frac{x_j-l_j}{r_j}-1.
 $$
 
-The [OpenPI implementation](https://github.com/Physical-Intelligence/openpi/blob/main/src/openpi/transforms.py) uses $\epsilon=10^{-6}$ and applies no clipping in this operation.
+The [OpenPI implementation](https://github.com/Physical-Intelligence/openpi/blob/main/src/openpi/transforms.py) uses $\epsilon=10^{-6}$ and applies no [clipping]{.term key="clipping"} in this operation.
 The lower reference maps exactly to $-1$; the upper maps approximately to $1$ because of $\epsilon$.
 Values beyond the reference interval can remain outside $[-1,1]$.
 Percentiles reduce the influence of extreme samples on the chosen scale; they do not delete those samples.
@@ -39,6 +41,9 @@ That nonlinear operation changes relative spacings between values.
 Different robot coordinates need separate statistics because their units and operating ranges differ.
 Scaling also changes the relative weight assigned by [squared loss](../machine-learning/loss.qmd#mse): a fixed physical error receives a larger normalised penalty when its reference range is smaller.
 Comparable numerical ranges do not establish comparable physical importance.
+
+The unclipped map is invertible for $r_j>0$, and squared error in coordinate $j$ is multiplied by $4/r_j^2$ relative to physical-coordinate squared error.
+This weight is a consequence of the coordinate transform, not a separately learned preference for that joint.
 
 ::: {.callout-note collapse="true" icon="false" title="Derivation: inversion and the weighting of errors"}
 
@@ -66,13 +71,24 @@ Clipping is many-to-one; the unclipped affine map is invertible.
 
 :::
 
+## Example and deployment boundaries
+
+Ignoring the tiny stabiliser, reference values $l=-2$ and $u=6$ send the midpoint $x=2$ to $0$ and the out-of-range value $x=10$ to $2$.
+This makes both the changed meaning of zero and the absence of automatic clipping visible.
+The inverse returns the original value only if later processing has preserved the transformed coordinate.
+
 Deployment must use the statistics and coordinate conventions associated with training.
 Re-estimating them from the current scene changes what the same model output means physically.
 For example, normalised zero denotes the midpoint of the chosen reference interval, not necessarily zero joint angle or zero velocity.
 Inverting normalisation also does not undo unrelated transformations such as converting absolute targets into displacements; each transformation needs its own inverse.
 
-## Related Concepts
+## Connections {#related-concepts}
 
 [Tokenization](../machine-learning/representations.qmd#state-bins) explains how a scaled state coordinate can subsequently become a discrete bin and then text IDs.
 The [loss overview](../machine-learning/loss.qmd#loss-and-risk) explains why the numerical scale of residuals matters to an optimization objective.
 [FAST](../../literature-review/action/fast.qmd) uses normalized action coordinates before its temporal transform and tokenization.
+
+## References
+
+[Pertsch et al., FAST, §V-B](https://arxiv.org/abs/2501.09747) describes percentile-based action normalisation in its tokenizer.
+[OpenPI transforms](https://github.com/Physical-Intelligence/openpi/blob/main/src/openpi/transforms.py) gives the concrete normalisation and inverse operations; the stabiliser and clipping behaviour are implementation-specific details.

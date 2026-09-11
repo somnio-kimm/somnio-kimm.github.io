@@ -1,13 +1,16 @@
 ---
 title: 'Generative models'
 description: "Model families, output targets, autoregressive factorisation, teacher forcing, and action-policy applications."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Machine Learning
 ---
 
-A model family describes part of a system, while its architecture, loss, and sampler describe other choices.
+## Motivation
+
+A generative model specifies a probability model or sampling procedure for possible data, optionally conditioned on supplied information.
+A model family describes part of a system, while its architecture, loss, and [sampler]{.term key="sampler"} describe other choices.
 Identifying each choice makes apparently conflicting descriptions compatible.
 For robot policies, several actions can fit the same observation: a robot may reach around an obstacle from either side, while an average path passes through it.
 Identify the target, model inputs, sampler, and execution procedure before comparing such policies.
@@ -15,7 +18,7 @@ Identify the target, model inputs, sampler, and execution procedure before compa
 ## Task, architecture, loss, and generation order {#taxonomy}
 
 Regression is the task of predicting numerical quantities.
-A Transformer is an architecture, MSE is an objective component, and autoregression is a factorisation of a sequence distribution.
+A Transformer is an architecture, MSE is an objective component, and [autoregression]{.term key="autoregressive-model"} is a factorisation of a sequence distribution.
 These describe different choices and can occur in the same system.
 
 | Construction | What the network predicts |
@@ -58,7 +61,7 @@ $$
   =\prod_{j=1}^{L}p_\theta(c_j\mid c_{<j},o).
 $$
 
-During teacher-forced training, a Transformer decoder can evaluate positions in parallel using shifted target inputs and a causal mask.
+During [teacher-forced training]{.term key="teacher-forcing"}, a Transformer decoder can evaluate positions in parallel using shifted target inputs and a causal mask.
 The shift aligns each prediction with the next target, and the mask restricts access to the allowed prefix.
 This parallel evaluation is a property of the architecture; a recurrent autoregressive model still has sequential state dependencies.
 During ordinary generation, each chosen token becomes part of the next prefix.
@@ -78,6 +81,17 @@ A categorical next-token probability vector has continuous numerical entries, wh
 The output variable and the numbers used to parameterise its distribution have different types.
 [FAST](../../literature-review/action/fast.qmd) applies discrete tokenisation to continuous action chunks.
 [Generative models](generative-models.qmd) compares autoregression with latent-variable, diffusion, and flow constructions.
+
+## Example and boundaries
+
+For a two-token output, the joint model is $p(c_1,c_2\mid o)=p(c_1\mid o)p(c_2\mid c_1,o)$.
+Training can evaluate the second factor using the demonstrated first token; generation evaluates it using the first token actually selected by the sampler.
+The two procedures use the same conditional model but can supply different prefixes.
+This makes the source of each input part of the explanation, alongside the formula itself.
+
+Each conditional distribution must be normalised on its output space, and variable-length generation also needs a stopping convention.
+A sampling procedure, a tractable likelihood, and a successful fit to the data are separate properties.
+Neither a generative label nor the ability to draw different outputs establishes that a model reproduces the desired distribution or respects task constraints.
 
 ## What needs explaining? {#questions}
 
@@ -105,3 +119,8 @@ The output variable and the numbers used to parameterise its distribution have d
 [Generative sampling](../robotics/generative-sampling.qmd) explains randomness and deterministic computation.
 [Energy-based models](energy-based-models.qmd) connects relative density, scores, and Langevin sampling.
 [Action horizons](../robotics/action-horizons.qmd) explains when the generated commands are executed.
+
+## References
+
+[Vaswani et al., Attention Is All You Need, §§3.1–3.2](https://arxiv.org/abs/1706.03762) describes shifted decoder inputs and causal masking.
+The linked [VAE](../../literature-review/theory/vae.qmd), [DDPM](../../literature-review/theory/ddpm.qmd), and [flow-matching](../../literature-review/theory/flow-matching.qmd) reviews provide the respective model constructions and primary sources.

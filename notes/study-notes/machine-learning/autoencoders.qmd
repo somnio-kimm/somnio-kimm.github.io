@@ -1,14 +1,17 @@
 ---
 title: 'Autoencoders'
 description: "Ordinary autoencoders, VAEs, conditional VAEs, and the roles of reconstruction, latent sampling, and deployment."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Machine Learning
 ---
 
+## Motivation
+
 Autoencoders learn a representation from which an example can be reconstructed.
-Variational autoencoders (VAEs) add a latent-variable probability model and approximate-posterior inference; conditional VAEs also supply context to the generative model.
+Variational autoencoders (VAEs) add a [latent-variable]{.term key="latent-variable"} probability model and approximate-posterior inference; conditional VAEs also supply context to the generative model.
+The central question is how learning to reconstruct examples can support useful representations and, with an additional probability model, generation.
 Let $A$ denote an observed example, $z$ an internal latent vector, and $\hat A$ a reconstructed prediction with the same output shape as $A$.
 
 ## Ordinary autoencoders {#autoencoders}
@@ -25,7 +28,7 @@ This alone does not specify a probability distribution from which useful new cod
 
 ## Variational autoencoders {#vae}
 
-A VAE specifies a prior $p(z)$, a decoder distribution $p_\theta(A\mid z)$, and an approximate posterior $q_\phi(z\mid A)$.
+A VAE specifies a [prior]{.term key="prior"} $p(z)$, a decoder distribution $p_\theta(A\mid z)$, and an approximate [posterior]{.term key="posterior"} $q_\phi(z\mid A)$.
 The encoder outputs parameters of a distribution over codes, rather than only one code.
 The decoder describes a distribution over possible examples given a code.
 These are the recognition and generative models in [Kingma and Welling, §§2.1–2.2](https://arxiv.org/pdf/1312.6114#page=3).
@@ -127,6 +130,16 @@ Choosing $\beta\ne1$ changes the standard ELBO weighting and should be understoo
 
 [MAE](loss.qmd#mae) and [MSE](loss.qmd#mse) compare absolute and squared error; [maximum likelihood](../mathematics/likelihood-and-estimation.qmd#classification) gives the discrete-label likelihood construction.
 
+## Assumptions and boundaries
+
+Reconstruction measures agreement under a chosen observation model or loss; it does not by itself establish that a code represents human-interpretable causes.
+For the Gaussian reparameterisation above, the encoder must supply a positive scale and the operations on the sampled code must admit the required pathwise derivatives.
+The ordinary ELBO uses the stated prior and likelihood; changing the likelihood, the KL weight, or the deployment rule changes a different part of the construction.
+
+For a concrete limiting case, an encoder and decoder with enough capacity can memorise a finite training set without learning a useful distribution for sampling new codes.
+For a CVAE, a fixed latent code still allows different outputs when the observation changes, but this one decoding rule does not explore the full latent distribution.
+These examples separate reconstruction quality, generative modelling, and deployment behaviour.
+
 ## Connections {#connections}
 
 [The ELBO](../mathematics/elbo.qmd) derives the reconstruction-plus-KL objective and distinguishes the prior penalty from the posterior approximation gap.
@@ -134,3 +147,8 @@ Choosing $\beta\ne1$ changes the standard ELBO weighting and should be understoo
 [Gaussian KL](../mathematics/entropy.qmd#gaussian-kl) gives the analytic prior penalty.
 The [VAE paper review](../../literature-review/theory/vae.qmd) places the construction in variational inference, and [normalizing flows](../../literature-review/theory/normalizing-flows.qmd) expands the encoder beyond a diagonal Gaussian.
 The [ACT review](../../literature-review/action/act.qmd) distinguishes its CVAE encoder from the transformer encoder inside the policy.
+
+## References
+
+[Kingma and Welling, Auto-Encoding Variational Bayes, §§2–3](https://arxiv.org/abs/1312.6114) defines the latent-variable model, variational objective, and reparameterised estimator.
+[Zhao et al., Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware, §IV](https://arxiv.org/abs/2304.13705) supplies the conditional action example and its deployment convention.

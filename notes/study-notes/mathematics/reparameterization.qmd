@@ -1,7 +1,7 @@
 ---
 title: "Reparameterisation"
 description: "Differentiable Gaussian sampling, log variance, and a Monte Carlo VAE training fragment."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Mathematics
@@ -10,10 +10,12 @@ categories:
 
 Reparameterisation expresses a parameter-dependent random sample as a deterministic function of the parameters and separate base noise.
 This lets appropriate sampled objectives carry pathwise gradients.
+The difficulty it addresses is that changing a parameter changes a sampling distribution, while ordinary automatic differentiation needs a concrete computational path.
+The transformed sample keeps the intended distribution; reparameterisation changes how that sample is constructed and differentiated.
 
 ## A diagonal Gaussian sample {#gaussian-sample}
 
-For a diagonal Gaussian encoder, the network outputs a mean vector $\mu$ and positive standard deviations $\sigma$.
+For a diagonal Gaussian encoder, the network outputs a mean vector $\mu$ and positive [standard deviations]{.term key="standard-deviation"} $\sigma$.
 A latent sample can be written as
 
 $$
@@ -27,7 +29,7 @@ This reparameterisation lets reconstruction gradients update the encoder as well
 
 ## Log variance and implementation {#implementation}
 
-An encoder often outputs $\ell_j=\log\sigma_j^2$, an unconstrained log variance.
+An encoder often outputs $\ell_j=\log\sigma_j^2$, an unconstrained log [variance]{.term key="variance"}.
 The standard deviation used for sampling is then $\sigma_j=\exp(\ell_j/2)$, while the variance in the KL is $\exp(\ell_j)$.
 Confusing these two quantities changes both the sampled distribution and the objective.
 
@@ -64,8 +66,19 @@ $$
   [\nabla_\phi h(g_\phi(\epsilon))].
 $$
 
-The base noise distribution does not depend on $\phi$, so automatic differentiation follows the deterministic map $g_\phi$ for each sampled noise vector.
+The base noise distribution does not depend on $\phi$, so [automatic differentiation]{.term key="automatic-differentiation"} follows the deterministic map $g_\phi$ for each sampled noise vector.
 Other gradient estimators exist; the VAE contribution is a useful differentiable estimator for suitable continuous latent variables.
+
+## Holding the noise fixed while differentiating {#example}
+
+In one dimension, let $z=\mu+\sigma\epsilon$ and $h(z)=z^2$, with $\epsilon\sim\mathcal N(0,1)$ independent of the parameters.
+For one sampled $\epsilon$, the pathwise derivative with respect to $\mu$ is $2z$ because $\partial z/\partial\mu=1$.
+Taking the expectation of this derivative gives $2\mu$, which agrees with differentiating $\mathbb E[z^2]=\mu^2+\sigma^2$ directly.
+An individual gradient estimate still depends on the sampled noise even though its expectation equals the target derivative.
+
+The method requires a suitable differentiable sampling map and conditions allowing the derivative and expectation to be exchanged.
+It does not mean that every sampling operation has useful ordinary derivatives: directly selecting a discrete category generally produces a piecewise-constant choice rather than the smooth Gaussian map above.
+The diagonal Gaussian construction also assumes independent base-noise coordinates and represents a diagonal covariance; correlated Gaussian samples require a different transformation.
 
 ## Connections {#connections}
 

@@ -1,7 +1,7 @@
 ---
 title: "Action horizons and feedback"
 description: "Distinguish observed history, predicted windows, executed commands, and transitions between chunks."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 aliases:
   - /notes/study-notes/physics/action-horizons.html
@@ -10,12 +10,14 @@ categories:
   - Robotics
 ---
 
-An action chunk contains several proposed commands, but a controller need not execute the entire chunk before obtaining a new prediction.
+## Motivation
+
+An [action chunk]{.term key="action-chunk"} contains several proposed commands, but a controller need not execute the entire chunk before obtaining a new prediction.
 Prediction, execution, and feedback therefore have separate time scales.
 
 ## Horizon and feedback definitions {#horizons}
 
-An observation horizon counts past observations provided to the policy.
+An observation horizon counts past observations provided to the [policy]{.term key="policy"}.
 A prediction horizon counts action positions in a predicted window; depending on its alignment, that window can include positions associated with observation history.
 An execution horizon counts commands applied before switching to an updated plan.
 In an asynchronous controller, the next result may be computed before the controller adopts it.
@@ -23,10 +25,20 @@ A training horizon is the segment length used in training, and an effective hori
 These need not be the same number.
 
 An open-loop segment executes a precomputed sequence without using new task observations to replan that segment.
-A closed-loop policy updates decisions from feedback.
+A closed-loop policy updates decisions from [feedback]{.term key="feedback"}.
 An action-chunk policy can be closed-loop across chunks while executing several commands open-loop within each chunk.
 Its low-level motor controller may still use fast feedback throughout.
 See [ACT](../../literature-review/action/act.qmd), [Diffusion Policy](../../literature-review/action/diffusion-policy.qmd), and [IRTC](../../literature-review/action/irtc.qmd#execution-timeline).
+
+## Example and units
+
+Consider a policy that reads the last two observations, predicts ten future commands, and executes only the first three before adopting an updated chunk.
+Its observation, prediction, and execution horizons are two, ten, and three respectively, provided the predicted window begins at the next executable command.
+The remaining seven predictions provide a future plan but need not all be executed.
+
+These horizons are counts, not durations, until the observation or command sampling interval is specified.
+At a fixed command interval $\Delta t$, executing three commands occupies $3\Delta t$ under this convention.
+With inference delay, identify which commands are already committed and align a newly returned chunk with the robot's current execution time.
 
 ## From a valid chunk to continuous execution {#execution}
 
@@ -42,3 +54,13 @@ Diffusion indices and flow time order internal computations that generate a pred
 An intermediate denoising state is not a command currently being executed.
 [Generative sampling](generative-sampling.qmd#objects) defines those numerical objects.
 For model-specific data flow, continue to [Diffusion Policy](../../literature-review/action/diffusion-policy.qmd), [π0](../../literature-review/action/pi0.qmd), or [π0.5](../../literature-review/action/pi05.qmd).
+
+## Boundaries and references
+
+“Closed-loop” must identify the level of feedback: fast motor feedback can coexist with a temporarily open-loop task plan.
+Increasing the prediction horizon does not by itself increase replanning frequency or remove inference latency.
+The definition and alignment of each horizon must be read from the particular policy's timeline.
+
+[ACT, §IV](https://arxiv.org/abs/2304.13705) gives action chunking and temporal ensembling.
+[Diffusion Policy](https://arxiv.org/abs/2303.04137) distinguishes observation, prediction, and execution horizons.
+The [IRTC review](../../literature-review/action/irtc.qmd#execution-timeline) traces the timing of asynchronous replacement chunks.

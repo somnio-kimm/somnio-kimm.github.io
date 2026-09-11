@@ -1,7 +1,7 @@
 ---
 title: "Diffusion and noise prediction"
 description: "Explain the noisy input, sampled training target, conditional mean, and iterative generation."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Machine Learning
@@ -9,8 +9,11 @@ categories:
   - Robotics
 ---
 
+## Motivation
+
 Noise-prediction diffusion learns how corruption relates to clean examples and uses a sampler to generate from noise.
-Here $A$ is a demonstrated action chunk, $o$ is its observation condition, and $k$ indexes the amount of corruption.
+Here $A$ is a demonstrated [action chunk]{.term key="action-chunk"}, $o$ is its observation condition, and $k$ indexes the amount of corruption.
+The question is how a model trained against known random noise can generate an action when the clean answer is unavailable.
 
 ## What noise prediction learns {#diffusion}
 
@@ -21,7 +24,7 @@ $$
   +\sqrt{1-\bar\alpha_k}\,\epsilon,
 $$
 
-where $\epsilon\sim\mathcal N(0,I)$ and the fixed schedule $\bar\alpha_k$ decreases as corruption increases.
+where $\epsilon\sim\mathcal N(0,I)$ is [Gaussian noise]{.term key="gaussian-distribution"} and the fixed schedule $\bar\alpha_k$ decreases as corruption increases.
 The network receives $(A_k,o,k)$ and predicts $\hat\epsilon=\epsilon_\theta(A_k,o,k)$.
 Its simplified training objective is
 
@@ -41,13 +44,25 @@ $$
   =\mathbb E[\epsilon\mid A_k,o,k].
 $$
 
-It is still a conditional average.
+This is a [conditional expectation]{.term key="conditional-expectation"}: an average over noise values compatible with the supplied inputs.
+The equality describes the population squared-error optimum when the relevant second moments are finite and the predictor is unrestricted; a trained finite network only approximates it.
 Its conditioning includes the location of the current noisy sample, so it defines a field across noisy action space instead of one final answer for an observation.
 
 At inference, a sampler starts with noise and repeatedly uses the trained network to update the sample.
 A scheduler supplies the update coefficients and, for a stochastic sampler, any additional random noise.
 There is no stored clean target being subtracted at inference.
 Only the final clean prediction is eligible for execution, as detailed in [Diffusion Policy](../../literature-review/action/diffusion-policy.qmd).
+
+## Example and conditions of use
+
+Suppose demonstrations reach around either side of an obstacle.
+A direct action predictor sees the observation and must return one chunk, whereas the diffusion predictor also sees the current noisy candidate and its noise level.
+Two different noisy candidates can therefore receive different predictions under the same observation; this is the relevant difference in their inputs, not the disappearance of conditional averaging.
+
+The displayed construction assumes additive Gaussian corruption and a schedule with $0\leq\bar\alpha_k\leq1$.
+The noise has the same shape as the action chunk, and generation must supply the observation, noise-level convention, and normalisation expected during training.
+The sampler and network together determine the generated distribution; the MSE objective alone does not specify the reverse updates.
+Neither finite-step sampling nor a low training loss guarantees that all demonstrated strategies are reproduced.
 
 ## Compare the targets {#targets}
 
@@ -62,3 +77,8 @@ These conditional averages are functions of different inputs and predict differe
 The [DDPM review](../../literature-review/theory/ddpm.qmd) derives the forward Gaussian chain, posterior, variational bound, and simplified MSE objective.
 The [score-based model review](../../literature-review/theory/score-based-models.qmd) relates noise prediction to log-density gradients.
 [Diffusion Policy](../../literature-review/action/diffusion-policy.qmd) explains observation conditioning, prediction windows, and robot execution.
+
+## References
+
+[Ho et al., Denoising Diffusion Probabilistic Models, §§3.2–3.4](https://arxiv.org/abs/2006.11239) gives the corruption process and simplified noise-prediction objective.
+[Chi et al., Diffusion Policy](https://arxiv.org/abs/2303.04137) applies conditional denoising to robot action sequences.

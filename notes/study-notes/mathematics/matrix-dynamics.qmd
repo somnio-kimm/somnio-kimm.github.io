@@ -1,14 +1,15 @@
 ---
 title: 'Matrix structure and dynamics'
 description: "Matrix properties, eigenvalue modes, transient amplification, and inverses with low-rank corrections."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Mathematics
 ---
 
 Eigenvalues describe long-time modes of a linear system, while singular values describe its largest Euclidean amplification at a given time.
-Here $h(t)$ is a finite-dimensional state and $A$ is a constant square matrix.
+Here $h(t)$ is a finite-dimensional [state vector]{.term key="state-vector"} and $A$ is a constant square matrix representing a linear map in a chosen coordinate system.
+The central question is whether a disturbance decays, grows temporarily, or grows without bound; these are different questions about the same dynamics.
 The related matrix properties and inverse identities explain how these systems can be analysed and computed.
 
 ## Matrix properties {#properties}
@@ -32,7 +33,8 @@ The spectral norm $\|A\|_2$ is its largest singular value.
 
 ## Modes and long-time stability {#modes}
 
-For $\dot h=Ah$, the solution is $h(t)=e^{tA}h(0)$.
+Consider the autonomous continuous-time system $\dot h=Ah$, with no external forcing.
+Its solution is $h(t)=e^{tA}h(0)$.
 If $A=V\Lambda V^{-1}$, then
 
 $$
@@ -40,13 +42,14 @@ $$
 $$
 
 The real part of each eigenvalue controls exponential growth or decay; its imaginary part controls oscillation.
+Asymptotic stability here means every initial state tends to zero as time tends to infinity.
 All eigenvalues having strictly negative real parts implies asymptotic stability in finite dimensions.
 Purely imaginary eigenvalues require more care: a nontrivial Jordan block can introduce polynomial growth even when exponential growth rates are zero.
 Calling a matrix “coupled” also depends on coordinates; a diagonalisable system has independent modal equations in its eigenvector basis.
 
 ## Transient amplification {#transient-amplification}
 
-For a fixed time, the largest possible amplification over nonzero initial states is
+For a fixed time, the largest possible amplification in the [Euclidean norm]{.term key="euclidean-norm"} over nonzero initial states is
 
 $$
   G(t)=\sup_{h_0\ne0}\frac{\|e^{tA}h_0\|_2}{\|h_0\|_2}
@@ -56,6 +59,17 @@ $$
 Define $G_{\max}=\sup_{t\geq0}G(t)$.
 An asymptotically stable non-normal matrix can have $G_{\max}>1$, but non-normality alone does not force it.
 For a normal matrix, $G(t)=\max_i e^{t\operatorname{Re}\lambda_i}$, so strictly negative real parts give monotone decay.
+
+For a concrete comparison, take
+
+$$
+  A_\kappa=\begin{pmatrix}-1&\kappa\\0&-1\end{pmatrix}.
+$$
+
+Both $\kappa=1$ and $\kappa=4$ give eigenvalues $-1,-1$ and eventual decay.
+The first never increases any state's Euclidean norm, while the second initially amplifies some states.
+Eigenvalues alone therefore do not determine the largest transient amplification.
+The conclusion concerns the specified norm and coordinate representation; changing either can change the amplification being measured.
 
 ::: {.callout-note collapse="true" icon="false" title="Proof and counterexample: non-normal does not mean transient growth"}
 

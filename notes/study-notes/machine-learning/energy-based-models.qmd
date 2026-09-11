@@ -1,14 +1,17 @@
 ---
 title: 'Energy-based models and Langevin sampling'
 description: "Relative densities, score gradients, stochastic updates, and the limits of finite-step sampling."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Machine Learning
 ---
 
+## Motivation
+
 An energy-based model assigns relative density through a scalar energy function.
-Its score provides a local direction for a stochastic sampler, even when evaluating the normalising constant is difficult.
+Its [score]{.term key="score"} provides a local direction for a stochastic sampler, even when evaluating the [normalising constant]{.term key="normalising-constant"} is difficult.
+The aim is to distinguish describing which outcomes are relatively likely from actually producing representative samples.
 
 ## Density and score {#energy-and-score}
 
@@ -25,6 +28,8 @@ $$
 The same negative sign appears in the density and its normaliser.
 Assume $Z$ is finite and $\beta>0$.
 Then the score is $\nabla_x\ln p(x)=-\beta\nabla_xE(x)$, since $Z$ is constant with respect to $x$.
+Energy is a scalar assigned to each candidate, while the score is a vector with one coordinate per input dimension.
+The word energy here specifies a modelling function; a physical energy interpretation requires additional modelling assumptions.
 Having an intractable normaliser is different from having no density specification at all.
 
 ## Score-based update {#langevin-dynamics}
@@ -42,8 +47,19 @@ $$
 with independent $\xi_k\sim\mathcal N(0,I)$.
 The associated continuous diffusion has invariant density $p$ under suitable regularity and boundary conditions.
 A finite-step discretisation generally has bias, and a finite run need not have mixed between modes.
-Removing the noise gives gradient ascent on log density; it may approach a local mode and is not a general distribution sampler.
+Removing the noise gives [gradient ascent]{.term key="gradient-ascent"} on log density; it may approach a local mode and is not a general distribution sampler.
 See [score-based generative modelling, Section 2](https://arxiv.org/abs/2011.13456) for the role of Langevin sampling.
+
+## Example and boundaries
+
+Take a scalar $x$ with energy $E(x)=x^2/2$ and $\beta=1$.
+The normalised density is standard Gaussian, and its score is $-x$.
+The Langevin update becomes $x_{k+1}=(1-\eta)x_k+\sqrt{2\eta}\,\xi_k$: drift pulls toward the centre while noise spreads the samples.
+Without noise, $0<\eta<2$ makes repeated updates converge to zero, illustrating why locating the mode does not reproduce the Gaussian distribution.
+
+A different limiting case is $E(x)=0$ on the whole real line.
+Every point receives equal weight, but the integral is infinite, so these weights do not define a normalised probability density there.
+Check integrability before interpreting an energy function as a probability model, and check discretisation error and mixing before interpreting a finite chain as target-distributed samples.
 
 ## Connections {#connections}
 
@@ -51,3 +67,8 @@ See [score-based generative modelling, Section 2](https://arxiv.org/abs/2011.134
 [Gradient-based optimization](../mathematics/optimization.qmd) explains deterministic updates, whose goal differs from distribution sampling.
 [Diffusion Policy](../../literature-review/action/diffusion-policy.qmd#the-score-interpretation-and-training-stability) distinguishes a gradient with respect to an action from a parameter gradient of the normaliser.
 [Score-based generative modelling](../../literature-review/theory/score-based-models.qmd) adds noise levels and reverse-time generation.
+
+## References
+
+[Song et al., Score-Based Generative Modeling through Stochastic Differential Equations, §2](https://arxiv.org/abs/2011.13456) relates scores to Langevin updates and explains the sampling construction.
+The quadratic and constant-energy examples above follow directly from the displayed density and update equations.

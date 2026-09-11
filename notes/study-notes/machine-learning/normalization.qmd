@@ -1,14 +1,17 @@
 ---
 title: "Activation normalization: BatchNorm, LayerNorm, and RMSNorm"
 description: "A connected comparison of normalization statistics, centering, inference behaviour, and the formulas behind the three methods."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Machine Learning
   - Neural Networks
 ---
 
-An activation normalization layer transforms intermediate numerical representations inside a network.
+## Motivation {#motivation}
+
+Two layers named “normalization” can couple different coordinates and behave differently when the batch changes.
+An activation normalization layer is a parameterized transformation of intermediate [activations]{.term key="activation"} inside a network.
 The key questions are **which coordinates share statistics**, **whether the mean is subtracted**, and **whether training and inference use the same statistics**.
 This differs from [quantile scaling](../robotics/quantile-normalization.qmd#quantile-scaling), which expresses physical input or output coordinates using fixed training-data reference values.
 
@@ -31,7 +34,7 @@ Placement matters: [ViT](../../literature-review/vision/vit.qmd) normalizes befo
 
 ## BatchNorm Uses Other Examples {#batchnorm}
 
-For one feature, collect its values $x_1,\ldots,x_m$ across a training minibatch.
+For one feature, collect its values $x_1,\ldots,x_m$ across a training [minibatch]{.term key="minibatch"}.
 BatchNorm computes a mean and variance for that feature, normalizes it, and applies a learned scale $\gamma$ and offset $\beta$:
 
 $$
@@ -41,6 +44,9 @@ $$
         y_i&=\gamma\frac{x_i-\mu_B}{\sqrt{v_B+\epsilon}}+\beta.
     \end{aligned}
 $$
+
+Here $m\geq1$ and $\epsilon>0$ keeps the denominator positive even when the feature values are identical.
+The batch mean and variance are computed from activations; $\gamma$ and $\beta$ are [learned parameters]{.term key="parameter"}.
 
 In a convolutional layer, the original method pools over batch and spatial positions separately for each channel.
 At inference, its standard procedure uses estimated population statistics instead of recomputing them from the current batch. [Ioffe and Szegedy (2015), Algorithms 1–2 and Section 3.2](https://proceedings.mlr.press/v37/ioffe15.pdf#page=3).
@@ -97,6 +103,16 @@ Adding $10$ to both input coordinates leaves the LayerNorm result unchanged but 
 Multiplying the whole vector by a positive scalar cancels between numerator and denominator for both operations when $\epsilon=0$.
 Finite $\epsilon$ makes this scale invariance approximate.
 :::
+
+## Applications and boundaries {#applications}
+
+For a tensor shaped as batch × sequence position × hidden feature, token LayerNorm computes separate statistics for every batch–position pair.
+It combines the hidden coordinates of one token rather than averaging across the tokens of the sentence.
+At the normalization operation itself, replacing another example in the minibatch leaves this token's LayerNorm result unchanged, whereas training-mode BatchNorm can change.
+This distinction helps identify unintended cross-example dependencies when inspecting a model.
+
+The normalized axes, stabilizer, affine parameters, and training or inference mode are needed to reproduce the operation.
+The formulas standardize selected statistics; they do not guarantee useful features or successful optimization on their own.
 
 ## Connections {#connections}
 

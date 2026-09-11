@@ -1,7 +1,7 @@
 ---
 title: "Entropy, cross-entropy, and divergence"
 description: "Information measures, binary and categorical losses, logit-to-probability maps, and Gaussian KL in one connected account."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Mathematics
@@ -10,12 +10,14 @@ categories:
 
 Entropy measures expected self-information; cross-entropy evaluates a proposed distribution on target outcomes; KL divergence compares the two.
 Their shared probability notation also explains classification losses, probability maps, and a Gaussian latent-distribution penalty.
+Each information measure is a scalar computed from specified distributions, rather than a label, a probability vector, or a physical amount of meaning.
+These distinctions explain why a predictive distribution can be correct while its cross-entropy remains positive, and why training loss can improve before classification accuracy changes.
 Read [probability](probability.qmd) for random variables and distributions, and [expectations](expectations.qmd) for the averages used below.
 
 ## Entropy and self-information {#entropy}
 
-Let $p(x)$ be the probability mass function of a discrete random variable $X$.
-Use natural logarithms, so information is measured in nats.
+Let $p(x)$ be the [probability mass function]{.term key="probability-mass-function"} of a discrete random variable $X$.
+Use natural logarithms, so information is measured in [nats]{.term key="nat"}.
 For a discrete outcome with positive probability, its self-information is $-\ln p(x)$.
 Entropy is the expected self-information under the same distribution:
 
@@ -93,6 +95,18 @@ Equality requires $p=q$ as distributions.
 This derivation concerns finite discrete distributions; analogous continuous statements require the relevant measures and integrability conditions.
 
 :::
+
+## Correct distributions and uncertain outcomes {#example}
+
+Suppose a fair binary outcome has target distribution $p=(1/2,1/2)$ and the prediction matches it exactly, $q=p$.
+Then $H(p)=H(p,q)=\ln2$, but $D_{\mathrm{KL}}(p\Vert q)=0$.
+The predicted distribution is correct even though each realised outcome incurs positive negative log-probability.
+That positive cross-entropy reflects uncertainty already present in the target distribution.
+
+If the outcome is instead certain, $p=(1,0)$, matching it gives both zero entropy and zero cross-entropy.
+Thus zero divergence means the distributions agree; zero entropy means the discrete source is certain.
+Neither statement describes the semantic importance of the outcomes.
+These examples use finite discrete outcome spaces, and the same claims about zero or positive entropy must not be transferred unchanged to differential entropy.
 
 ## Binary logits and sigmoid {#sigmoid}
 
@@ -182,7 +196,7 @@ $$
 
 The [sigmoid derivative](entropy.qmd#sigmoid-derivative) is $dp/dz=p(1-p)$.
 
-Applying the chain rule, the factors cancel:
+Applying the [chain rule]{.term key="chain-rule"}, the factors cancel:
 
 $$
   \frac{d\ell}{dz}

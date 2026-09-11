@@ -1,20 +1,23 @@
 ---
 title: "KV caching: prefill and decoding"
 description: "When earlier attention keys and values can be reused, and what still has to be computed for each new query."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Machine Learning
   - Transformers
 ---
 
-A key–value cache stores attention keys and values that can be reused during inference.
+## Motivation {#motivation}
+
+Generating a long sequence repeatedly uses earlier context.
+A key–value cache is a stored collection of per-layer attention [activations]{.term key="activation"}: it stores keys and values that can be reused during [inference]{.term key="inference"}.
 It saves computation only when the inputs and attention structure keep those stored representations valid.
 First read [attention projections](attention.qmd#projections) and [causal masks](attention.qmd#mask-values).
 
 ## Prefill, decoding, and the KV cache {#kv-cache}
 
-During autoregressive inference, prefill processes the known prompt and stores each layer's keys and values.
+During [autoregressive generation]{.term key="autoregressive-generation"}, prefill processes the known prompt and stores each layer's keys and values.
 Decoding then processes newly generated tokens and appends their keys and values to that layer's cache.
 For one new query $q_t$, attention still computes
 
@@ -28,18 +31,31 @@ $$
 $$
 
 Caching avoids recomputing old representations; it does not remove softmax or turn attention into an unnormalised product of queries, keys, and values.
-Causal masking ensures that appending a future token does not change earlier token representations, assuming fixed model parameters and consistent position handling.
+Causal masking ensures that appending a future token does not change earlier token representations, assuming fixed [model parameters]{.term key="parameter"} and consistent position handling.
 Full bidirectional attention over a growing sequence does not have that property in general.
 
 At fixed width, standard cached attention reads a number of keys proportional to the available context for each new token.
 This is different from evaluating all query–key pairs for an entire sequence at once.
 The cache is maintained separately for each layer, as explained in the [Transformers cache documentation](https://huggingface.co/docs/transformers/main/cache_explanation).
 
+## Example: append one token {#append-example}
+
+Suppose a causal decoder has already processed three tokens, with each layer caching three keys and three values.
+After a fourth token is selected, its forward pass computes that token's query, key, and value at each layer and appends the new key and value.
+Its query reads four positions, while the earlier three keys and values are reused.
+The new representation is then used to predict the next token; the cache stores reusable attention inputs rather than final answers.
+
+## Reuse conditions and applications {#reuse-conditions}
+
 A fixed image/text prefix can also be cached across action-generation steps when the attention structure makes its representations independent of the changing action tokens.
 Changing an observation or another prefix input requires recomputing the affected prefix.
 See [PaliGemma](../../literature-review/multimodality/paligemma.qmd), [π0](../../literature-review/action/pi0.qmd), and [Mamba's recurrent alternative](../../literature-review/theory/mamba.qmd).
 
-## Related Concepts
+## Connections and boundaries {#related-concepts}
+
+Cache validity depends on the computation that produced each stored value, including its context, model parameters, positions, and mask.
+A cached prefix from one input cannot simply be treated as the prefix for a different input.
+The standard growing cache trades additional stored activations for reduced recomputation; it does not make the context-length cost disappear.
 
 [Attention masks](attention.qmd#generation-order) separates the order of attention dependencies from the generation loop.
 [Action queries](attention.qmd#action-positions) explains why noisy action representations change during sampling even when their observation prefix stays fixed.

@@ -1,0 +1,108 @@
+/* Definitions remain readable inline if JavaScript is unavailable or in print. */
+.study-term-label {
+  color: inherit;
+  background: #e8e4fa;
+  border: 0;
+  border-bottom: 1px dotted #76638e;
+  border-radius: 0.2em;
+  padding: 0 0.12em;
+  font: inherit;
+  line-height: inherit;
+  text-align: inherit;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.study-term-definition::before { content: " ("; }
+.study-term-definition::after { content: ")"; }
+.study-term-heading { font-weight: 600; }
+.study-term-heading::after { content: ": "; }
+.study-term-more { margin-left: 0.35em; }
+.study-term-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.quarto-dark .study-term-label {
+  background: #4a405b;
+  color: #f2edf9;
+  border-bottom-color: #c7b6e0;
+}
+@media screen {
+  .study-term-ready > .study-term-label { cursor: help; }
+  .study-term-ready > .study-term-label:hover,
+  .study-term-ready > .study-term-label[aria-expanded="true"] { background: #dcd4f4; }
+  .study-term-ready > .study-term-label:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+  .study-term-ready > .study-term-definition {
+    position: fixed;
+    z-index: 1085;
+    display: block;
+    box-sizing: border-box;
+    width: 340px;
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+    overflow: auto;
+    padding: 0.9rem 2.3rem 0.9rem 1rem;
+    color: #292432;
+    background: #fcfaff;
+    border: 1px solid #c7b9dc;
+    border-radius: 0.6rem;
+    box-shadow: 0 6px 22px rgb(38 23 58 / 18%);
+    font-size: 0.93rem;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .study-term-ready > .study-term-definition[hidden] { display: none; }
+  .study-term-ready > .study-term-definition::before,
+  .study-term-ready > .study-term-definition::after,
+  .study-term-ready .study-term-heading::after { content: none; }
+  .study-term-ready .study-term-heading,
+  .study-term-ready .study-term-text { display: block; }
+  .study-term-ready .study-term-heading { margin-bottom: 0.25rem; }
+  .study-term-ready .study-term-more {
+    display: inline-block;
+    margin: 0.45rem 0 0;
+    padding-block: 0.15rem;
+  }
+  .study-term-close {
+    position: absolute;
+    top: 0.35rem;
+    right: 0.35rem;
+    width: 1.8rem;
+    height: 1.8rem;
+    padding: 0;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    border-radius: 0.2rem;
+    font: inherit;
+    font-size: 1.3rem;
+    cursor: pointer;
+  }
+  .study-term-close:focus-visible,
+  .study-term-more:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+  .quarto-dark .study-term-ready > .study-term-label:hover,
+  .quarto-dark .study-term-ready > .study-term-label[aria-expanded="true"] { background: #605174; }
+  .quarto-dark .study-term-ready > .study-term-definition {
+    color: #f2edf9;
+    background: #302a39;
+    border-color: #9380ad;
+  }
+  .quarto-dark .study-term-more { color: #bcceff; }
+}
+@media print {
+  .study-term-label { background: none; border: 0; padding: 0; }
+  .study-term-definition[hidden] { display: inline !important; }
+  .study-term-close { display: none; }
+}

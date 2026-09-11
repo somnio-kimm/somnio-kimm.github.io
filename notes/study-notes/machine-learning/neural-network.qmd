@@ -1,0 +1,73 @@
+---
+title: 'Neural Network'
+description: "Feedforward networks as compositions of parameterised functions, with layers, nonlinearities, and the distinction between prediction and learning."
+date-modified: 2026-09-11
+draft: false
+categories:
+  - Machine Learning
+---
+
+## Motivation {#motivation}
+
+A prediction may require several transformations of the input before a useful output can be produced.
+A neural network organises those transformations into a function whose adjustable values can be learned from data.
+This note starts with feedforward networks; it separates what the network computes from how its parameters are learned.
+
+## Feedforward neural network {#feedforward-neural-network}
+
+A **feedforward neural network** is a [parameterised function]{.term key="parameterised-function"} organised into layers, with computation flowing from the input toward the output without feedback cycles.
+For fixed parameters and deterministic operations, it maps an input to an output; the architecture specifies a family of possible functions, and the chosen parameters select one member.
+
+A **layer** is a stage that transforms its inputs into another set of values.
+Its output is a [representation]{.term key="representation"} passed to later computation.
+The network output need not be a probability: its meaning depends on the task and the final transformation.
+
+## Layer composition {#layer-composition}
+
+For a simple dense network with one hidden layer, let $x\in\mathbb R^d$ be the input and $h\in\mathbb R^m$ the hidden representation:
+
+$$
+  h=\phi(W_1x+b_1),\qquad f_\theta(x)=W_2h+b_2.
+$$
+
+Here, $W_1\in\mathbb R^{m\times d}$, $b_1\in\mathbb R^m$, $W_2\in\mathbb R^{k\times m}$, and $b_2\in\mathbb R^k$ give an output in $\mathbb R^k$.
+The symbol $\theta$ collects these [parameters]{.term key="parameter"}, and $\phi$ is an activation function, typically nonlinear and applied coordinatewise in this example.
+The formula specifies a forward computation; it does not itself choose a loss or update parameters.
+
+Without a nonlinearity between these two affine transformations, their composition is another affine transformation.
+Adding such a layer therefore does not by itself enlarge the family beyond affine functions.
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: two affine layers collapse to one"}
+
+Set $\phi(u)=u$ and substitute the first layer into the second:
+
+$$
+  \begin{aligned}
+  f_\theta(x)&=W_2(W_1x+b_1)+b_2\\
+  &=(W_2W_1)x+(W_2b_1+b_2).
+  \end{aligned}
+$$
+
+The combined weight is $W_2W_1$ and the combined bias is $W_2b_1+b_2$.
+This is again affine in $x$.
+
+:::
+
+## Example and use {#examples}
+
+As a constructed scalar example, take $h=\max(0,2x-1)$ and $f(x)=3h$.
+The hidden layer suppresses inputs at or below $1/2$; above that threshold the output increases with slope $6$.
+The same operations and parameters apply to every input, while the intermediate value changes with the input.
+Training would adjust the coefficients against a chosen objective; evaluating the formula with fixed coefficients is prediction.
+
+## Connections and boundaries {#connections}
+
+[Loss](loss.qmd#loss-and-risk) defines the penalty used to assess predictions, while [optimisation](../mathematics/optimization.qmd#gradient-descent) changes parameters to reduce an objective.
+[Representations](representations.qmd) explains how intermediate values encode information for later use.
+[Attention](attention.qmd) is another way to construct transformations; a dense layer is not the definition of every neural-network layer.
+A feedforward computation has no feedback cycle within that computation, but the same network can still be called repeatedly by an external controller or generation procedure.
+The architecture alone does not establish accuracy, generalisation, or a physical interpretation for a hidden coordinate.
+
+## References
+
+[Goodfellow, Bengio, and Courville, *Deep Learning*, Chapter 6](https://www.deeplearningbook.org/contents/mlp.html) develops feedforward networks, composition, and nonlinear hidden units.

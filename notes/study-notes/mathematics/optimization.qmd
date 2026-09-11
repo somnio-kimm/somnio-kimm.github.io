@@ -1,7 +1,7 @@
 ---
 title: 'Gradient-based optimization'
 description: "Gradient descent, parameter updates, and supporting slopes for convex objectives with corners."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Mathematics
@@ -9,10 +9,11 @@ categories:
 
 Optimization chooses parameters to improve a scalar objective.
 This note connects ordinary derivatives to parameter updates, then defines a supporting slope that remains meaningful for a convex objective at a corner.
+An objective is a scalar-valued function, a gradient describes its local change, and an update rule is an algorithm that uses that information to choose a new parameter value.
 
 ## The update rule {#gradient-descent}
 
-Let $L$ be the differentiable scalar objective being minimised, such as an [empirical risk](../machine-learning/loss.qmd#loss-and-risk).
+Let $L$ be the [differentiable]{.term key="differentiable-function"} scalar objective being minimised, such as an [empirical risk](../machine-learning/loss.qmd#loss-and-risk).
 For one real parameter, gradient descent repeatedly updates the parameter by subtracting a positive multiple of the objective's derivative:
 
 $$
@@ -44,10 +45,21 @@ Training minimises the aggregate objective, so a step that improves it can still
 For differentiable individual losses, the gradient of their average is the average of their gradients.
 Examples can favour opposite changes, and their gradients can cancel while their errors remain nonzero.
 
+## A step can improve or worsen the same objective {#step-size-example}
+
+Take $L(w)=w^2$ and start at $w=1$, so $L'(w)=2$.
+With $\eta=0.25$, the update reaches $w=0.5$ and reduces the objective from $1$ to $0.25$.
+With $\eta=2$, the same negative-gradient direction reaches $w=-3$ and raises the objective to $9$.
+The direction comes from local derivative information, while the step size determines how far that information is used.
+
+A zero gradient indicates a [stationary point]{.term key="stationary-point"}, which need not be a minimum for a general differentiable objective.
+For example, $L(w)=-w^2$ has zero derivative at $w=0$, but moving either way decreases the objective.
+This separates an update rule's stopping signal from a claim of optimality.
+
 ## Definition and absolute-loss example {#subgradients}
 
 Absolute loss has no ordinary derivative at zero.
-For a convex function $\ell:\mathbb R\rightarrow\mathbb R$, a subgradient at $e$ is a number $g$ satisfying
+For a [convex function]{.term key="convex-function"} $\ell:\mathbb R\rightarrow\mathbb R$, a subgradient at $e$ is a number $g$ satisfying
 
 $$
   \ell(z)\geq\ell(e)+g(z-e)

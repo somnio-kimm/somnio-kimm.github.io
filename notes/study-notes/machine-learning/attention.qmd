@@ -1,16 +1,19 @@
 ---
 title: "Attention: projections, masks, and action queries"
 description: "How queries read keys and values, how masks constrain access, and why action queries differ from robot state."
-date-modified: 2026-09-10
+date-modified: 2026-09-11
 draft: false
 categories:
   - Machine Learning
   - Transformers
 ---
 
-Attention updates a representation by combining information from selected source representations.
+## Motivation {#motivation}
+
+A model may need a different combination of context for each word, image patch, or future action position.
+Attention provides an input-dependent aggregation operation: it updates a representation by weighting and combining source representations.
 To identify its inputs, first identify the positions being updated and the positions they can read.
-A token can represent a word, an image patch, a robot state, or an action position; its semantic type does not permanently assign it the role of query, key, or value.
+A [token]{.term key="token"} can represent a word, an image patch, a robot state, or an action position; its semantic type does not permanently assign it the role of query, key, or value.
 
 Start with the [representation overview](representations.qmd) for the distinction between a sequence element and its numerical vector.
 
@@ -32,8 +35,8 @@ $$
   \end{aligned}
 $$
 
-The projection matrices are learned parameters.
-The resulting $Q$, $K$, and $V$ are activations that change with the current input and layer.
+The projection matrices are [learned parameters]{.term key="parameter"}.
+The resulting $Q$, $K$, and $V$ are [activations]{.term key="activation"} that change with the current input and layer.
 
 | Object | Shape | Meaning |
 |---|---|---|
@@ -64,7 +67,7 @@ Here, $M$ is an attention mask expressed as additive score adjustments.
 The [mask section](#mask-values) specifies allowed and prohibited reads and the condition for a valid row.
 
 The score $S_{ij}$ measures compatibility between query $i$ and source key $j$.
-The weight $P_{ij}$ is nonnegative, and each row sums to one.
+The weight $P_{ij}$ is nonnegative, and each valid row sums to one because of [softmax]{.term key="softmax"}.
 The output row is
 
 $$
@@ -191,7 +194,10 @@ This diagram shows information flow for one action query, not a complete model a
 Other action tokens can be additional sources if the mask permits them.
 In [π0](../../literature-review/action/pi0.qmd) and [π0.5](../../literature-review/action/pi05.qmd), also check where state is represented before deciding which stream owns its projections.
 
-## Connections {#connections}
+## Connections and boundaries {#connections}
+
+An attention weight describes a contribution in one head and layer under the current mask.
+Its value alone does not establish that a source position caused the model's final decision; values, output projections, and later computations also determine that decision.
 
 [Stop-gradient](../computer-software/stop-gradient.qmd) controls where a loss can send derivatives while leaving a forward value readable.
 [KV caching](kv-cache.qmd) reuses keys and values when the mask and inputs keep their representations independent of newly added or changing inputs.
