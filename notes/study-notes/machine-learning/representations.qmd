@@ -82,7 +82,7 @@ The numerical data type alone cannot tell these roles apart.
 
 [Contrastive image–text learning](representation-learning.qmd#clip-and-siglip) explains CLIP and SigLIP's paired-image-and-text objectives.
 Its [pretraining discussion](representation-learning.qmd#representation-pretraining-and-policy-training) separates the origin of an encoder's weights from the objective used by a downstream policy.
-[Activation normalization](normalization.qmd#what-to-check-when-reading-a-model) transforms internal activations and has a different role from scaling physical input or output coordinates.
+[Activation normalization](normalisation.qmd#which-values-share-statistics) transforms internal activations and has a different role from scaling physical input or output coordinates.
 
 ## Paper Connections {#paper-connections}
 
@@ -97,7 +97,7 @@ Binning many continuous values into one state bin is an example: the bin identif
 An embedding's dimension also does not identify how many words, physical quantities, or named objects it represents.
 
 [Quantile normalization](../robotics/quantile-normalization.qmd) develops continuous coordinate scaling and its inverse.
-[Attention](attention.qmd#projections) updates representations using permitted positions; [activation normalization](normalization.qmd#what-to-check-when-reading-a-model) transforms their internal statistics.
+[Attention](attention.qmd#projections) updates representations using permitted positions; [activation normalization](normalisation.qmd#which-values-share-statistics) transforms their internal statistics.
 [Representation learning](representation-learning.qmd) explains training and adapting the encoders that produce these vectors.
 [Cross-entropy](../mathematics/entropy.qmd#cross-entropy) evaluates predicted distributions over discrete targets.
 The [ViT review](../../literature-review/vision/vit.qmd) gives the patch projection and transformer architecture.

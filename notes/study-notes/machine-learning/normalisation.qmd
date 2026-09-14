@@ -1,0 +1,165 @@
+---
+title: "Activation normalisation: BatchNorm, LayerNorm, and RMSNorm"
+description: "From activations and standardisation to the statistics, learned parameters, and inference behaviour of three normalisation methods."
+date-modified: 2026-09-14
+draft: false
+categories:
+  - Machine Learning
+---
+
+## From activations to normalisation
+
+A **neural network** processes an input through a sequence of computations. An **activation** is a value produced inside the network during this process; it depends on both the input and the network's parameters.
+
+For a simple scalar computation inside a layer,
+
+$$
+    \begin{aligned}
+        z &= wx + b, \\
+        a &= \phi(z).
+    \end{aligned}
+$$
+
+Here, $x$ is the input, $w$ is a weight controlling its contribution, and $b$ is a bias that adds an offset. The intermediate result $z$ is the **pre-activation**. Applying the activation function $\phi$ produces $a$, which can become an input to the next layer. During training, the learning procedure adjusts parameters such as $w$ and $b$.
+
+**Activation normalisation** transforms a collection of these intermediate values using statistics computed over a specified group. Depending on the architecture, it may be applied before or after an activation function. In the comparisons below, $a$ denotes the values entering the normalisation operation.
+
+## Centring and scaling a collection
+
+Suppose we pass a minibatch of $m$ images through the network and record one particular neuron's activation for each image. The images form the **minibatch**; their corresponding activations form the collection $\{a_1, a_2, \ldots, a_m\}$.
+
+The **mean** describes the collection's average level:
+
+$$
+    \mu = \frac{1}{m} \sum_{i=1}^{m} a_i.
+$$
+
+The **standard deviation** describes how much the values vary around that mean:
+
+$$
+    \sigma = \sqrt{\frac{1}{m} \sum_{i=1}^{m} (a_i - \mu)^2}.
+$$
+
+Assuming the activations are not all equal, so that $\sigma > 0$, we can **standardise** the collection:
+
+$$
+    \hat{a}_i = \frac{a_i - \mu}{\sigma}.
+$$
+
+Subtracting $\mu$ shifts the collection to have zero mean without changing its spread. Dividing by $\sigma$ then gives it unit standard deviation, and therefore unit variance. These are properties of the transformed collection, rather than of an individual activation. Standardisation does not imply that the values follow a Gaussian distribution.
+
+Practical normalisation layers use a small positive constant $\epsilon$ in the denominator, typically $\sqrt{\sigma^2 + \epsilon}$, to avoid division by zero. With this addition, the normalised variance is only approximately one when $\sigma^2$ is large relative to $\epsilon$.
+
+## Which values share statistics?
+
+Consider a dense layer that produces three activations for each of three images. Write $a_{ij}$ for the activation of neuron $j$ on image $i$:
+
+| | Neuron 1 | Neuron 2 | Neuron 3 |
+|---|---|---|---|
+| Image A | $a_{A1}$ | $a_{A2}$ | $a_{A3}$ |
+| Image B | $a_{B1}$ | $a_{B2}$ | $a_{B3}$ |
+| Image C | $a_{C1}$ | $a_{C2}$ | $a_{C3}$ |
+
+BatchNorm computes statistics **down each column**, across images. LayerNorm and RMSNorm compute statistics **across each row**, across features of one image. This table illustrates a dense layer; for other tensor shapes, the normalised axes must be specified explicitly.
+
+The three methods differ in which values share statistics, whether they subtract the mean, and which statistics they use at inference.
+
+### BatchNorm
+
+For each neuron $j$, BatchNorm computes a mean and variance across the $m$ examples in the current minibatch:
+
+$$
+    \begin{aligned}
+        \mu_j &= \frac{1}{m} \sum_{i=1}^{m} a_{ij}, \\
+        \sigma_j^2 &= \frac{1}{m} \sum_{i=1}^{m} (a_{ij} - \mu_j)^2.
+    \end{aligned}
+$$
+
+It then normalises each activation and applies a learned scale and offset:
+
+$$
+    \begin{aligned}
+        \hat{a}_{ij} &= \frac{a_{ij} - \mu_j}{\sqrt{\sigma_j^2 + \epsilon}}, \\
+        y_{ij} &= \gamma_j \hat{a}_{ij} + \beta_j.
+    \end{aligned}
+$$
+
+The parameters $\gamma_j$ and $\beta_j$ belong to feature $j$ and are shared across examples. Normalisation establishes a reference scale and centre; the learned parameters let the network choose a useful output scale and offset relative to that reference. Consequently, the final output $y$ need not have zero mean or unit variance.
+
+During training, an example's normalised activation depends on the other examples in its minibatch. At inference, standard BatchNorm uses fixed estimates of the mean and variance accumulated during training, typically as running averages. See the [BatchNorm paper](https://arxiv.org/abs/1502.03167).
+
+### LayerNorm
+
+LayerNorm changes the group over which the statistics are computed. For each image $i$, it computes a mean and variance across that image's $d$ features:
+
+$$
+    \begin{aligned}
+        \mu_i &= \frac{1}{d} \sum_{j=1}^{d} a_{ij}, \\
+        \sigma_i^2 &= \frac{1}{d} \sum_{j=1}^{d} (a_{ij} - \mu_i)^2, \\
+        \hat{a}_{ij} &= \frac{a_{ij} - \mu_i}{\sqrt{\sigma_i^2 + \epsilon}}, \\
+        y_{ij} &= \gamma_j \hat{a}_{ij} + \beta_j.
+    \end{aligned}
+$$
+
+Each example supplies its own statistics, so its normalisation does not depend on the other examples in the minibatch. LayerNorm uses the same computation during training and inference and requires no running statistics. In a Transformer, it is commonly applied across the hidden features of each token separately. See the [LayerNorm paper](https://arxiv.org/abs/1607.06450).
+
+### RMSNorm
+
+RMSNorm uses the same feature grouping as LayerNorm in this example, but rescales the values without subtracting their mean. Its reference scale is the **root mean square** (RMS), which measures magnitude relative to zero:
+
+$$
+    \begin{aligned}
+        r_i &= \sqrt{\frac{1}{d} \sum_{j=1}^{d} a_{ij}^{2}}, \\
+        \hat{a}_{ij} &= \frac{a_{ij}}{\sqrt{r_i^2 + \epsilon}}, \\
+        y_{ij} &= \gamma_j \hat{a}_{ij}.
+    \end{aligned}
+$$
+
+This is a common implementation with a learned scale and no additive bias, as in [PyTorch RMSNorm](https://docs.pytorch.org/docs/stable/generated/torch.nn.RMSNorm.html). Like LayerNorm, it computes statistics from the current example during both training and inference.
+
+Because RMSNorm does not subtract the mean, it does not generally centre the values at zero. Before the learned scaling, every feature is divided by the same positive number, preserving feature ratios wherever those ratios are defined. The feature-specific parameters $\gamma_j$ can subsequently change those ratios.
+
+Ignoring $\epsilon$, multiplying every feature by the same positive constant $c$ also multiplies its RMS by $c$, so the factor cancels. This is **invariance to a common positive rescaling**. With a fixed $\epsilon > 0$, the invariance is approximate when the squared RMS dominates $\epsilon$. Adding a common offset does not generally cancel in this way. See the [RMSNorm paper](https://arxiv.org/abs/1910.07467).
+
+::: {.callout-note collapse="true" icon="false" title="Derivation: why a common positive scale cancels"}
+
+Let $a_i$ denote the full feature vector for example $i$, with nonzero RMS. For $c > 0$,
+
+$$
+    \operatorname{RMS}(c a_i)
+    = \sqrt{\frac{1}{d}\sum_{j=1}^{d} c^2 a_{ij}^2}
+    = c\operatorname{RMS}(a_i).
+$$
+
+With $\epsilon = 0$, this gives
+
+$$
+    \frac{c a_{ij}}{\operatorname{RMS}(c a_i)}
+    = \frac{c a_{ij}}{c\operatorname{RMS}(a_i)}
+    = \frac{a_{ij}}{\operatorname{RMS}(a_i)}.
+$$
+
+The normalised values, and hence the outputs with learned scaling held fixed, remain unchanged.
+
+:::
+
+## Why use normalisation?
+
+Normalisation gives intermediate values a controlled reference scale and, for BatchNorm and LayerNorm, a reference centre. This can make optimisation more stable and allow faster training, although the benefit depends on the network and training setup. It does not guarantee that gradients will avoid vanishing or exploding.
+
+To see why activation scale matters, consider one scalar computation in the next layer:
+
+$$
+    z_{\text{next}} = wa + b.
+$$
+
+For a loss $L$, the chain rule gives this weight's gradient contribution:
+
+$$
+    \frac{\partial L}{\partial w}
+    = \frac{\partial L}{\partial z_{\text{next}}}
+      \frac{\partial z_{\text{next}}}{\partial w}
+    = \frac{\partial L}{\partial z_{\text{next}}}\,a.
+$$
+
+The incoming activation $a$ directly multiplies the gradient signal reaching the weight. Its scale therefore matters for the size of the update. This is only part of the explanation: inserting normalisation also changes the forward computation and the derivatives propagated to earlier layers, because its statistics depend on the values being normalised.

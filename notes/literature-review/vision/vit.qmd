@@ -64,7 +64,7 @@ $$
 
 The MLP is applied to each sequence position and contains two linear maps with a GELU nonlinearity between them.
 Self-attention allows patch and class-token representations to exchange information across the whole sequence.
-The shared study notes explain [attention weights](../../study-notes/machine-learning/attention.qmd#weights-and-values) and [LayerNorm](../../study-notes/machine-learning/normalization.qmd#layernorm).
+The shared study notes explain [attention weights](../../study-notes/machine-learning/attention.qmd#weights-and-values) and [LayerNorm](../../study-notes/machine-learning/normalisation.qmd#layernorm).
 :::
 
 ## Evidence and Limitations

@@ -77,7 +77,7 @@ For a matrix, the maximum must be taken along the same axis as that softmax; a c
 :::
 
 **Normalization, tokenization, and caching are separate operations.**
-[Activation normalization](../../study-notes/machine-learning/normalization.qmd#what-to-check-when-reading-a-model) changes hidden-vector statistics.
+[Activation normalization](../../study-notes/machine-learning/normalisation.qmd#which-values-share-statistics) changes hidden-vector statistics.
 [SentencePiece tokenization](../../study-notes/machine-learning/representations.qmd#sentencepiece) converts text into pieces and IDs; the framework supports multiple algorithms.
 [Attention and KV caching](../../study-notes/machine-learning/attention.qmd#projections) explain how fixed prefix computations can be reused during causal decoding.
 Caching stores previous keys and values at each layer; it does not remove the query–key softmax needed to read them.

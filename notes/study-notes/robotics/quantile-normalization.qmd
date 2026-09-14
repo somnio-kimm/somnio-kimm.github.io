@@ -15,7 +15,7 @@ categories:
 
 Quantile normalization here means an [affine rescaling]{.term key="affine-map"} based on fixed [percentiles]{.term key="quantile"} of the training data.
 It changes the numerical coordinates used by a model, such as the coordinates of a robot action.
-Start with the [representation overview](../machine-learning/representations.qmd); compare [activation normalization](../machine-learning/normalization.qmd#what-to-check-when-reading-a-model) for transformations inside a network.
+Start with the [representation overview](../machine-learning/representations.qmd); compare [activation normalization](../machine-learning/normalisation.qmd#which-values-share-statistics) for transformations inside a network.
 
 ## Quantile scaling changes coordinates {#quantile-scaling}
 

@@ -50,7 +50,7 @@ The original paper reports model-size-dependent evaluations in Section 3; this s
 
 ## Connections
 
-[Activation normalization](../../study-notes/machine-learning/normalization.qmd#rmsnorm) gives the RMSNorm equation and its difference from LayerNorm.
+[Activation normalization](../../study-notes/machine-learning/normalisation.qmd#rmsnorm) gives the RMSNorm equation and its difference from LayerNorm.
 [Attention](../../study-notes/machine-learning/attention.qmd#projections) explains query–key weighting and the reuse of earlier keys and values during decoding.
 [Cross-entropy](../../study-notes/mathematics/entropy.qmd#cross-entropy) connects vocabulary logits to next-token training.
 [BERT](bert.qmd) offers a useful comparison with bidirectional encoder pretraining.
