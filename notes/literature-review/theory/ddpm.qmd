@@ -2,7 +2,7 @@
 title: 'DDPM: Denoising Diffusion Probabilistic Models'
 description: "From a Gaussian corruption chain to a variational bound, noise-prediction loss, and iterative generation."
 date-modified: 2026-09-10
-draft: false
+draft: true
 categories:
   - Machine Learning
   - Generative Models

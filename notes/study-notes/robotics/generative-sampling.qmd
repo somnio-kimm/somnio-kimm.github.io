@@ -2,7 +2,7 @@
 title: "Generative sampling and randomness"
 description: "Separate internal generative time, random inputs, deterministic computation, and repeated sampling."
 date-modified: 2026-09-11
-draft: false
+draft: true
 aliases:
   - /notes/study-notes/machine-learning/generative-sampling.html
 categories:

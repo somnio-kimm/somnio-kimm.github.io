@@ -2,7 +2,7 @@
 title: 'Fast R-CNN: Shared Features and RoI Pooling'
 description: "One image feature map, region-wise classification, Smooth L1 localization, and joint head training."
 date-modified: 2026-09-10
-draft: false
+draft: true
 categories:
   - Vision
   - Object Detection

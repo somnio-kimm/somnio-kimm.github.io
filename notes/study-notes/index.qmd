@@ -13,7 +13,7 @@ listing:
   filter-ui: true
   sort-ui: true
   fields: [title, description, categories]
-draft: false
+draft: true
 ---
 
 Each page develops one connected family of ideas, with sections for concepts best understood together.

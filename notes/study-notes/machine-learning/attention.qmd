@@ -2,7 +2,7 @@
 title: "Attention: projections, masks, and action queries"
 description: "How queries read keys and values, how masks constrain access, and why action queries differ from robot state."
 date-modified: 2026-09-11
-draft: false
+draft: true
 categories:
   - Machine Learning
   - Transformers

@@ -2,7 +2,7 @@
 title: "Object detection metrics"
 description: "Interpret IoU, precision, recall, and average precision under a specified matching protocol."
 date-modified: 2026-09-11
-draft: false
+draft: true
 categories:
   - Machine Learning
   - Computer Vision

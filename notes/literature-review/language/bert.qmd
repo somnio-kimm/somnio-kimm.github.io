@@ -2,7 +2,7 @@
 title: 'BERT: Bidirectional Language Pretraining'
 description: "Input embeddings, masked-language targets, next-sentence prediction, and task-specific fine-tuning."
 date-modified: 2026-09-10
-draft: false
+draft: true
 categories:
   - Language
   - Transformers

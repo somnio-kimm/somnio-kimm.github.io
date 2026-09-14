@@ -2,7 +2,7 @@
 title: 'Policies and learning regimes'
 description: "Action selection, imitation and reinforcement learning, and the different meanings of online and offline."
 date-modified: 2026-09-11
-draft: false
+draft: true
 aliases:
   - /notes/study-notes/machine-learning/policies.html
 categories:

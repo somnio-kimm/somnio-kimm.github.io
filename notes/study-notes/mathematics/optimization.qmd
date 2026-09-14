@@ -2,7 +2,7 @@
 title: 'Gradient-based optimization'
 description: "Gradient descent, parameter updates, and supporting slopes for convex objectives with corners."
 date-modified: 2026-09-11
-draft: false
+draft: true
 categories:
   - Mathematics
 ---

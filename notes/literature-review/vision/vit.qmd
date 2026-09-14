@@ -2,7 +2,7 @@
 title: 'ViT: An Image Is Worth 16 × 16 Words'
 description: "From image patches to transformer tokens, including patch projection and residual encoder blocks."
 date-modified: 2026-09-10
-draft: false
+draft: true
 categories:
   - Vision
   - Transformers

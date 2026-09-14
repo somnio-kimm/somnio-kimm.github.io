@@ -2,7 +2,7 @@
 title: "KV caching: prefill and decoding"
 description: "When earlier attention keys and values can be reused, and what still has to be computed for each new query."
 date-modified: 2026-09-11
-draft: false
+draft: true
 categories:
   - Machine Learning
   - Transformers

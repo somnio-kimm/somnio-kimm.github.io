@@ -2,7 +2,7 @@
 title: 'SSD: Single Shot MultiBox Detector'
 description: "Multi-scale default boxes, target matching, hard-negative mining, and direct class-and-box prediction."
 date-modified: 2026-09-10
-draft: false
+draft: true
 categories:
   - Vision
   - Object Detection

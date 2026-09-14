@@ -2,7 +2,7 @@
 title: "Likelihood and estimation: MLE and MAP"
 description: "Likelihood as a parameter function, its classification cross-entropy objective, and the effect of a parameter prior."
 date-modified: 2026-09-11
-draft: false
+draft: true
 categories:
   - Mathematics
   - Probability

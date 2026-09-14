@@ -2,7 +2,7 @@
 title: 'Score-Based Generative Modeling through SDEs'
 description: "What a score predicts, how denoising estimates it, and how reverse SDEs and probability-flow ODEs generate samples."
 date-modified: 2026-09-10
-draft: false
+draft: true
 categories:
   - Machine Learning
   - Generative Models

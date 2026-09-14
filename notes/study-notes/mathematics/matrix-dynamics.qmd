@@ -2,7 +2,7 @@
 title: 'Matrix structure and dynamics'
 description: "Matrix properties, eigenvalue modes, transient amplification, and inverses with low-rank corrections."
 date-modified: 2026-09-11
-draft: false
+draft: true
 categories:
   - Mathematics
 ---

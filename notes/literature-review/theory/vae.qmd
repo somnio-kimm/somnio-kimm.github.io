@@ -2,7 +2,7 @@
 title: 'VAE: Auto-Encoding Variational Bayes'
 description: "How a learned approximate posterior and reparameterised samples make latent-variable likelihood training practical."
 date-modified: 2026-09-10
-draft: false
+draft: true
 categories:
   - Machine Learning
   - Generative Models

@@ -2,7 +2,7 @@
 title: 'OpenVLA: An Open-Source Vision-Language-Action Model'
 description: "How fused visual patch features, language tokens, and discretised action coordinates become one autoregressive robot policy."
 date-modified: 2026-09-10
-draft: false
+draft: true
 categories:
   - Robotics
   - Machine Learning

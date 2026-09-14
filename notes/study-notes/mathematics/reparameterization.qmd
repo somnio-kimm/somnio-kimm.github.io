@@ -2,7 +2,7 @@
 title: "Reparameterisation"
 description: "Differentiable Gaussian sampling, log variance, and a Monte Carlo VAE training fragment."
 date-modified: 2026-09-11
-draft: false
+draft: true
 categories:
   - Mathematics
   - Generative Models

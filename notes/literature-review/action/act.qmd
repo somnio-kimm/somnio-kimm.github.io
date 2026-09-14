@@ -2,7 +2,7 @@
 title: 'Action Chunking with Transformers (ACT)'
 description: "How ACT trains a conditional VAE, generates an action chunk jointly, and combines overlapping predictions during execution."
 date-modified: 2026-09-10
-draft: false
+draft: true
 categories:
   - Robotics
   - Machine Learning

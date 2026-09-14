@@ -2,7 +2,7 @@
 title: "Flow matching and local velocity prediction"
 description: "Construct a probability path, regress its velocity, and understand why local averages can generate multiple modes."
 date-modified: 2026-09-11
-draft: false
+draft: true
 categories:
   - Machine Learning
   - Generative Models

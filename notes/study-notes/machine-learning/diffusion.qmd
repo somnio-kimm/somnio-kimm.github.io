@@ -2,7 +2,7 @@
 title: "Diffusion and noise prediction"
 description: "Explain the noisy input, sampled training target, conditional mean, and iterative generation."
 date-modified: 2026-09-11
-draft: false
+draft: true
 categories:
   - Machine Learning
   - Generative Models

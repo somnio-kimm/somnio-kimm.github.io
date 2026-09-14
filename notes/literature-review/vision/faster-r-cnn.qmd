@@ -2,7 +2,7 @@
 title: 'Faster R-CNN: Learning Region Proposals'
 description: "Anchors, objectness, shared convolutional features, and the original proposal-training schemes."
 date-modified: 2026-09-10
-draft: false
+draft: true
 categories:
   - Vision
   - Object Detection

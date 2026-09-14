@@ -2,7 +2,7 @@
 title: 'R-CNN: Region Proposals and CNN Features'
 description: "The original multi-stage detector, its different training labels, and ridge-regression box refinement."
 date-modified: 2026-09-10
-draft: false
+draft: true
 categories:
   - Vision
   - Object Detection

@@ -2,7 +2,7 @@
 title: "Distribution shift and confounding"
 description: "Distinguish changed distributions, policy-induced observation shift, and causal explanations for associations."
 date-modified: 2026-09-11
-draft: false
+draft: true
 categories:
   - Machine Learning
   - Learning Regimes

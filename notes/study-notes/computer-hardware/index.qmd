@@ -2,7 +2,7 @@
 title: "Computer Hardware"
 description: "Digital logic, processors, memory, and computer architecture."
 listing-page: true
-draft: false
+draft: true
 ---
 
 This section is reserved for notes on digital logic, processors, memory, and computer architecture.

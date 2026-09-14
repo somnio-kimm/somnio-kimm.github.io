@@ -7,7 +7,7 @@ listing:
   type: default
   sort: "title"
   fields: [title, description]
-draft: false
+draft: true
 ---
 
 These notes develop mathematical definitions, assumptions, and derivations used across the other subjects.

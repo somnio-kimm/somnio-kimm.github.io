@@ -2,7 +2,7 @@
 title: 'LLaMA: An Architecture Reading Note'
 description: "A concise map of original LLaMA's decoder, RMSNorm, SwiGLU, rotary positions, and inference cache."
 date-modified: 2026-09-10
-draft: false
+draft: true
 categories:
   - Language
   - Transformers

@@ -2,7 +2,7 @@
 title: 'Generative models'
 description: "Model families, output targets, autoregressive factorisation, teacher forcing, and action-policy applications."
 date-modified: 2026-09-11
-draft: false
+draft: true
 categories:
   - Machine Learning
 ---

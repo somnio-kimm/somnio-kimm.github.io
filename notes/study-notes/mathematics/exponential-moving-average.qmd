@@ -2,7 +2,7 @@
 title: "Exponential moving averages"
 description: "Track geometrically weighted history while keeping the averaged object and time index explicit."
 date-modified: 2026-09-11
-draft: false
+draft: true
 categories:
   - Mathematics
   - Machine Learning

@@ -2,7 +2,7 @@
 title: 'State-space models'
 description: "Continuous dynamics, discretisation, recurrence and convolution, polynomial memory, and selective sequence layers."
 date-modified: 2026-09-11
-draft: false
+draft: true
 categories:
   - Machine Learning
 ---

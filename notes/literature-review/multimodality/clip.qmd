@@ -2,7 +2,7 @@
 title: 'CLIP: Learning Visual Representations from Language'
 description: "Image–text contrastive learning, prompt-based zero-shot classification, and the limits of transfer."
 date-modified: 2026-09-10
-draft: false
+draft: true
 aliases:
   - /notes/literature-review/multimodal/clip.html
   - /notes/literature-review/vision/clip.html

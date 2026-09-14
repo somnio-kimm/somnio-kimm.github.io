@@ -2,7 +2,7 @@
 title: 'Knowledge Insulating Vision-Language-Action Models'
 description: "Why discrete action supervision lets a VLM learn robotics while stop-gradient isolates its continuous action expert."
 date-modified: 2026-09-10
-draft: false
+draft: true
 categories:
   - Robotics
   - ML

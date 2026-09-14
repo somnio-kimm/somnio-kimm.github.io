@@ -7,7 +7,7 @@ listing:
   type: default
   sort: "title"
   fields: [title, description]
-draft: false
+draft: true
 ---
 
 These reviews examine how models represent images, learn visual features, and detect objects.

@@ -2,7 +2,7 @@
 title: 'Distilling the Knowledge in a Neural Network'
 description: "Teacher soft targets, temperature, the T-squared loss factor, and the high-temperature logit-matching limit."
 date-modified: 2026-09-10
-draft: false
+draft: true
 categories:
   - Machine Learning
   - Representation Learning

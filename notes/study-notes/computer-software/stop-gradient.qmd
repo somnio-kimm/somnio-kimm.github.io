@@ -2,7 +2,7 @@
 title: "Stop-gradient"
 description: "An unchanged forward value with a blocked derivative path, including detached context and the chain rule."
 date-modified: 2026-09-11
-draft: false
+draft: true
 categories:
   - Computer Software
   - Machine Learning

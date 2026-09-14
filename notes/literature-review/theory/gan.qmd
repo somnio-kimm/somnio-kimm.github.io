@@ -2,7 +2,7 @@
 title: 'GAN: Generative Adversarial Nets'
 description: "Learn an implicit generator through a discriminator, and separate the ideal minimax result from practical training."
 date-modified: 2026-09-10
-draft: false
+draft: true
 categories:
   - Machine Learning
   - Generative Models

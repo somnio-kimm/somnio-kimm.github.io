@@ -2,7 +2,7 @@
 title: "Quantile normalization of physical coordinates"
 description: "Percentile-based affine scaling, inversion, out-of-range values, and the resulting weighting of errors."
 date-modified: 2026-09-11
-draft: false
+draft: true
 aliases:
   - /notes/study-notes/machine-learning/quantile-normalization.html
 categories:

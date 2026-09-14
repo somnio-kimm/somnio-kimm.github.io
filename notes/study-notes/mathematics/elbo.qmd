@@ -2,7 +2,7 @@
 title: "Evidence lower bound"
 description: "The reconstruction-plus-KL objective and the separate posterior KL that forms its likelihood gap."
 date-modified: 2026-09-11
-draft: false
+draft: true
 categories:
   - Mathematics
   - Generative Models

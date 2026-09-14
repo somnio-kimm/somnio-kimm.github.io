@@ -1,6 +1,6 @@
 ---
 title: "Curriculum Vitae"
-draft: false
+draft: true
 ---
 
 ## Education

@@ -2,7 +2,7 @@
 title: "Probability: variables, distributions, and conditioning"
 description: "Random variables, probability masses and densities, joint distributions, marginalisation, and Bayes’ rule."
 date-modified: 2026-09-11
-draft: false
+draft: true
 categories:
   - Mathematics
   - Probability

@@ -19,7 +19,7 @@ about:
     - icon: envelope
       text: Email
       href: mailto:somnio.kimm@gmail.com
-draft: false
+draft: true
 ---
 
 ## What you'll find here

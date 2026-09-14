@@ -2,7 +2,7 @@
 title: 'Representations, tokens, and embeddings'
 description: "How physical coordinates, text, and images become the numerical inputs to a model."
 date-modified: 2026-09-11
-draft: false
+draft: true
 categories:
   - Machine Learning
 ---

@@ -2,7 +2,7 @@
 title: 'π*0.6: Learning from Experience with RECAP'
 description: "How accumulated robot experience trains a distributional value model and an advantage-conditioned VLA, including the differences between rewards, values, and action labels."
 date-modified: 2026-09-10
-draft: false
+draft: true
 categories:
   - Robotics
   - Machine Learning

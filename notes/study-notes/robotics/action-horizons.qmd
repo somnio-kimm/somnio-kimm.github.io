@@ -2,7 +2,7 @@
 title: "Action horizons and feedback"
 description: "Distinguish observed history, predicted windows, executed commands, and transitions between chunks."
 date-modified: 2026-09-11
-draft: false
+draft: true
 aliases:
   - /notes/study-notes/physics/action-horizons.html
 categories:

@@ -2,7 +2,7 @@
 title: 'Variational Inference with Normalizing Flows'
 description: "How invertible transformations enrich a latent distribution, and why density changes use an inverse Jacobian."
 date-modified: 2026-09-10
-draft: false
+draft: true
 categories:
   - Machine Learning
   - Generative Models

@@ -7,7 +7,7 @@ listing:
   type: default
   sort: "title"
   fields: [title, description]
-draft: false
+draft: true
 ---
 
 These notes connect policy learning, action representations, and generation to the commands a robot executes.

@@ -2,7 +2,7 @@
 title: 'π0: A Vision-Language-Action Flow Model'
 description: "How a pretrained VLM and a continuous action expert combine images, language, state, and noisy actions."
 date-modified: 2026-09-10
-draft: false
+draft: true
 categories:
   - Robotics
   - ML
