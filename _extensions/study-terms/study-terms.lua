@@ -9,9 +9,19 @@ local function value(field)
   return field and pandoc.utils.stringify(field) or nil
 end
 
+-- quarto preview leaves quarto.project.directory nil, so fall back to this
+-- filter's own location: _extensions/study-terms sits at the project root.
+local function glossary_path()
+  local relative = "notes/study-notes/_glossary.yml"
+  if quarto.project.directory then
+    return quarto.project.directory .. "/" .. relative
+  end
+  return quarto.utils.resolve_path("../../" .. relative)
+end
+
 function Pandoc(doc)
-  local glossary_path = quarto.project.directory .. "/notes/study-notes/_glossary.yml"
-  local file = assert(io.open(glossary_path, "r"), "Cannot open study-note glossary")
+  local path = glossary_path()
+  local file = assert(io.open(path, "r"), "Cannot open study-note glossary: " .. path)
   local source = file:read("*a")
   file:close()
   local glossary = pandoc.read("---\n" .. source .. "\n---\n", "markdown").meta
