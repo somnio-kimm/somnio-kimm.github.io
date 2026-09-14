@@ -12,13 +12,16 @@ action-chunk:
   definition: An ordered sequence of proposed robot commands for several control steps. The controller
     may execute only part of the chunk before replacing it.
 activation:
-  label: Activation
+  label: activation
   definition: An intermediate value computed by a network for a particular input, as distinct from a learned
     parameter.
+activation-function:
+  label: activation function
+  definition: A nonlinear function applied to a network's intermediate values, often elementwise. It
+    allows the network to represent nonlinear functions of its input.
 affine-map:
-  label: Affine map
-  definition: A transformation consisting of a linear map followed by a translation. For a scalar coordinate
-    it has the form a times x plus b, and is invertible when a is nonzero.
+  label: affine map
+  definition: A transformation consisting of a linear map followed by a translation.
 automatic-differentiation:
   label: Automatic differentiation
   definition: Computing derivatives of a program by combining the derivative rules of its elementary operations

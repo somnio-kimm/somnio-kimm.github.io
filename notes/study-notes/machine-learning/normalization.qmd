@@ -2,121 +2,95 @@
 title: "Activation normalization: BatchNorm, LayerNorm, and RMSNorm"
 description: "A connected comparison of normalization statistics, centering, inference behaviour, and the formulas behind the three methods."
 date-modified: 2026-09-11
-draft: false
+draft: true
 categories:
   - Machine Learning
   - Neural Networks
 ---
 
-## Motivation {#motivation}
+A neural network takes an input and performs a sequence of computations.
+An activation is a value computed inside the netwrok while processing an input. 
+It depends on both the input and the network's parameters.
+Consider a simple computation inside a layer:
+$$
+\begin{align}
+    z & = wx + b \\
+    a & = \phi(z)
+\end{align}
+$$
 
-Two layers named “normalization” can couple different coordinates and behave differently when the batch changes.
-An activation normalization layer is a parameterized transformation of intermediate [activations]{.term key="activation"} inside a network.
+where $x$ is the input value, $w$ is a weight controlling how storngly $x$ contributes, $b$ is a bias providing an added offset, $z$ is the intermediate result called a pre-activation, $\phi$ is an activation function applied to $z$, and $a$ is the final activation output which can become an input to the next layer.
+During training, the learning procedure adjusts parameters such as $w$ and $b$.
+Activation normalisation operates on collections of activations, typically across a batch of examples or across the coordinates of a single example.
+
+Suppose passing several images through the network and recording one particular neuron's activation for each image.
+This gives a collection $\{a_1, a_2, \ldots, a_m\}$ where $m$ is the number of images, $a_i$ is the activation for image $i$, and the collection is called a minibatch.
+
+The mean describes its average level.
+$$
+    \mu = \frac{1}{m} \sum_{i=1}^{m} a_i
+$$
+
+The standard deviation describes how much the values vary around the mean.
+$$
+    \sigma = \sqrt{\frac{1}{m} \sum_{i=1}^{m} (a_i - \mu)^2}
+$$
+
+Assume that the activations are not all the same, so $\sigma > 0$.
+Each activation can be normalised to have zero mean and unit variance. 
+Subtracting the mean centers the collection at zero.
+Dividing by the standard deviation rescales the collection to have unit variance.
+$$
+    \hat{a}_i = \frac{a_i - \mu}{\sigma}
+$$
+
+Imagine three images processed together in a minibatch, producing three activations per neuron.
+
+| | Neuron 1 | Neuron 2 | Neuron 3 |
+|---|---|---|---|
+| Image A | \(a_{A1}\) | \(a_{A2}\) | \(a_{A3}\) |
+| Image B | \(a_{B1}\) | \(a_{B2}\) | \(a_{B3}\) |
+| Image C | \(a_{C1}\) | \(a_{C2}\) | \(a_{C3}\) |
+
 The key questions are **which coordinates share statistics**, **whether the mean is subtracted**, and **whether training and inference use the same statistics**.
-This differs from [quantile scaling](../robotics/quantile-normalization.qmd#quantile-scaling), which expresses physical input or output coordinates using fixed training-data reference values.
 
-## Comparing normalization methods {#what-to-check-when-reading-a-model}
+### BatchNorm
 
-| Method | Training statistics | Inference statistics |
-|---|---|---|
-| [BatchNorm](#batchnorm) | Batch; also space for CNNs | Estimated population |
-| [Token LayerNorm](#layernorm) | One token's hidden coordinates | Current token |
-| [Token RMSNorm](#rmsnorm) | One token's hidden coordinates | Current token |
-
-BatchNorm and LayerNorm subtract the mean; RMSNorm only rescales.
-These rows describe common settings; the normalized axes remain part of the model specification.
-The sections below give the equations for each method.
-
-The learned affine transformation means that normalized layer outputs need not retain zero mean or unit variance.
-Normalization also does not generally decorrelate features, make them Gaussian, or preserve information needed to invert the input from the output alone.
-Placement matters: [ViT](../../literature-review/vision/vit.qmd) normalizes before attention and its MLP, while [LLaMA](../../literature-review/language/llama.qmd) uses RMSNorm before its transformer sublayers.
-[PaliGemma](../../literature-review/multimodality/paligemma.qmd) motivates keeping these activation operations distinct from image encoding, text tokenization, and physical-coordinate scaling.
-
-## BatchNorm Uses Other Examples {#batchnorm}
-
-For one feature, collect its values $x_1,\ldots,x_m$ across a training [minibatch]{.term key="minibatch"}.
-BatchNorm computes a mean and variance for that feature, normalizes it, and applies a learned scale $\gamma$ and offset $\beta$:
-
+BatchNorm computes the mean and standard deviation across the three images for each neuron, then normalises each neuron's activations using those statistics.
+During training, the mean and standard deviation are computed from the current minibatch.
+During inference, the mean and standard deviation are estimated from the training data and used for all examples.
 $$
     \begin{aligned}
-        \mu_B&=\frac1m\sum_i x_i,\\
-        v_B&=\frac1m\sum_i(x_i-\mu_B)^2,\\
-        y_i&=\gamma\frac{x_i-\mu_B}{\sqrt{v_B+\epsilon}}+\beta.
+        \hat{a}_{i} & = \frac{a_{i} - \mu}{\sqrt{\sigma_j^{2} + \epsilon}} \\
+        y_{i} & = \gamma \hat{a_{i}} + \beta
     \end{aligned}
 $$
+where $gamma$ and $\beta$ are learned parameters, and $\epsilon$ is a small constant to prevent division by zero.
+Normalisaiotiong establishes a reference based on the current group.
+The learned paramteres let the network choose a usueful output scale and offset relative to that reference.
 
-Here $m\geq1$ and $\epsilon>0$ keeps the denominator positive even when the feature values are identical.
-The batch mean and variance are computed from activations; $\gamma$ and $\beta$ are [learned parameters]{.term key="parameter"}.
+### LayerNorm
 
-In a convolutional layer, the original method pools over batch and spatial positions separately for each channel.
-At inference, its standard procedure uses estimated population statistics instead of recomputing them from the current batch. [Ioffe and Szegedy (2015), Algorithms 1–2 and Section 3.2](https://proceedings.mlr.press/v37/ioffe15.pdf#page=3).
-Consequently, changing the other examples in a training batch can change one example's normalized activations.
-That dependency is absent when inference uses fixed statistics.
+LayerNorm computes the mean and standard deviation across the three neurons for each image, then normalises each image's activations using those statistics.
+It does not change its behaviour between training and inference, and it does not require a running estimate of the mean or standard deviation.
 
-## LayerNorm Uses One Representation {#layernorm}
+### RMSNorm
 
-For a transformer token vector $x\in\mathbb{R}^d$, LayerNorm computes statistics across its $d$ hidden coordinates.
-Each token in each example has its own statistics:
-
+RMSNorm computes the root mean square across the three neurons for each image, then rescales each image's activations using that statistic.
 $$
     \begin{aligned}
-        \mu&=\frac1d\sum_jx_j,\\
-        v&=\frac1d\sum_j(x_j-\mu)^2,\\
-        y_j&=\gamma_j\frac{x_j-\mu}{\sqrt{v+\epsilon}}+\beta_j.
+        r_i & = \sqrt{\frac{1}{d} \sum_{j=1}^{d} a_{ij}^{2}} \\
+        y_{ij} & = \gamma \frac{a_{ij}}{r_i + \epsilon} + \beta
     \end{aligned}
 $$
+where $d$ is the number of features.
+There is no subtraction of the mean, so the output is not centered at zero.
+RMSNorm removes a common positive scaling of the whole activation collection, but it does not remove a common offset.
+Every normalised value stays unchanged under rescaling of the input by a positive constant, i.e., rescaling invariance.
+If upstream computations merely multiply the entire feature collection by a common postiive factor, the nsxt layer can still receive the same normalised values, with learned scaling held fixed.
+All features are multiplied by the same factor, so the relative differences between features are preserved.
 
-The trainable $\gamma$ and $\beta$ have one coordinate per normalized feature and are shared across examples and token positions.
-Training and inference use the same normalization operation, without a running batch mean. [Ba et al. (2016), Sections 3 and 5](https://arxiv.org/abs/1607.06450).
-The exact normalized axes are part of the architecture: “LayerNorm” alone does not specify every possible tensor layout.
 
-## RMSNorm Scales without Centering {#rmsnorm}
+### QuantileNorm
 
-RMSNorm divides each coordinate by the root mean square of the same vector.
-A common form includes a numerical stabilizer and a learned gain:
-
-$$
-    \begin{aligned}
-        r^2&=\frac1d\sum_jx_j^2,\\
-        y_j&=\gamma_j\frac{x_j}{\sqrt{r^2+\epsilon}}.
-    \end{aligned}
-$$
-
-It does not subtract the mean, so its output need not be centered at zero.
-Its simpler computation retains rescaling invariance in the idealized zero-stabilizer setting, while giving up invariance to adding a common offset. [Zhang and Sennrich (2019), Section 3](https://papers.nips.cc/paper/2019/file/1e8a19426224ca89e83cef47f1e7f53b-Paper.pdf#page=3).
-This does not imply that subtracting a mean is inherently unstable or that RMSNorm always outperforms LayerNorm.
-
-::: {.callout-note collapse="true" icon="false" title="Derivation: RMS, variance, and an example"}
-Expanding the variance gives
-
-$$
-    \begin{aligned}
-        v&=\frac1d\sum_jx_j^2-\mu^2,\\
-        r^2&=v+\mu^2.
-    \end{aligned}
-$$
-
-Ignoring $\epsilon$ and taking unit gain and zero offset, consider $x=(1,3)$.
-Its mean is $2$, variance is $1$, and mean square is $5$.
-LayerNorm returns $(-1,1)$, while RMSNorm returns $(1,3)/\sqrt5$.
-Adding $10$ to both input coordinates leaves the LayerNorm result unchanged but changes the RMSNorm result.
-Multiplying the whole vector by a positive scalar cancels between numerator and denominator for both operations when $\epsilon=0$.
-Finite $\epsilon$ makes this scale invariance approximate.
-:::
-
-## Applications and boundaries {#applications}
-
-For a tensor shaped as batch × sequence position × hidden feature, token LayerNorm computes separate statistics for every batch–position pair.
-It combines the hidden coordinates of one token rather than averaging across the tokens of the sentence.
-At the normalization operation itself, replacing another example in the minibatch leaves this token's LayerNorm result unchanged, whereas training-mode BatchNorm can change.
-This distinction helps identify unintended cross-example dependencies when inspecting a model.
-
-The normalized axes, stabilizer, affine parameters, and training or inference mode are needed to reproduce the operation.
-The formulas standardize selected statistics; they do not guarantee useful features or successful optimization on their own.
-
-## Connections {#connections}
-
-[Quantile normalization](../robotics/quantile-normalization.qmd) uses fixed training-data references to express physical coordinates in a model's numerical range.
-[Attention](attention.qmd#projections) combines information from sequence positions; normalization changes the hidden vectors used within a transformer block.
-[Token embeddings](representations.qmd#embeddings) supplies the hidden-coordinate representation used in the LayerNorm example.
-[Representations](representations.qmd) connects hidden vectors to text, images, and physical inputs.
+QuantileNorm computes the mean and standard deviation across the three images for each neuron, then normalises each neuron's activations using those statistics.
