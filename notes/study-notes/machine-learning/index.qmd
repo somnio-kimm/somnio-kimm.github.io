@@ -7,7 +7,7 @@ listing:
   type: default
   sort: "title"
   fields: [title, description]
-draft: true
+draft: false
 ---
 
 These notes group related model concepts into complete explanations and link to their mathematical foundations and paper applications.

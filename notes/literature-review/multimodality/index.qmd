@@ -7,7 +7,7 @@ listing:
   type: default
   sort: "title"
   fields: [title, description]
-draft: true
+draft: false
 aliases:
   - /notes/literature-review/multimodal/index.html
 ---

@@ -1,6 +1,6 @@
 ---
 title: "Talks"
-draft: true
+draft: false
 ---
 
 Seminar talks, with slides.

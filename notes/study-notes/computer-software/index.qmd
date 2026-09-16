@@ -7,7 +7,7 @@ listing:
   type: default
   sort: "title"
   fields: [title, description]
-draft: true
+draft: false
 ---
 
 These notes describe computational operations and their behaviour within larger software systems.
