@@ -1,3 +1,11 @@
+---
+title: "Regularisation"
+date-modified: 2026-09-29
+draft: true
+categories:
+  - Machine Learning
+---
+
 Regularisation introduces restrictions or preferences into learning to encourage solutions that generalise better. It expresses something about the solutions we prefer beyond their fit to the observed training data.
 One common implementation adds a penalty:
 \[

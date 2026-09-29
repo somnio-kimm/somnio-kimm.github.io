@@ -1,3 +1,11 @@
+---
+title: "Optimisation"
+date-modified: 2026-09-29
+draft: true
+categories:
+  - Machine Learning
+---
+
 Optimisation means searching for an allowed parameter value that minimises the chosen objective.
 
 | Type | How nearby loss values compare |

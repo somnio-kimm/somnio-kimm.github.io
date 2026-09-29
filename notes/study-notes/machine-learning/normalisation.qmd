@@ -1,8 +1,8 @@
 ---
 title: "Activation normalisation: BatchNorm, LayerNorm, and RMSNorm"
 description: "From activations and standardisation to the statistics, learned parameters, and inference behaviour of three normalisation methods."
-date-modified: 2026-09-14
-draft: false
+date-modified: 2026-09-29
+draft: true
 categories:
   - Machine Learning
 ---
