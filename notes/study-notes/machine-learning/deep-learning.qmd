@@ -1,0 +1,171 @@
+---
+title: 'Deep Learning'
+description: ""
+date-modified: 2026-09-15
+draft: true
+categories:
+  - Machine Learning
+---
+
+A **model** is a prediction function with adjustable parameters.
+// A function is a rule that assings one output to each allowed input.
+Given a target $y$ and an input $x$, a model predicts $\hat{y} = f_\theta(x)$, where $\theta$ are the parameters.
+A **loss function** is a function that measures how well the model predicts the target. It takes the predicted value $\hat{y}$ and the true value $y$ and outputs a scalar loss value $\mathcal{L}(\hat{y}, y)$.
+The deriviative of the loss function with respect to the model parameters $\theta$ is called the **gradient**. The gradient points in the direction of steepest ascent of the loss function. To minimise the loss, we update the parameters in the opposite direction of the gradient.
+
+The **gradient descent** algorithm is an iterative optimization algorithm that updates the model parameters in the direction of the negative gradient of the loss function. The update rule is given by:
+$$
+\theta \leftarrow \theta - \eta \nabla_\theta \mathcal{L}(\hat{y}, y)
+$$  
+where $\eta$ is the learning rate, which controls the step size of the update.
+
+A **neural network** is a model that consists of multiple layers of interconnected nodes, called neurons. Each neuron applies a linear transformation to its inputs, followed by a non-linear activation function. The output of one layer serves as the input to the next layer.
+Here is a simple example with one input and one hidden unit:
+\[
+\begin{aligned}
+z &= w_1x+b_1,\\
+a &= \phi(z),\\
+\hat y &= w_2a+b_2.
+\end{aligned}
+\]
+“Hidden” means intermediate: \(a\) is neither the supplied input nor the final output.
+Why include a non-linear activation function? Because if we only use linear transformations, the entire network would collapse into a single linear transformation, regardless of the number of layers. Non-linear activation functions allow the network to learn complex, non-linear mappings from inputs to outputs.
+Our network was
+\[
+a=\phi(w_1x+b_1),
+\qquad
+\hat y=w_2a+b_2.
+\]Suppose we remove \(\phi\), so the first layer simply outputs \(a=w_1x+b_1\). Substituting this into the second layer gives
+\[
+\begin{aligned}
+\hat y
+&=w_2(w_1x+b_1)+b_2\\
+&=(w_2w_1)x+(w_2b_1+b_2).
+\end{aligned}
+\]Despite having two layers, this is still just a coefficient times \(x\), plus a constant. Its graph is a straight line. These transformations are called affine: linear transformations with an added constant.
+
+The **backpropagation** algorithm is used to compute the gradients of the loss function with respect to the model parameters in a neural network. It applies the chain rule of calculus to propagate the error backward through the network, layer by layer, allowing us to efficiently compute the gradients for all parameters.
+In our network,
+\[
+z=w_1x+b_1,\qquad a=\phi(z),\qquad \hat y=w_2a+b_2,
+\]an early parameter affects the loss through several intermediate computations:
+\[
+w_1\longrightarrow z\longrightarrow a\longrightarrow\hat y\longrightarrow L.
+\]
+Extending the chain rule gives
+\[
+\boxed{
+\frac{\partial L}{\partial w_1}
+=
+\underbrace{\frac{\partial L}{\partial a}}_{\text{already obtained}}
+\underbrace{\frac{\partial a}{\partial z}}_{\text{activation's local rate}}
+\underbrace{\frac{\partial z}{\partial w_1}}_{\text{parameter's effect}}
+}
+\]
+
+
+For our network,
+\[
+z=w_1x+b_1,\qquad
+a=\operatorname{ReLU}(z),\qquad
+\hat y=w_2a+b_2,
+\]training has four parts.
+1. Forward pass: calculate predictions
+Supply training inputs and calculate \(z\), then \(a\), then \(\hat y\), using the current parameters.
+2. Calculate the loss
+Compare predictions with recorded targets. For two equally weighted examples:
+\[
+L=\frac{(\hat y_1-y_1)^2+(\hat y_2-y_2)^2}{2}.
+\]The subscripts identify the examples. Both predictions come from the same network with the same parameters.
+3. Backpropagation: calculate gradients
+Apply the chain rule to find how the loss depends on each parameter:
+\[
+\frac{\partial L}{\partial w_1},\quad
+\frac{\partial L}{\partial b_1},\quad
+\frac{\partial L}{\partial w_2},\quad
+\frac{\partial L}{\partial b_2}.
+\]Backpropagation calculates these gradients. It does not itself update the parameters.
+4. Optimizer step: update parameters
+An optimizer is the rule that uses gradients to adjust parameters. Gradient descent is one optimizer:
+\[
+\text{new parameter}
+=
+\text{old parameter}
+-\eta\,(\text{its loss derivative}).
+\]The next forward pass uses the updated parameters, producing new predictions and a new loss.
+In short:
+Predict → measure loss → calculate gradients → update parameters → repeat.
+
+**Overfitting** occurs when a model fits details specific to its training sample that do not generalize well to new examples from the population we care about.
+
+
+| Data split | Purpose |
+|---|---|
+| **Training** | Calculate gradients and update parameters |
+| **Validation** | Choose architectures, learning rates, or when to stop training |
+| **Test** | Evaluate the chosen model after those decisions are settled |
+
+An **epoch** is one complete pass through the training data. A **batch** is a subset of the training data used to calculate gradients and update parameters. A **mini-batch** is a batch that is smaller than the full training set, allowing for more frequent updates and better generalization.
+
+**Early stopping** is a regularization technique that halts training when the validation loss stops improving, preventing overfitting. In practice, validation scores fluctuate, so we often allow several epochs without improvement before stopping. That waiting allowance is called **patience**.
+A saved parameter state is called a **checkpoint**. Checkpoints allow us to resume training from a previous state or to select the best-performing model based on validation performance.
+
+Another regularisation technique is **dropout**, which randomly sets a fraction of the neurons to zero during training. This prevents the network from relying too heavily on any single neuron, promoting redundancy and improving generalization.
+
+Another regularization technique is **weight decay**, which adds a penalty to the loss function based on the magnitude of the model parameters. This encourages the model to keep its weights small, reducing overfitting.
+A very strong penalty can prevent the model from learning useful relationships. That can produce **underfitting**: failing to capture important patterns even in the training data.
+
+\[
+\boxed{\mathbf z=W\mathbf x+\mathbf b}
+\]This introduces compact notation for the existing computations, not a different operation:
+- Each row of \(W\) contains one receiving unit’s weights.
+- Each column corresponds to one input feature.
+
+The hidden-layer weights affect the hidden activations, which affect the prediction, which affects this loss:
+\[
+\text{hidden weights}
+\longrightarrow
+\text{hidden activations}
+\longrightarrow
+\hat y
+\longrightarrow
+L.
+\]
+
+Backpropagation follows these dependencies backward. It calculates how changing each hidden-layer weight would affect the final prediction loss.
+
+This is called end-to-end training: a final task objective trains the connected layers together.
+
+The hidden unit’s purpose is to transform the input into a feature that makes a useful prediction relationship possible.
+
+Two separate roles:
+- Hidden activations: intermediate computations used to make the prediction.
+- Final target: the reference used to judge the prediction and train those computations.
+hidden units serve as adjustable intermediate computations that let the model express more varied input–output relationships.
+The second hidden layer transforms features computed by the first layer. It does not receive the original measurements directly in this architecture.
+So:
+- More width: more features computed at the same stage.
+- More depth: more stages that transform previously computed features.
+
+**Vanishing gradients** occur when gradients become very small as they propagate backward through the network. This can give early-layer parameters tiny updates, making those layers learn slowly.
+The important distinction is:
+- Loss value: how wrong the predictions are under our chosen measure.
+- Gradient: how sensitive that loss is to a particular change.
+A network can therefore make poor predictions while giving some parameters very little signal about how to improve them. Small gradients do not necessarily mean successful training.
+
+One way to help gradients travel through deep networks is a residual connection, also called a skip connection.
+Let:
+- \(a\) be the input activation to a block of layers.
+- \(F(a)\) be the transformation computed by those layers.
+- \(h\) be the block’s output.
+An ordinary block outputs
+\[
+h=F(a).
+\]A residual block outputs
+\[
+\boxed{h=a+F(a)}.
+\]The input travels along two paths: directly to the addition, and through \(F\). For vector activations, the two quantities being added must have matching shapes.
+
+
+
+

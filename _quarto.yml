@@ -1,6 +1,7 @@
 project:
   type: website
   output-dir: _site
+  pre-render: _wiki/build_index.py   # wiki index: [[wikilinks]] + "Linked from"
   render:
     - index.qmd
     - publications.qmd
@@ -12,6 +13,9 @@ project:
     - images/
     - files/
 
+filters:
+  - wiki
+
 editor:
   render-on-save: true
 
@@ -21,6 +25,8 @@ website:
   favicon: images/favicon.svg
   site-url: "https://somnio-kimm.github.io"
   repo-url: "https://github.com/somnio-kimm/somnio-kimm.github.io"
+  repo-branch: master
+  repo-actions: [edit, source, issue]
   search:
     location: navbar
     type: overlay
@@ -42,6 +48,9 @@ website:
             text: Literature Review
           - href: notes/study-notes/index.qmd
             text: Study Notes
+          - text: "---"
+          - href: notes/recent.qmd
+            text: Recently Updated
     right:
       - icon: github
         href: https://github.com/somnio-kimm
@@ -100,6 +109,7 @@ website:
 
 format:
   html:
+    from: markdown+wikilinks_title_after_pipe
     include-in-header: _includes/favicon.html
     theme:
       light: [cosmo, styles.scss]

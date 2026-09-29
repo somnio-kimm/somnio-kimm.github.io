@@ -1,0 +1,355 @@
+Optimisation means searching for an allowed parameter value that minimises the chosen objective.
+
+| Type | How nearby loss values compare |
+|---|---|
+| Local minimum | No sufficiently nearby point has lower loss |
+| Local maximum | No sufficiently nearby point has higher loss |
+| Saddle point | There are both higher and lower loss values arbitrarily nearby |
+
+For a general loss, zero gradient is inconclusive. But for a differentiable convex loss, a zero gradient guarantees a global minimum.
+What does convex mean?
+Choose any two parameter settings, \(\boldsymbol{\theta}_A\) and \(\boldsymbol{\theta}_B\). A point along the straight line between them is
+\[
+\boldsymbol{\theta}_t=(1-t)\boldsymbol{\theta}_A+t\boldsymbol{\theta}_B,
+\qquad 0\le t\le1.
+\]Here, \(t=0\) gives the first setting, \(t=1\) gives the second, and intermediate values blend them.
+A loss is convex if, for every pair of settings and every such \(t\),
+\[
+L(\boldsymbol{\theta}_t)
+\le
+(1-t)L(\boldsymbol{\theta}_A)+tL(\boldsymbol{\theta}_B).
+\]
+
+So far, we have imagined computing the gradient of the loss over the entire training dataset before every update. With a large dataset, that can be expensive.
+Instead, we can use a small subset of examples—a mini-batch—to choose each update.
+Let:
+- \(\boldsymbol{\theta}\) collect the model’s parameters.
+- \(\ell_i(\boldsymbol{\theta})\) be the loss on training example \(i\).
+- \(N\) be the number of training examples.
+The full training objective is
+\[
+L(\boldsymbol{\theta})
+=\frac{1}{N}\sum_{i=1}^{N}\ell_i(\boldsymbol{\theta}).
+\]Its gradient is the average of the individual examples’ gradients. A mini-batch approximates that average using fewer examples:
+\[
+\underbrace{\frac{1}{|B|}\sum_{i\in B}\nabla\ell_i(\boldsymbol{\theta})}_{\text{mini-batch gradient}},
+\]where \(B\) is the selected set of examples and \(|B|\) is its size.
+We still want to reduce the full training loss. We are estimating its gradient from a sample.
+Different samples can suggest different updates. For example, one group of objects might push our mass-prediction model toward a larger weight, while another pushes toward a smaller weight. The full gradient combines their contributions; one mini-batch sees only part of them.
+This gives three common terms:
+Method	Examples used per update
+Full-batch gradient descent	Entire training dataset
+Stochastic gradient descent, strictly speaking	One randomly selected example
+Mini-batch SGD, commonly also called SGD	A randomly selected batch
+
+
+With uniform random sampling, the mini-batch gradient equals the full gradient on average, evaluated at the same fixed parameters. An individual estimate can still point in a different direction.
+Increasing \(w\) can therefore improve the mini-batch while worsening the full training loss—even when the step is small.
+
+| Cause | What went wrong? |
+|---|---|
+| Overshooting | The direction was locally useful for the full loss, but the step was too large. |
+| Sampling noise | The mini-batch suggested a direction that was locally harmful to the full loss. |
+
+Another way to reduce erratic updates is momentum: retaining information from previous gradients.
+Ordinary SGD chooses each update using only the current mini-batch gradient. Momentum combines that gradient with a running average of earlier ones.
+Let:
+- \(g_t\) be the current mini-batch gradient at step \(t\).
+- \(m_t\) be the running average after incorporating \(g_t\).
+- \(\beta\), between \(0\) and \(1\), control how much previous information we retain.
+One common formulation is
+\[
+m_t=\beta m_{t-1}+(1-\beta)g_t,
+\qquad
+\boldsymbol{\theta}_{t+1}
+=\boldsymbol{\theta}_t-\eta m_t.
+\]We usually initialise \(m_0\) to zero. A larger \(\beta\) gives previous gradients more influence.
+Imagine two parameters:
+- For \(w\), successive gradients consistently suggest decreasing it.
+- For \(b\), successive gradients alternate between suggesting increases and decreases.
+In the running average, the consistent contributions for \(w\) reinforce each other, while the alternating contributions for \(b\) partly cancel. This can preserve useful movement while reducing oscillation.
+Larger batches average across examples at the current parameters. Momentum averages across steps, which used different parameter values. That historical information can help, but it can also become outdated.
+it smooths temporary fluctuations, but can lag when the useful direction changes.
+
+Suppose one parameter repeatedly has large gradients while another has small gradients. With a shared learning rate, their update sizes can differ greatly. Adaptive methods use each parameter’s recent gradient magnitudes to adjust its effective step size.
+For one parameter, let \(g_t\) be its current gradient. Define a running average of squared gradients:
+\[
+v_t=\beta_2v_{t-1}+(1-\beta_2)g_t^2,
+\]where \(0\le\beta_2<1\) controls how much history is retained.
+Squaring prevents positive and negative gradients from cancelling: \(v_t\) tracks magnitude, rather than a preferred direction. Its square root gives a recent gradient scale.
+An RMSProp-style update uses this scale:
+\[
+\theta_{t+1}
+=
+\theta_t-\eta\frac{g_t}{\sqrt{v_t}+\epsilon}.
+\]Here, \(\epsilon>0\) is a small constant that prevents division by zero. Each parameter has its own \(v_t\).
+A larger recent gradient scale produces a larger denominator, reducing the update relative to ordinary SGD. This is not a measurement of curvature or certainty—it is a running statistic of squared gradients.
+Adam combines this scaling idea with momentum: a running average of gradients supplies the numerator, while a running average of squared gradients supplies the scale. We’ll add its exact correction next.
+
+Adam combines the two mechanisms we have built. For each parameter, it maintains:
+\[
+m_t=\beta_1m_{t-1}+(1-\beta_1)g_t
+\]\[
+v_t=\beta_2v_{t-1}+(1-\beta_2)g_t^2.
+\]Here, \(g_t\) is that parameter’s current gradient:
+- \(m_t\) averages signed gradients, retaining a preferred direction.
+- \(v_t\) averages squared gradients, retaining a magnitude scale.
+- \(\beta_1\) and \(\beta_2\) independently control how much history each average retains.
+There is one extra detail: both averages start at zero. Early on, that initial zero pulls their values toward zero. Adam corrects this with
+\[
+\hat m_t=\frac{m_t}{1-\beta_1^t},
+\qquad
+\hat v_t=\frac{v_t}{1-\beta_2^t},
+\]where \(t\) counts updates starting from \(1\). The hats denote corrected versions of the same averages.
+For example, after the first gradient,
+\[
+m_1=(1-\beta_1)g_1.
+\]Dividing by \(1-\beta_1\) gives \(\hat m_1=g_1\), removing the shrinkage caused by starting at zero. The same reasoning applies to \(v_1\).
+Adam then updates each parameter using
+\[
+\boxed{
+\theta_{t+1}
+=
+\theta_t-\eta\frac{\hat m_t}{\sqrt{\hat v_t}+\epsilon}
+}
+\]The numerator provides the accumulated direction; the denominator scales its size. This still does not guarantee that every update reduces the full training loss.
+
+Why does starting \(m_0=0\) make \(m_t\) artificially small, and why does dividing by \(1-\beta^t\) fix it?
+Suppose gradients have been roughly
+\[
+g_1=10,\qquad g_2=10,\qquad g_3=10,\ldots
+\]So the quantity we're trying to track is clearly around
+\[
+10.
+\]Now use an exponential moving average:
+\[
+m_t=\beta m_{t-1}+(1-\beta)g_t.
+\]Let's choose
+\[
+\beta=0.9.
+\]That means
+\[
+m_t
+=
+0.9m_{t-1}
++
+0.1g_t.
+\]But Adam initializes
+\[
+m_0=0.
+\]Here's the problem.
+2. Look at the first step
+We know
+\[
+g_1=10.
+\]But:
+\[
+m_1
+=
+0.9m_0+0.1g_1
+\]Substitute \(m_0=0\):
+\[
+m_1
+=
+0.9(0)+0.1(10)
+\]\[
+m_1=1.
+\]That's strange.
+Our only observed gradient is
+\[
+10,
+\]yet our "average" says
+\[
+1.
+\]Why?
+Because the formula effectively mixed
+\[
+90\%\times 0
+\]with
+\[
+10\%\times10.
+\]That zero isn't real gradient information.
+It's just the initialization.
+So early in training, our moving average is contaminated by the artificial initial zero.
+
+3. What should the first average actually be?
+We've observed exactly one gradient:
+\[
+g_1=10.
+\]Therefore the best average of our observed gradients should simply be
+\[
+10.
+\]But Adam currently has
+\[
+m_1=(1-\beta)g_1.
+\]So:
+\[
+m_1=0.1g_1.
+\]We want to undo that factor \(0.1\).
+Divide by \(0.1\):
+\[
+\hat m_1
+=
+\frac{m_1}{0.1}.
+\]Since
+\[
+0.1=1-\beta,
+\]we get
+\[
+\boxed{
+\hat m_1=\frac{m_1}{1-\beta}
+}
+\]and therefore
+\[
+\hat m_1
+=
+\frac{(1-\beta)g_1}{1-\beta}
+=
+g_1.
+\]For our example:
+\[
+\hat m_1
+=
+\frac{1}{0.1}
+=
+10.
+\]Now it makes sense.
+
+4. But why does the general formula contain \(\beta^t\)?
+This is the deeper part.
+Let's expand the recurrence.
+Start with
+\[
+m_t=\beta m_{t-1}+(1-\beta)g_t.
+\]At \(t=1\):
+\[
+m_1
+=
+\beta m_0+(1-\beta)g_1.
+\]Since \(m_0=0\),
+\[
+m_1=(1-\beta)g_1.
+\]At \(t=2\):
+\[
+m_2
+=
+\beta m_1+(1-\beta)g_2.
+\]Substitute \(m_1\):
+\[
+m_2
+=
+\beta(1-\beta)g_1
++
+(1-\beta)g_2.
+\]Factor:
+\[
+m_2
+=
+(1-\beta)
+\left(
+\beta g_1+g_2
+\right).
+\]At \(t=3\):
+\[
+m_3
+=
+\beta m_2+(1-\beta)g_3.
+\]Substitute \(m_2\):
+\[
+m_3
+=
+\beta(1-\beta)
+(\beta g_1+g_2)
++
+(1-\beta)g_3.
+\]Distribute:
+\[
+m_3
+=
+(1-\beta)
+\left(
+\beta^2g_1+\beta g_2+g_3
+\right).
+\]So generally,
+\[
+\boxed{
+m_t
+=
+(1-\beta)
+\left(
+\beta^{t-1}g_1
++\beta^{t-2}g_2
++\cdots
++g_t
+\right)
+}
+\]Now look at the weights assigned to the gradients.
+They are
+\[
+(1-\beta)\beta^{t-1},
+\quad
+(1-\beta)\beta^{t-2},
+\quad\ldots,\quad
+(1-\beta).
+\]If this were a properly normalized weighted average, those weights should add to
+\[
+1.
+\]But they don't yet.
+Their sum is
+\[
+(1-\beta)
+\left(
+1+\beta+\beta^2+\cdots+\beta^{t-1}
+\right).
+\]The geometric-series identity gives
+\[
+1+\beta+\cdots+\beta^{t-1}
+=
+\frac{1-\beta^t}{1-\beta}.
+\]Therefore:
+\[
+(1-\beta)
+\frac{1-\beta^t}{1-\beta}
+=
+1-\beta^t.
+\]So the weights currently add to
+\[
+\boxed{1-\beta^t}
+\]instead of \(1\).
+That's where \(1-\beta^t\) comes from.
+
+Because Adam starts its moving averages at an artificial zero, the weights of the real observations initially sum to less than 1; dividing by \(1-\beta^t\) renormalizes those weights to sum to 1.
+
+| Quantity | What it averages | What it retains |
+|---|---|---|
+| \(m_t\), first-moment estimate | \(g_t\) | Signed direction and magnitude |
+| \(v_t\), second-moment estimate | \(g_t^2\) | Magnitude without sign cancellation |
+
+dam scales updates separately for each parameter, but the learning rate still controls their overall size:
+\[
+\Delta\theta_{t,i}
+=
+-\eta_t
+\frac{\hat m_{t,i}}{\sqrt{\hat v_{t,i}}+\epsilon}.
+\]Here, \(i\) selects a parameter and \(t\) selects a training step.
+There are two separate mechanisms:
+- Adam’s adaptive scaling depends on each parameter’s gradient history.
+- The learning-rate schedule specifies how the shared multiplier \(\eta_t\) changes during training.
+A schedule is simply a rule assigning a learning rate to each step. Common shapes include:
+| Schedule | What happens to \(\eta_t\)? |
+|---|---|
+| Constant | Stays fixed |
+| Decay | Decreases over training |
+| Warmup followed by decay | Starts small, increases initially, then decreases |
+
+Why decrease it?
+Near a minimum of the full training loss, individual mini-batches can still produce nonzero gradients. Their preferred directions may disagree even when the full gradient is zero.
+With a substantial learning rate, those gradients can keep moving the parameters around the minimum. A smaller learning rate reduces the movement caused by each update, allowing finer adjustments.
+However, reducing the learning rate does not make a mini-batch gradient more representative of the full dataset. It only changes how strongly that estimate affects the parameters. Excessively small steps can also make progress slow.
+
+| Procedure | Job |
+|---|---|
+| Forward pass | Compute intermediate values, predictions, and loss |
+| Backpropagation | Compute how the loss responds to each parameter |
+| Optimiser | Use those gradients to update parameters |
+

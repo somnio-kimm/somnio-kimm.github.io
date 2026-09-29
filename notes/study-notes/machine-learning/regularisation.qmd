@@ -1,0 +1,68 @@
+Regularisation introduces restrictions or preferences into learning to encourage solutions that generalise better. It expresses something about the solutions we prefer beyond their fit to the observed training data.
+One common implementation adds a penalty:
+\[
+J(w)=L_{\text{train}}(w)+\lambda R(w).
+\]Here:
+- \(w\) is the collection of model parameters that training changes.
+- \(L_{\text{train}}(w)\) measures prediction error on the fixed training dataset.
+- \(R(w)\) penalises a specified property of the parameters—for example, large weight magnitudes.
+- \(\lambda\geq 0\) controls the strength of that penalty and is held fixed during this training run.
+- \(J(w)\) is the total objective the optimiser now tries to minimise.
+The important change is that a reduction in training error may no longer be worth its accompanying increase in the penalty. Training can favour a solution with slightly worse training fit if it better satisfies the chosen preference.
+Whether that preference actually helps on new data must be checked; regularisation does not guarantee improvement.
+
+L2 regularisation pushes weights towards zero during training.
+Consider one weight \(w\), with objective
+\[
+J(w)=L_{\text{train}}(w)+\lambda w^2.
+\]During an update, the dataset and \(\lambda\) are fixed. We differentiate with respect to \(w\):
+\[
+\frac{dJ}{dw}
+=
+\frac{dL_{\text{train}}}{dw}+2\lambda w.
+\]The two terms have different roles:
+- \(\frac{dL_{\text{train}}}{dw}\) describes how changing \(w\) affects training prediction error.
+- \(2\lambda w\) describes how changing \(w\) affects the penalty.
+Ordinary gradient descent subtracts the total derivative, multiplied by the learning rate \(\eta>0\):
+\[
+\begin{aligned}
+w_{\text{new}}
+&=w-\eta\left(\frac{dL_{\text{train}}}{dw}+2\lambda w\right)\\
+&=\underbrace{(1-2\eta\lambda)w}_{\text{effect of the penalty}}
+-\underbrace{\eta\frac{dL_{\text{train}}}{dw}}_{\text{effect of fitting the data}}.
+\end{aligned}
+\]For a step size satisfying \(0<2\eta\lambda<1\), the penalty multiplies the old weight by a number between zero and one. That moves both positive and negative weights towards zero.
+But the data-fitting term may push the weight away from zero. L2 adds a pull towards zero; it does not require every complete update to reduce the weight’s magnitude. The final update combines both effects.
+
+\[
+J(w)=L_{\text{train}}(w)+\lambda R(w).
+\]\(\lambda\) controls how much training fit we are willing to sacrifice to reduce the penalty.
+For two candidate models whose parameters are held fixed, increasing \(\lambda\) gives their penalty difference more influence over which has the lower objective. When we train again with this larger \(\lambda\), we therefore ask the optimiser to solve a different trade-off.
+For L2 regularisation:
+Strength	Effect
+\(\lambda=0\)	The objective considers only training prediction error.
+Moderate \(\lambda\)	Smaller weights are preferred, potentially discouraging fitting noise.
+Excessively large \(\lambda\)	The preference can suppress relationships needed for accurate prediction.
+
+
+That last situation can produce underfitting: the fitted model fails to capture useful structure, so even its training predictions are poor.
+Also distinguish the two controls:
+- Learning rate \(\eta\): controls the size of each gradient-descent step.
+- Regularisation strength \(\lambda\): changes the objective those steps seek to minimise.
+
+ We have used L2 regularisation, which penalises squared weights. Another common choice is L1 regularisation, which penalises absolute weights:
+\[
+\begin{aligned}
+R_{\mathrm{L2}}(w)&=\sum_j w_j^2,\\
+R_{\mathrm{L1}}(w)&=\sum_j |w_j|.
+\end{aligned}
+\]Here, \(w\) is the collection of weights, and \(j\) indexes individual weights. Both penalties favour smaller magnitudes, but their behaviour near zero differs.
+For one weight, with \(\lambda>0\):
+| | L2 penalty: \(\lambda w^2\) | L1 penalty: \(\lambda|w|\) |
+|---|---|---|
+| Penalty derivative away from zero | \(2\lambda w\) | \(+\lambda\) for positive \(w\); \(-\lambda\) for negative \(w\) |
+| As the weight approaches zero | The penalty’s pull becomes weaker | The penalty’s pull keeps the same magnitude until zero |
+| Typical effect | Shrinks weights | Can set weights exactly to zero |
+At zero, the L1 penalty has a corner: moving away from zero in either direction immediately increases the penalty at rate \(\lambda\). If the training-loss improvement is too weak to compensate, keeping that weight exactly zero is optimal. L2’s penalty instead has zero slope at zero, so it does not create the same threshold.
+This is why L1 can produce sparse weights, meaning many weights are exactly zero.
+

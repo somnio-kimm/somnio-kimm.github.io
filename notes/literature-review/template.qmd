@@ -40,4 +40,5 @@ Cite the paper's section, figure, or table and distinguish evidence from interpr
 
 ## Connections
 
-<!-- Link the study notes and related papers, explaining each relationship. -->
+<!-- Link the study notes and related papers, explaining each relationship.
+Use [[file-name]] or [[file-name|link text]]; add a folder ([[theory/flow-matching]]) when a name is ambiguous. -->
