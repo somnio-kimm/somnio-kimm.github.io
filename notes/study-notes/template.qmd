@@ -1,25 +1,17 @@
 ---
-title: ''
-description: ""
-date-modified: XXXX-XX-XX
+title: 'concept name'
+description: "In one line, what this concept is about."
+date-modified: YYYY-MM-DD
 draft: true
 categories:
   - XXXX
 ---
 
-## In one line
-
 ## Intuition
 
-```mermaid
-flowchart LR
-  A[input] --> B[this concept] --> C[output]
-```
 
 ## How it works
 
-```TEX
-```
 
 ## Not to be confused with
 

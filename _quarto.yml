@@ -48,6 +48,8 @@ website:
             text: Literature Review
           - href: notes/study-notes/index.qmd
             text: Study Notes
+          - href: notes/study-notes/glossary.qmd
+            text: Glossary
           - text: "---"
           - href: notes/recent.qmd
             text: Recently Updated
@@ -88,6 +90,8 @@ website:
       contents:
         - href: notes/study-notes/index.qmd
           text: "All study notes"
+        - href: notes/study-notes/glossary.qmd
+          text: "Glossary cards"
         - section: "Mathematics"
           href: notes/study-notes/mathematics/index.qmd
           contents: "notes/study-notes/mathematics/*.qmd"

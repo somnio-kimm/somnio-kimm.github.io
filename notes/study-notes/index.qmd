@@ -7,6 +7,7 @@ listing:
     - "**/*.qmd"
     - "!**/index.qmd"
     - "!template.qmd"
+    - "!glossary.qmd"
   type: grid
   sort: "title"
   categories: true
@@ -21,6 +22,7 @@ Substantial supporting topics have their own linked pages.
 Definitions and main results stay visible; expand a derivation or proof for the supporting steps.
 Notes explain the motivation, what kind of object the concept is, how it works, and where it applies or breaks down.
 Hover over, focus on, or tap a pastel-highlighted term for a short supporting definition.
+Use the [glossary cards](glossary.qmd) to search definitions, filter related concepts by tag, or practise recalling meanings.
 
 | Subject | Scope |
 |---|---|

@@ -1,0 +1,33 @@
+# Robotics glossary cards.
+# Add terms anywhere in this file; the card page sorts them automatically.
+# Use short plain-text definitions and reusable lowercase tags.
+
+action-chunk:
+  label: Action chunk
+  tags: [robotics]
+  definition: An ordered sequence of proposed robot commands for several control steps. The controller
+    may execute only part of the chunk before replacing it.
+
+behavioural-cloning:
+  label: Behavioural cloning
+  tags: [imitation-learning, machine-learning, robotics]
+  definition: Learning a policy from demonstrated observations and actions using a supervised learning
+    objective.
+
+bounding-box:
+  label: Bounding box
+  tags: [computer-vision, robotics]
+  definition: A rectangle used to specify the location and extent of a region in an image, under a stated
+    coordinate convention.
+
+discounted-return:
+  label: Discounted return
+  tags: [reinforcement-learning, robotics]
+  definition: A sum of rewards along a trajectory in which later rewards are multiplied by progressively
+    higher powers of a discount factor. Its expectation is one common reinforcement-learning objective.
+
+policy:
+  label: Policy
+  tags: [reinforcement-learning, robotics]
+  definition: A rule for choosing actions from available information, such as a state, observation, or
+    history. It may return an action directly or specify a distribution from which an action is selected.

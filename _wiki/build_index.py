@@ -23,6 +23,7 @@ WIKILINK = re.compile(r"\[\[([^\[\]|#]+)(?:#[^\[\]|]*)?(?:\|[^\[\]]*)?\]\]")
 MDLINK = re.compile(r"\]\(\s*<?([^)\s>]+?\.qmd)(?:#[^)\s>]*)?>?(?:\s+\"[^\"]*\")?\s*\)")
 CODE = re.compile(r"```.*?```|`[^`\n]*`", re.S)
 COMMENT = re.compile(r"<!--.*?-->", re.S)
+TERM = re.compile(r'\{[^{}]*\.term\b[^{}]*\bkey\s*=\s*[\"\']([^\"\']+)[\"\'][^{}]*\}')
 
 
 def scalar(block, key):
@@ -55,8 +56,10 @@ def main():
         block = fm.group(1) if fm else ""
         draft = (scalar(block, "draft") or "false").lower() == "true"
         title = scalar(block, "title") or p.stem
-        pages[rel] = {"title": title, "draft": draft}
         texts[rel] = text[fm.end():] if fm else text
+        body = CODE.sub("", COMMENT.sub("", texts[rel]))
+        pages[rel] = {"title": title, "draft": draft,
+                      "terms": sorted(set(TERM.findall(body)))}
 
     # Lookup keys: file stem, folder name for index pages, path suffixes, and title.
     keys = {}

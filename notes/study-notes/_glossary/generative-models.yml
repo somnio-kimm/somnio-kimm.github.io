@@ -1,0 +1,45 @@
+# Generative Models glossary cards.
+# Add terms anywhere in this file; the card page sorts them automatically.
+# Use short plain-text definitions and reusable lowercase tags.
+
+autoregressive-generation:
+  label: Autoregressive generation
+  tags: [generative-models, machine-learning]
+  definition: Generating an output sequence by repeatedly predicting the next element conditioned on earlier
+    elements and any supplied context.
+
+autoregressive-model:
+  label: Autoregressive model
+  tags: [generative-models, machine-learning, probability]
+  definition: A probability model that factorises a joint distribution into conditional distributions,
+    each conditioned on earlier variables in a chosen order. The variables may be discrete or continuous.
+
+nat:
+  label: Nat
+  tags: [generative-models, information-theory, machine-learning]
+  definition: The unit of information obtained when logarithms use base e. Changing the logarithm base
+    changes the unit and rescales the numerical information value.
+
+probability-path:
+  label: Probability path
+  tags: [generative-models, machine-learning, probability]
+  definition: A family of probability distributions indexed by a time-like variable. A generative flow
+    chooses such a family to connect a simple starting distribution to a data distribution.
+
+sampler:
+  label: Sampler
+  tags: [generative-models, machine-learning, probability]
+  definition: A procedure for producing draws from, or approximating draws from, a specified distribution.
+    It includes the random inputs and numerical update rules, not only the trained network.
+
+score:
+  label: Score of a density
+  tags: [calculus, generative-models, machine-learning, probability]
+  definition: The gradient of log density with respect to the sample coordinates. It indicates the local
+    direction and rate of increase of log density, and differs from a gradient with respect to model parameters.
+
+velocity-field:
+  label: Velocity field
+  tags: [dynamical-systems, generative-models, machine-learning]
+  definition: A function assigning a local direction and rate of change to each position and time. In
+    flow generation, it changes a sample with respect to internal generative time.

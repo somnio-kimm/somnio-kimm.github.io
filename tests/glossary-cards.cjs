@@ -1,0 +1,96 @@
+// Same Playwright setup as study-terms.cjs. Pass origin and optionally --drafts.
+const assert = require("node:assert/strict");
+const { chromium } = require("playwright-core");
+
+(async () => {
+  const origin = process.argv[2] || "http://127.0.0.1:8765";
+  const url = `${origin}/notes/study-notes/glossary.html`;
+  const drafts = process.argv.includes("--drafts");
+  const browser = await chromium.launch({
+    executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || undefined,
+    headless: true,
+  });
+  try {
+    for (const width of [1440, 390]) {
+      const context = await browser.newContext({viewport: {width, height: 900}, hasTouch: width === 390});
+      const page = await context.newPage();
+      const errors = [];
+      page.on("pageerror", error => errors.push(error.message));
+      await page.goto(url, {waitUntil: "networkidle"});
+      const cards = page.locator(".glossary-card");
+      const total = await cards.count();
+      assert(total >= 66);
+      const labels = await page.locator(".glossary-card-title").allTextContents();
+      assert.deepEqual(labels, [...labels].sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1));
+      assert.equal(await page.locator(".glossary-definition[open]").count(), total);
+
+      if (width === 390) await page.locator(".glossary-tag-picker summary").click();
+      await page.locator('[data-filter="robotics"]').click();
+      assert(await page.locator(".glossary-card:visible").count() < total);
+      await page.locator(".glossary-reset").click();
+      if (width === 390) await page.locator(".glossary-tag-picker summary").click();
+
+      await page.locator("#glossary-practice").check();
+      assert.equal(await page.locator(".glossary-definition[open]").count(), 0);
+      await cards.first().locator("summary").press("Enter");
+      assert.equal(await cards.first().locator(".glossary-definition p").isVisible(), true);
+      await page.locator("#glossary-search").fill("LATENT variable");
+      assert.equal(await page.locator("#term-latent-variable").isVisible(), true);
+      await page.locator("#glossary-search").fill("zzzz-no-such-term");
+      assert.equal(await page.locator(".glossary-empty").isVisible(), true);
+      await page.locator(".glossary-reset").click();
+      assert.equal(await page.locator(".glossary-card:visible").count(), total);
+
+      await page.locator('#term-latent-variable [data-tag="probability"]').click();
+      const visible = await page.locator(".glossary-card:visible").evaluateAll(items => items.map(el => JSON.parse(el.dataset.tags)));
+      assert(visible.length > 1 && visible.length < total);
+      assert(visible.every(tags => tags.includes("probability")));
+      assert(new URL(page.url()).searchParams.get("tag") === "probability");
+      await page.reload({waitUntil: "networkidle"});
+      assert.equal(await page.locator('[data-filter="probability"]').getAttribute("aria-pressed"), "true");
+      await page.goto(`${url}?tag=robotics#term-latent-variable`, {waitUntil: "networkidle"});
+      assert.equal(await page.locator("#term-latent-variable").isVisible(), true);
+      assert.equal(await page.locator("#term-latent-variable details").getAttribute("open"), "");
+
+      await page.locator(".glossary-reset").click();
+      if (drafts) {
+        const link = page.locator('#term-parameterised-function .glossary-related a[href$="neural-network.html"]');
+        assert.equal(await link.count(), 1);
+        await link.click();
+        await page.waitForURL("**/neural-network.html", {waitUntil: "networkidle"});
+        assert(await page.locator("main .study-term").count() > 0);
+        await page.goBack({waitUntil: "networkidle"});
+      } else {
+        assert.equal(await page.locator(".glossary-draft").count(), 0);
+        assert.equal(await page.locator('.glossary-related a[href$="neural-network.html"]').count(), 0);
+      }
+      for (const dark of [false, true]) {
+        await page.evaluate(value => {
+          document.body.classList.toggle("quarto-dark", value);
+          document.body.classList.toggle("quarto-light", !value);
+        }, dark);
+        assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), "no horizontal overflow");
+      }
+      await page.screenshot({path: `/private/tmp/glossary-cards-${drafts ? "preview" : "production"}-${width}.png`, fullPage: false});
+      await page.locator("#glossary-practice").check();
+      await page.locator("#glossary-search").fill("latent");
+      await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
+      await page.emulateMedia({media: "print"});
+      assert.equal(await page.locator(".glossary-card:visible").count(), total);
+      assert.equal(await page.locator(".glossary-definition[open]").count(), total);
+      await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
+      assert.equal(await page.locator(".glossary-definition[open]").count(), 0);
+      assert.deepEqual(errors, []);
+      await context.close();
+      console.log(`PASS ${width}px: practice, search, tags, deep links, drafts, layout, print`);
+    }
+    const fallback = await browser.newContext({javaScriptEnabled: false});
+    const page = await fallback.newPage();
+    await page.goto(url);
+    assert.equal(await page.locator(".glossary-controls").isVisible(), false);
+    assert(await page.locator(".glossary-definition[open]").count() >= 66);
+    assert.equal(await page.locator(".glossary-definition p").first().isVisible(), true);
+    await fallback.close();
+    console.log("PASS no JavaScript: cards and definitions remain readable");
+  } finally { await browser.close(); }
+})().catch(error => { console.error(error); process.exitCode = 1; });

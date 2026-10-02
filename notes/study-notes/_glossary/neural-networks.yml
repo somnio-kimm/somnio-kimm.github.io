@@ -1,0 +1,81 @@
+# Neural Networks glossary cards.
+# Add terms anywhere in this file; the card page sorts them automatically.
+# Use short plain-text definitions and reusable lowercase tags.
+
+activation:
+  label: activation
+  tags: [machine-learning, neural-networks]
+  definition: An intermediate value computed by a network for a particular input, as distinct from a learned
+    parameter.
+
+activation-function:
+  label: activation function
+  tags: [machine-learning, neural-networks]
+  definition: A nonlinear function applied to a network's intermediate values, often elementwise. It
+    allows the network to represent nonlinear functions of its input.
+
+encoder:
+  label: Encoder
+  tags: [machine-learning, neural-networks]
+  definition: A function or model component that maps an input into a representation used by subsequent
+    computation. Its architecture and training objective determine what information the representation
+    carries.
+
+inference:
+  label: Inference
+  tags: [machine-learning, neural-networks]
+  definition: Using a trained model to compute predictions or generate outputs from supplied inputs. Ordinary
+    inference does not update the learned parameters.
+
+learned-feature-vector:
+  label: Learned feature vector
+  tags: [machine-learning, neural-networks]
+  definition: A numerical description whose coordinates are produced or adjusted through learning for
+    an objective. The coordinates need not each correspond to a named human-interpretable property.
+
+minibatch:
+  label: Minibatch
+  tags: [machine-learning, neural-networks]
+  definition: A group of training examples processed together to compute an update or shared batch statistics.
+
+parameter:
+  label: Model parameter
+  tags: [machine-learning, neural-networks]
+  definition: A value that selects a model's behaviour, such as a learned weight or bias. It is held fixed
+    during an ordinary prediction, unlike the input.
+
+parameterised-function:
+  label: Parameterised function
+  tags: [machine-learning, neural-networks]
+  definition: A family of functions indexed by parameters. Fixing the parameters selects the function
+    applied to an input.
+
+representation:
+  label: Representation
+  tags: [machine-learning, neural-networks]
+  definition: An encoding of information used by a model or computation. Its form and usefulness depend
+    on what later operations need to do with it.
+
+softmax:
+  label: Softmax
+  tags: [machine-learning, neural-networks]
+  definition: A function that exponentiates scores and divides each exponential by their sum, producing
+    positive values that sum to one for finite scores.
+
+teacher-forcing:
+  label: Teacher forcing
+  tags: [machine-learning, neural-networks]
+  definition: Training a sequence predictor using the observed earlier outputs as context for later predictions.
+    Generation usually supplies the model’s own earlier outputs instead.
+
+token:
+  label: Token
+  tags: [machine-learning, neural-networks]
+  definition: A sequence element processed by a model. Depending on the input path, it may originate from
+    a discrete vocabulary item or a continuous feature vector.
+
+transformer:
+  label: Transformer
+  tags: [machine-learning, neural-networks]
+  definition: A neural-network architecture built from blocks that combine attention with positionwise
+    transformations, typically using residual connections and normalization.

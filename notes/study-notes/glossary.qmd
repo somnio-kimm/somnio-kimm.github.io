@@ -1,0 +1,13 @@
+---
+title: "Glossary"
+description: "Word cards with short definitions, topic tags, and related study notes."
+draft: false
+toc: false
+listing-page: true
+---
+
+Browse a term, follow a tag to connect related ideas, or search for a word.
+Turn on **Hide definitions for practice** to recall each meaning before revealing it.
+
+::: {.glossary-cards}
+:::

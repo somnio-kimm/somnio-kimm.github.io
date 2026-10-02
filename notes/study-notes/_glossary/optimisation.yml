@@ -1,0 +1,21 @@
+# Optimisation glossary cards.
+# Add terms anywhere in this file; the card page sorts them automatically.
+# Use short plain-text definitions and reusable lowercase tags.
+
+clipping:
+  label: Clipping
+  tags: [machine-learning, optimisation]
+  definition: Replacing values outside a specified interval by its nearest endpoint. Several distinct
+    original values can then share the same result, so clipping generally cannot be inverted.
+
+regularisation-penalty:
+  label: Regularisation penalty
+  tags: [machine-learning, optimisation]
+  definition: An additional objective term that penalizes specified properties of parameters or predictions,
+    expressing a preference beyond fitting the observed targets.
+
+training-objective:
+  label: Training objective
+  tags: [machine-learning, optimisation]
+  definition: A scalar-valued function of model parameters that the training procedure seeks to optimize,
+    often combining data loss and additional penalties.
