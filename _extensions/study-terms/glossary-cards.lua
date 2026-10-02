@@ -71,13 +71,24 @@ function M.render(glossary, meta)
   local notes = related_notes(meta)
   local html = {'<div class="glossary-browser">',
     '<div class="glossary-controls" hidden>',
-    '<label for="glossary-search">Search terms, definitions, tags, or related notes</label>',
+    '<label for="glossary-search">Search glossary</label>',
     '<input id="glossary-search" type="search" placeholder="e.g. latent, mathematics, robotics" autocomplete="off">',
+    '<p class="glossary-search-hint">Search terms, definitions, tags, and related notes. Results stay in A–Z order.</p>',
+    '<div class="glossary-alphabet" role="group" aria-label="Browse by first letter">',
+    '<button type="button" data-letter="" aria-pressed="true">All</button>'}
+  for letter = string.byte("A"), string.byte("Z") do
+    local name = string.char(letter)
+    html[#html + 1] = '<button type="button" data-letter="' .. name
+      .. '" aria-pressed="false" aria-label="Terms starting with ' .. name .. '">' .. name .. '</button>'
+  end
+  html[#html + 1] = '</div>'
+  local controls = {
     '<div class="glossary-options"><label><input id="glossary-practice" type="checkbox"> Hide definitions for practice</label>',
     '<button type="button" class="glossary-reset">Clear filters</button></div>',
     '<details class="glossary-tag-picker" open><summary>Filter by tag</summary>',
     '<div class="glossary-filters" role="group" aria-label="Filter by tag">',
     '<button type="button" data-filter="" aria-pressed="true">All tags</button>'}
+  for _, part in ipairs(controls) do html[#html + 1] = part end
   local sorted_tags = {}
   for tag in pairs(all_tags) do sorted_tags[#sorted_tags + 1] = tag end
   table.sort(sorted_tags)

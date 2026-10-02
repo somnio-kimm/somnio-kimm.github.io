@@ -48,10 +48,13 @@ Tags match the study-note subject folder names: `mathematics`, `machine-learning
 one when a term spans subjects. They belong to the term, independently of which file holds it.
 
 The Glossary page loads every entry from these same files. It supports text search,
-tag filtering, shareable `?tag=mathematics&q=latent` filters, and practice by hiding
+an A–Z first-letter filter, tag filtering, shareable `?tag=mathematics&letter=L&q=latent`
+filters, and practice by hiding
 definitions until each native disclosure is opened. `#term-latent-variable` links
 directly to a card. Without JavaScript, cards and definitions remain readable.
 Printing includes all cards and definitions.
+The glossary has its own sidebar, with alphabetical subject links that filter the
+glossary directly. Subjects with no entries show the empty state.
 
 Related notes are collected from `.term` annotations by `_wiki/build_index.py`;
 code examples and comments are ignored. Links to draft notes appear only with

@@ -23,6 +23,45 @@ const { chromium } = require("playwright-core");
       const labels = await page.locator(".glossary-card-title").allTextContents();
       assert.deepEqual(labels, [...labels].sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1));
       assert.equal(await page.locator(".glossary-definition[open]").count(), total);
+      const sidebar = page.locator("#quarto-sidebar");
+      assert(!(await sidebar.textContent()).includes("All study notes"));
+      const subjectLinks = sidebar.locator('a[href*="?tag="]');
+      assert.equal(await subjectLinks.count(), 6);
+      assert((await subjectLinks.evaluateAll(items => items.map(el => el.href)))
+        .every(href => new URL(href).pathname.endsWith("/glossary.html")));
+
+      await page.locator('[data-letter="L"]').click();
+      const lCards = await page.locator(".glossary-card:visible .glossary-card-title").allTextContents();
+      assert(lCards.length > 0 && lCards.every(label => label.toUpperCase().startsWith("L")));
+      assert.equal(new URL(page.url()).searchParams.get("letter"), "L");
+      if (width === 390) await page.locator(".glossary-tag-picker summary").click();
+      await page.locator('[data-filter="mathematics"]').click();
+      const combined = await page.locator(".glossary-card:visible").evaluateAll(items => items.map(el => ({
+        title: el.querySelector(".glossary-card-title").textContent,
+        tags: JSON.parse(el.dataset.tags),
+      })));
+      assert(combined.length > 0 && combined.every(item => item.title.startsWith("L") && item.tags.includes("mathematics")));
+      await page.reload({waitUntil: "networkidle"});
+      assert.equal(await page.locator('[data-letter="L"]').getAttribute("aria-pressed"), "true");
+      assert.equal(await page.locator('[data-filter="mathematics"]').getAttribute("aria-pressed"), "true");
+      await page.locator(".glossary-reset").click();
+      assert.equal(await page.locator(".glossary-card:visible").count(), total);
+      const missingLetter = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"].find(letter => !labels.some(label => label.toUpperCase().startsWith(letter)));
+      if (missingLetter) assert.equal(await page.locator(`[data-letter="${missingLetter}"]`).isDisabled(), true);
+
+      {
+        const hardwareCount = await cards.evaluateAll(items => items.filter(el => JSON.parse(el.dataset.tags).includes("computer-hardware")).length);
+        if (width === 390) await page.getByRole("button", {name: "Toggle sidebar navigation"}).click();
+        await sidebar.locator('a[href*="tag=computer-hardware"]').click();
+        await page.waitForURL("**/glossary.html?tag=computer-hardware", {waitUntil: "networkidle"});
+        assert.equal(await page.locator(".glossary-card:visible").count(), hardwareCount);
+        assert.equal(await page.locator(".glossary-empty").isVisible(), hardwareCount === 0);
+        assert.equal(await sidebar.locator('a[href*="tag=computer-hardware"]').getAttribute("aria-current"), "page");
+        if (width === 390) await page.getByRole("button", {name: "Toggle sidebar navigation"}).click();
+        await sidebar.getByText("All terms A–Z", {exact: true}).click();
+        await page.waitForURL("**/glossary.html", {waitUntil: "networkidle"});
+        assert.equal(await page.locator(".glossary-card:visible").count(), total);
+      }
 
       if (width === 390) await page.locator(".glossary-tag-picker summary").click();
       await page.locator('[data-filter="robotics"]').click();
@@ -82,7 +121,7 @@ const { chromium } = require("playwright-core");
       assert.equal(await page.locator(".glossary-definition[open]").count(), 0);
       assert.deepEqual(errors, []);
       await context.close();
-      console.log(`PASS ${width}px: practice, search, tags, deep links, drafts, layout, print`);
+      console.log(`PASS ${width}px: glossary sidebar, A–Z + tags, practice, search, deep links, layout, print`);
     }
     const fallback = await browser.newContext({javaScriptEnabled: false});
     const page = await fallback.newPage();

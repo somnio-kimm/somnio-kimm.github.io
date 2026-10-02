@@ -108,6 +108,27 @@ website:
         - section: "Computer Software"
           href: notes/study-notes/computer-software/index.qmd
           contents: "notes/study-notes/computer-software/*.qmd"
+    - id: glossary
+      title: "Glossary"
+      style: floating
+      collapse-level: 2
+      contents:
+        - href: notes/study-notes/glossary.qmd
+          text: "All terms A–Z"
+        - section: "By subject"
+          contents:
+            - href: notes/study-notes/glossary.html?tag=computer-hardware
+              text: "Computer Hardware"
+            - href: notes/study-notes/glossary.html?tag=computer-software
+              text: "Computer Software"
+            - href: notes/study-notes/glossary.html?tag=machine-learning
+              text: "Machine Learning"
+            - href: notes/study-notes/glossary.html?tag=mathematics
+              text: "Mathematics"
+            - href: notes/study-notes/glossary.html?tag=physics
+              text: "Physics"
+            - href: notes/study-notes/glossary.html?tag=robotics
+              text: "Robotics"
   page-footer:
     center: "© 2026 Soo Min Kimm · Built with [Quarto](https://quarto.org)"
 

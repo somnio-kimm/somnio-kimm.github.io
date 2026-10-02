@@ -4,9 +4,11 @@ description: "Word cards with short definitions, topic tags, and related study n
 draft: false
 toc: false
 listing-page: true
+sidebar: glossary
 ---
 
-Browse a term, follow a tag to connect related ideas, or search for a word.
+Search for a word or choose its first letter. Cards are always shown in alphabetical order.
+Use the glossary sidebar or a tag to browse a subject.
 Turn on **Hide definitions for practice** to recall each meaning before revealing it.
 
 ::: {.glossary-cards}
