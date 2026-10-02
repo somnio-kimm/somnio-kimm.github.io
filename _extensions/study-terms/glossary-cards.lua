@@ -72,7 +72,7 @@ function M.render(glossary, meta)
   local html = {'<div class="glossary-browser">',
     '<div class="glossary-controls" hidden>',
     '<label for="glossary-search">Search terms, definitions, tags, or related notes</label>',
-    '<input id="glossary-search" type="search" placeholder="e.g. latent, probability, robotics" autocomplete="off">',
+    '<input id="glossary-search" type="search" placeholder="e.g. latent, mathematics, robotics" autocomplete="off">',
     '<div class="glossary-options"><label><input id="glossary-practice" type="checkbox"> Hide definitions for practice</label>',
     '<button type="button" class="glossary-reset">Clear filters</button></div>',
     '<details class="glossary-tag-picker" open><summary>Filter by tag</summary>',

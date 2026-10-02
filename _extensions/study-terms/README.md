@@ -1,7 +1,7 @@
 # Study-note definitions
 
 This local filter is enabled only by `notes/study-notes/_metadata.yml`.
-The shared definitions live in small topic files under `notes/study-notes/_glossary/`.
+The shared definitions live in subject files under `notes/study-notes/_glossary/`.
 `notes/study-notes/_glossary.yml` lists those files.
 An unknown key or missing definition fails the render so an author cannot silently publish an empty bubble.
 
@@ -26,23 +26,29 @@ Implementation references: [Quarto filter API](https://quarto.org/docs/extension
 
 ## Adding a word card
 
-Append an entry anywhere in the closest topic file; alphabetical ordering is optional.
-The rendered cards are always sorted by label. Terms can have several tags across topics.
+Append an entry anywhere in the closest subject file; alphabetical ordering is optional.
+The rendered cards are always sorted by label. Terms can have several subject tags.
 
 ```yaml
 your-term:
   label: Your term
-  tags: [probability, generative-models]
+  tags: [mathematics, machine-learning]
   definition: A short definition in one or two plain-text sentences.
 ```
 
-If a new topic needs its own file, add its relative path to `_glossary.yml`.
+Each glossary filename matches a study-note subject folder, such as `mathematics.yml`
+or `machine-learning.yml`. Keep each term in one primary subject file and use tags
+for its other subjects. The six subject files are listed in `_glossary.yml`;
+`computer-hardware.yml` is ready for future entries.
+If you add a new subject folder and glossary file, add its relative path to `_glossary.yml`.
 Keys must be unique across all files. Missing files and duplicate keys fail the render.
-Existing note annotations keep working when entries move between topic files.
-Tags use lowercase words joined with hyphens. They belong to the term, independently of which file holds it.
+Existing note annotations keep working when entries move between subject files.
+Tags match the study-note subject folder names: `mathematics`, `machine-learning`,
+`robotics`, `physics`, `computer-hardware`, and `computer-software`. Use more than
+one when a term spans subjects. They belong to the term, independently of which file holds it.
 
 The Glossary page loads every entry from these same files. It supports text search,
-tag filtering, shareable `?tag=probability&q=latent` filters, and practice by hiding
+tag filtering, shareable `?tag=mathematics&q=latent` filters, and practice by hiding
 definitions until each native disclosure is opened. `#term-latent-variable` links
 directly to a card. Without JavaScript, cards and definitions remain readable.
 Printing includes all cards and definitions.

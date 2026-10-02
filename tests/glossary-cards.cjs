@@ -41,13 +41,13 @@ const { chromium } = require("playwright-core");
       await page.locator(".glossary-reset").click();
       assert.equal(await page.locator(".glossary-card:visible").count(), total);
 
-      await page.locator('#term-latent-variable [data-tag="probability"]').click();
+      await page.locator('#term-latent-variable [data-tag="mathematics"]').click();
       const visible = await page.locator(".glossary-card:visible").evaluateAll(items => items.map(el => JSON.parse(el.dataset.tags)));
       assert(visible.length > 1 && visible.length < total);
-      assert(visible.every(tags => tags.includes("probability")));
-      assert(new URL(page.url()).searchParams.get("tag") === "probability");
+      assert(visible.every(tags => tags.includes("mathematics")));
+      assert(new URL(page.url()).searchParams.get("tag") === "mathematics");
       await page.reload({waitUntil: "networkidle"});
-      assert.equal(await page.locator('[data-filter="probability"]').getAttribute("aria-pressed"), "true");
+      assert.equal(await page.locator('[data-filter="mathematics"]').getAttribute("aria-pressed"), "true");
       await page.goto(`${url}?tag=robotics#term-latent-variable`, {waitUntil: "networkidle"});
       assert.equal(await page.locator("#term-latent-variable").isVisible(), true);
       assert.equal(await page.locator("#term-latent-variable details").getAttribute("open"), "");

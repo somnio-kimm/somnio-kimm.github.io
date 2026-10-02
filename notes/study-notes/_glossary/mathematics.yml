@@ -1,0 +1,207 @@
+# Mathematics glossary cards.
+# Add terms anywhere in this file; the card page sorts them automatically.
+# Tags match the study-note subject folders; a term may have several tags.
+
+absolute-integrability:
+  label: Absolute integrability
+  tags: [mathematics]
+  definition: A random quantity is absolutely integrable when its expected absolute value is finite. This
+    guarantees that its expectation is a finite number.
+
+affine-map:
+  label: affine map
+  tags: [mathematics]
+  definition: A transformation consisting of a linear map followed by a translation.
+
+automatic-differentiation:
+  label: Automatic differentiation
+  tags: [machine-learning, mathematics]
+  definition: Computing derivatives of a program by combining the derivative rules of its elementary operations
+    through the chain rule. Operations such as stop-gradient can intentionally define special differentiation
+    behaviour.
+
+chain-rule:
+  label: Chain rule
+  tags: [machine-learning, mathematics]
+  definition: The rule for differentiating a composition of functions by multiplying the appropriate local
+    derivatives or Jacobians. Contributions are added when several graph paths connect an input to an
+    output.
+
+conditional-distribution:
+  label: Conditional distribution
+  tags: [mathematics]
+  definition: A distribution describing a random quantity given specified information, on conditioning
+    events or values for which it is defined. It may retain uncertainty or assign all probability to a
+    single outcome.
+
+conditional-expectation:
+  label: Conditional expectation
+  tags: [mathematics]
+  definition: The average of a random quantity under the distribution remaining after specified information
+    is given. With squared-error loss and finite second moments, it is the best unrestricted predictor
+    from that information.
+
+confidence-score:
+  label: Confidence score
+  tags: [machine-learning, mathematics]
+  definition: A numerical score used to rank or select a model prediction. Its interpretation as a probability
+    requires additional assumptions or calibration.
+
+convex-function:
+  label: Convex function
+  tags: [machine-learning, mathematics]
+  definition: A function on a convex domain whose value at a weighted average of two inputs is no greater
+    than the same weighted average of their function values. Its graph lies below the line segment joining
+    any two points on the graph.
+
+cosine-similarity:
+  label: Cosine similarity
+  tags: [mathematics]
+  definition: The dot product of two nonzero vectors divided by the product of their Euclidean lengths.
+    It compares directions rather than vector magnitudes.
+
+differentiable-function:
+  label: Differentiable function
+  tags: [mathematics]
+  definition: A function that admits a linear approximation near the point being considered, with an error
+    that becomes negligible relative to the input change. In one dimension, the slope of that approximation
+    is the derivative.
+
+euclidean-norm:
+  label: Euclidean norm
+  tags: [mathematics]
+  definition: The square root of the sum of squared magnitudes of a vector’s coordinates. It is the usual
+    vector length in the specified coordinates.
+
+gaussian-distribution:
+  label: Gaussian distribution
+  tags: [mathematics]
+  definition: A probability distribution specified by a mean and covariance; in one dimension with positive
+    variance its density is bell-shaped. A standard multivariate Gaussian has zero mean and identity covariance.
+
+geometric-decay:
+  label: Geometric decay
+  tags: [mathematics]
+  definition: A sequence of nonnegative weights in which each successive weight is multiplied by the same
+    factor smaller than one. In an EMA, this factor determines how quickly older observations lose weight.
+
+gradient-ascent:
+  label: Gradient ascent
+  tags: [machine-learning, mathematics]
+  definition: An iterative optimisation method that moves parameters or inputs in the direction of a function’s
+    gradient to increase its value locally. The step size determines how far each update moves.
+
+independent-samples:
+  label: Independent samples
+  tags: [mathematics]
+  definition: Random samples whose joint distribution factors into the product of their individual distributions.
+    Independence alone does not say that they have the same distribution.
+
+latent-variable:
+  label: Latent variable
+  tags: [machine-learning, mathematics]
+  definition: A variable included in a model but not directly observed in the example being explained.
+    Its coordinates need not correspond to identifiable physical causes.
+
+marginal-distribution:
+  label: Marginal distribution
+  tags: [mathematics]
+  definition: The distribution of selected variables obtained from a joint distribution by summing or
+    integrating over the other variables.
+
+marginalisation:
+  label: Marginalisation
+  tags: [mathematics]
+  definition: Summing or integrating a joint distribution over variables that are not retained. The result
+    describes the remaining variables while accounting for the possible values of the removed variables.
+
+matrix-exponential:
+  label: Matrix exponential
+  tags: [mathematics]
+  definition: The matrix function defined by the power series I + A + A squared divided by 2 factorial,
+    and so on. It propagates a constant-coefficient homogeneous linear differential equation.
+
+measurable-function:
+  label: Measurable function
+  tags: [mathematics]
+  definition: A function whose preimage of every measurable output set is a measurable input event. This
+    lets a probability model assign probabilities consistently to events defined through the function.
+
+nat:
+  label: Nat
+  tags: [mathematics]
+  definition: The unit of information obtained when logarithms use base e. Changing the logarithm base
+    changes the unit and rescales the numerical information value.
+
+normalising-constant:
+  label: Normalising constant
+  tags: [mathematics]
+  definition: A sum or integral of unnormalised weights used to make their total probability equal one.
+    It must be positive and finite for the resulting distribution to be well defined.
+
+posterior:
+  label: Posterior distribution
+  tags: [machine-learning, mathematics]
+  definition: The conditional distribution of unknown parameters or latent variables after incorporating
+    specified observations under a model. It combines the likelihood of those observations with the prior.
+
+prior:
+  label: Prior distribution
+  tags: [machine-learning, mathematics]
+  definition: A distribution specified before incorporating the observation currently being explained.
+    It may describe parameters or latent variables and may already condition on other supplied context.
+
+probability-mass-function:
+  label: Probability mass function
+  tags: [mathematics]
+  definition: A function assigning the probability of each value of a discrete random variable. Its values
+    are nonnegative and sum to one.
+
+quantile:
+  label: Quantile
+  tags: [mathematics]
+  definition: A threshold associated with a chosen cumulative probability level. A percentile is a quantile
+    whose level is expressed as a percentage; finite-sample estimation conventions can differ.
+
+random-variable:
+  label: Random variable
+  tags: [mathematics]
+  definition: A measurable function assigning a value to each outcome of a probability model. Its distribution
+    describes the probabilities of those values, while a realisation is one value it takes.
+
+recurrence:
+  label: Recurrence
+  tags: [computer-software, mathematics]
+  definition: A rule defining each value of a sequence using earlier values and, when applicable, new
+    inputs. Initial values are needed to determine the sequence.
+
+second-moment:
+  label: Second moment
+  tags: [mathematics]
+  definition: The expectation of a squared scalar random variable, or of a squared norm for a random vector.
+    A finite second moment means that this expectation is finite.
+
+standard-deviation:
+  label: Standard deviation
+  tags: [mathematics]
+  definition: The nonnegative square root of a variance. It measures spread in the same units as the random
+    quantity.
+
+stationary-point:
+  label: Stationary point
+  tags: [machine-learning, mathematics]
+  definition: A point at which a differentiable scalar objective has zero gradient. It can be a minimum,
+    a maximum, or a point that is neither.
+
+variance:
+  label: Variance
+  tags: [mathematics]
+  definition: The expected squared deviation of a random quantity from its mean, when this quantity exists.
+    It measures spread in squared units.
+
+variational-distribution:
+  label: Variational distribution
+  tags: [machine-learning, mathematics]
+  definition: A distribution from a chosen family with adjustable parameters, used to approximate a posterior
+    that is difficult to work with directly. Optimising its parameters does not guarantee equality with
+    the true posterior.

@@ -1,0 +1,135 @@
+# Machine Learning glossary cards.
+# Add terms anywhere in this file; the card page sorts them automatically.
+# Tags match the study-note subject folders; a term may have several tags.
+
+activation:
+  label: activation
+  tags: [machine-learning]
+  definition: An intermediate value computed by a network for a particular input, as distinct from a learned
+    parameter.
+
+activation-function:
+  label: activation function
+  tags: [machine-learning]
+  definition: A nonlinear function applied to a network's intermediate values, often elementwise. It
+    allows the network to represent nonlinear functions of its input.
+
+autoregressive-generation:
+  label: Autoregressive generation
+  tags: [machine-learning]
+  definition: Generating an output sequence by repeatedly predicting the next element conditioned on earlier
+    elements and any supplied context.
+
+autoregressive-model:
+  label: Autoregressive model
+  tags: [machine-learning, mathematics]
+  definition: A probability model that factorises a joint distribution into conditional distributions,
+    each conditioned on earlier variables in a chosen order. The variables may be discrete or continuous.
+
+clipping:
+  label: Clipping
+  tags: [machine-learning, mathematics]
+  definition: Replacing values outside a specified interval by its nearest endpoint. Several distinct
+    original values can then share the same result, so clipping generally cannot be inverted.
+
+encoder:
+  label: Encoder
+  tags: [machine-learning]
+  definition: A function or model component that maps an input into a representation used by subsequent
+    computation. Its architecture and training objective determine what information the representation
+    carries.
+
+inference:
+  label: Inference
+  tags: [machine-learning]
+  definition: Using a trained model to compute predictions or generate outputs from supplied inputs. Ordinary
+    inference does not update the learned parameters.
+
+learned-feature-vector:
+  label: Learned feature vector
+  tags: [machine-learning]
+  definition: A numerical description whose coordinates are produced or adjusted through learning for
+    an objective. The coordinates need not each correspond to a named human-interpretable property.
+
+minibatch:
+  label: Minibatch
+  tags: [machine-learning]
+  definition: A group of training examples processed together to compute an update or shared batch statistics.
+
+parameter:
+  label: Model parameter
+  tags: [machine-learning]
+  definition: A value that selects a model's behaviour, such as a learned weight or bias. It is held fixed
+    during an ordinary prediction, unlike the input.
+
+parameterised-function:
+  label: Parameterised function
+  tags: [machine-learning]
+  definition: A family of functions indexed by parameters. Fixing the parameters selects the function
+    applied to an input.
+
+probability-path:
+  label: Probability path
+  tags: [machine-learning, mathematics]
+  definition: A family of probability distributions indexed by a time-like variable. A generative flow
+    chooses such a family to connect a simple starting distribution to a data distribution.
+
+regularisation-penalty:
+  label: Regularisation penalty
+  tags: [machine-learning, mathematics]
+  definition: An additional objective term that penalizes specified properties of parameters or predictions,
+    expressing a preference beyond fitting the observed targets.
+
+representation:
+  label: Representation
+  tags: [machine-learning]
+  definition: An encoding of information used by a model or computation. Its form and usefulness depend
+    on what later operations need to do with it.
+
+sampler:
+  label: Sampler
+  tags: [machine-learning, mathematics]
+  definition: A procedure for producing draws from, or approximating draws from, a specified distribution.
+    It includes the random inputs and numerical update rules, not only the trained network.
+
+score:
+  label: Score of a density
+  tags: [machine-learning, mathematics]
+  definition: The gradient of log density with respect to the sample coordinates. It indicates the local
+    direction and rate of increase of log density, and differs from a gradient with respect to model parameters.
+
+softmax:
+  label: Softmax
+  tags: [machine-learning]
+  definition: A function that exponentiates scores and divides each exponential by their sum, producing
+    positive values that sum to one for finite scores.
+
+teacher-forcing:
+  label: Teacher forcing
+  tags: [machine-learning]
+  definition: Training a sequence predictor using the observed earlier outputs as context for later predictions.
+    Generation usually supplies the model’s own earlier outputs instead.
+
+token:
+  label: Token
+  tags: [machine-learning]
+  definition: A sequence element processed by a model. Depending on the input path, it may originate from
+    a discrete vocabulary item or a continuous feature vector.
+
+training-objective:
+  label: Training objective
+  tags: [machine-learning, mathematics]
+  definition: A scalar-valued function of model parameters that the training procedure seeks to optimize,
+    often combining data loss and additional penalties.
+
+transformer:
+  label: Transformer
+  tags: [machine-learning]
+  definition: A neural-network architecture built from blocks that combine attention with positionwise
+    transformations, typically using residual connections and normalization.
+
+velocity-field:
+  label: Velocity field
+  tags: [machine-learning, mathematics]
+  definition: A function assigning a local direction and rate of change to each position and time. In
+    flow generation, it changes a sample with respect to internal generative time.

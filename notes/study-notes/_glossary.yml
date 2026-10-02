@@ -1,19 +1,18 @@
-# Glossary file index. Add terms in the topic files below, in any order.
+# Glossary file index. Add terms in the subject files below, in any order.
 # The same entries supply definition bubbles and searchable word cards.
 # New entry example:
 #   your-term:
 #     label: Your term
-#     tags: [probability, generative-models]
+#     tags: [mathematics, machine-learning]
 #     definition: A short plain-text definition.
 # Syntax in notes: [display text]{.term key="your-term"}
-# Add a path here only when you create a new topic file.
+# Tags: mathematics, machine-learning, robotics, physics, computer-hardware, computer-software.
+# Each filename matches a study-note subject folder. Keep each term in one file.
+# Add a path here when adding a new subject folder and glossary file.
 files:
-  - _glossary/calculus.yml
-  - _glossary/control.yml
-  - _glossary/generative-models.yml
-  - _glossary/linear-algebra.yml
-  - _glossary/neural-networks.yml
-  - _glossary/optimisation.yml
-  - _glossary/probability.yml
+  - _glossary/computer-hardware.yml
+  - _glossary/computer-software.yml
+  - _glossary/machine-learning.yml
+  - _glossary/mathematics.yml
+  - _glossary/physics.yml
   - _glossary/robotics.yml
-  - _glossary/statistics.yml
