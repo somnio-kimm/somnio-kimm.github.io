@@ -2,7 +2,7 @@
 # The same entries supply definition bubbles and searchable word cards.
 # New entry example:
 #   your-term:
-#     label: Your term
+#     label: your term
 #     tags: [mathematics, machine-learning]
 #     definition: A short plain-text definition.
 # Syntax in notes: [display text]{.term key="your-term"}

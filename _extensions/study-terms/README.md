@@ -27,11 +27,11 @@ Implementation references: [Quarto filter API](https://quarto.org/docs/extension
 ## Adding a word card
 
 Append an entry anywhere in the closest subject file; alphabetical ordering is optional.
-The rendered cards are always sorted by label. Terms can have several subject tags.
+Start labels with a lowercase letter. The rendered cards are always sorted by label. Terms can have several subject tags.
 
 ```yaml
 your-term:
-  label: Your term
+  label: your term
   tags: [mathematics, machine-learning]
   definition: A short definition in one or two plain-text sentences.
 ```

@@ -3,13 +3,13 @@
 # Tags match the study-note subject folders; a term may have several tags.
 
 numerical-solver:
-  label: Numerical solver
+  label: numerical solver
   tags: [computer-software, mathematics]
   definition: An algorithm that approximates the solution to a mathematical problem. For an ordinary differential
     equation, it computes successive approximate states from a derivative field.
 
 pseudorandom-seed:
-  label: Pseudorandom seed
+  label: pseudorandom seed
   tags: [computer-software]
   definition: A value used to initialise a deterministic random-number generator. Reusing it with the
     same algorithm and draw sequence reproduces the same sequence; successive draws within that sequence

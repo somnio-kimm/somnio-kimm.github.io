@@ -40,7 +40,7 @@ const { chromium } = require("playwright-core");
         title: el.querySelector(".glossary-card-title").textContent,
         tags: JSON.parse(el.dataset.tags),
       })));
-      assert(combined.length > 0 && combined.every(item => item.title.startsWith("L") && item.tags.includes("mathematics")));
+      assert(combined.length > 0 && combined.every(item => item.title.toUpperCase().startsWith("L") && item.tags.includes("mathematics")));
       await page.reload({waitUntil: "networkidle"});
       assert.equal(await page.locator('[data-letter="L"]').getAttribute("aria-pressed"), "true");
       assert.equal(await page.locator('[data-filter="mathematics"]').getAttribute("aria-pressed"), "true");
