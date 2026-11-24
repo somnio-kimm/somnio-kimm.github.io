@@ -2,7 +2,7 @@
 title: 'Representation learning and adaptation'
 description: "Learned features, task adaptation, contrastive image–text objectives, and downstream policy training."
 date: 2026-09-10
-date-modified: 2026-09-11
+date-modified: 2026-11-24
 draft: true
 categories:
   - Machine Learning
@@ -35,7 +35,7 @@ An end-to-end [training objective]{.term key="training-objective"} connects inpu
 A modular system splits responsibilities into components; some modular systems are still trained jointly.
 Late fusion processes modalities separately before combining representations or scores.
 These properties should be established from the actual computation and gradient paths.
-[CLIP](../../literature-review/multimodality/clip.qmd), [DINO](../../literature-review/vision/dino.qmd), and [PaliGemma](../../literature-review/multimodality/paligemma.qmd) illustrate different representation and adaptation choices.
+[CLIP](../../literature-review/vision/clip.qmd), [DINO](../../literature-review/vision/dino.qmd), and [PaliGemma](../../literature-review/language/paligemma.qmd) illustrate different representation and adaptation choices.
 
 ## Context and position in sequence representations {#sequence-terms}
 
@@ -141,5 +141,5 @@ The same encoder can give different results under a frozen probe, full fine-tuni
 [Input representations](representations.qmd) distinguishes token identifiers, embeddings, image patches, and numerical scaling.
 [Cross-entropy](../mathematics/entropy.qmd#cross-entropy) derives the binary and categorical loss forms used above.
 [Autoregression](generative-models.qmd#factorisation) describes output factorisation and generation order, separately from how features were learned.
-The [CLIP review](../../literature-review/multimodality/clip.qmd) develops zero-shot classification and transfer evidence; [DINO](../../literature-review/vision/dino.qmd) uses a student–teacher objective without paired text.
+The [CLIP review](../../literature-review/vision/clip.qmd) develops zero-shot classification and transfer evidence; [DINO](../../literature-review/vision/dino.qmd) uses a student–teacher objective without paired text.
 [Stop-gradient](../computer-software/stop-gradient.qmd) explains why an available target or context can have a blocked derivative path.

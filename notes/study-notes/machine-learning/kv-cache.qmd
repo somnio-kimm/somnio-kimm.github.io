@@ -2,7 +2,7 @@
 title: "KV caching: prefill and decoding"
 description: "When earlier attention keys and values can be reused, and what still has to be computed for each new query."
 date: 2026-09-10
-date-modified: 2026-09-11
+date-modified: 2026-11-24
 draft: true
 categories:
   - Machine Learning
@@ -50,7 +50,7 @@ The new representation is then used to predict the next token; the cache stores 
 
 A fixed image/text prefix can also be cached across action-generation steps when the attention structure makes its representations independent of the changing action tokens.
 Changing an observation or another prefix input requires recomputing the affected prefix.
-See [PaliGemma](../../literature-review/multimodality/paligemma.qmd), [π0](../../literature-review/action/pi0.qmd), and [Mamba's recurrent alternative](../../literature-review/theory/mamba.qmd).
+See [PaliGemma](../../literature-review/language/paligemma.qmd), [π0](../../literature-review/action/pi0.qmd), and [Mamba's recurrent alternative](../../literature-review/theory/mamba.qmd).
 
 ## Connections and boundaries {#related-concepts}
 

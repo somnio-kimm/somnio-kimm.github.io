@@ -2,7 +2,7 @@
 title: "Attention: projections, masks, and action queries"
 description: "How queries read keys and values, how masks constrain access, and why action queries differ from robot state."
 date: 2026-09-10
-date-modified: 2026-09-11
+date-modified: 2026-11-24
 draft: true
 categories:
   - Machine Learning
@@ -202,6 +202,6 @@ Its value alone does not establish that a source position caused the model's fin
 
 [Stop-gradient](../computer-software/stop-gradient.qmd) controls where a loss can send derivatives while leaving a forward value readable.
 [KV caching](kv-cache.qmd) reuses keys and values when the mask and inputs keep their representations independent of newly added or changing inputs.
-[BERT](../../literature-review/language/bert.qmd) and [PaliGemma](../../literature-review/multimodality/paligemma.qmd) illustrate different bidirectional and causal access patterns.
+[BERT](../../literature-review/language/bert.qmd) and [PaliGemma](../../literature-review/language/paligemma.qmd) illustrate different bidirectional and causal access patterns.
 [Visual tokens](representations.qmd#visual-tokens) and [text tokenization](representations.qmd#sentencepiece) explain how image and text inputs become vectors.
 [Generative action models](generative-models.qmd#questions) distinguishes parallel chunk prediction from iterative denoising and autoregressive token generation.

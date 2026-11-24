@@ -2,7 +2,7 @@
 title: 'BERT: Bidirectional Language Pretraining'
 description: "Input embeddings, masked-language targets, next-sentence prediction, and task-specific fine-tuning."
 date: 2026-06-19
-date-modified: 2026-09-10
+date-modified: 2026-11-24
 draft: true
 categories:
   - Language
@@ -51,4 +51,4 @@ BERT's default encoder is not a causal next-token generator, and `[CLS]` is a le
 
 The [attention note](../../study-notes/machine-learning/attention.qmd#generation-order) distinguishes bidirectional reads from causal generation.
 The [representation note](../../study-notes/machine-learning/representations.qmd#sentencepiece) distinguishes tokenizer algorithms, token IDs, and embedding vectors.
-[PaliGemma](../multimodality/paligemma.qmd) combines a bidirectional image-and-prompt prefix with a causally generated output suffix.
+[PaliGemma](paligemma.qmd) combines a bidirectional image-and-prompt prefix with a causally generated output suffix.

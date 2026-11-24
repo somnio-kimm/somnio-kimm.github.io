@@ -16,6 +16,9 @@ listing:
   fields: [title, description, categories, date-modified]
   date-format: "YYYY-MM-DD"
 draft: false
+aliases:
+  - /notes/literature-review/multimodality/index.html
+  - /notes/literature-review/multimodal/index.html
 ---
 
 | Subject | Scope |
@@ -24,4 +27,3 @@ draft: false
 | [Theory](theory/index.qmd) | Generative modeling, learning objectives, and sequence modeling. |
 | [Vision](vision/index.qmd) | Visual representations, image models, and object detection. |
 | [Language](language/index.qmd) | Language representations, pretraining, and language-model architectures. |
-| [Multimodality](multimodality/index.qmd) | Models that connect images and language through shared representations and generation. |

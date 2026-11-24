@@ -2,13 +2,14 @@
 title: 'PaliGemma: A Vision–Language Model for Transfer'
 description: "SigLIP image features, Gemma text generation, prefix attention, and the distinction between component and VLM training."
 date: 2026-06-19
-date-modified: 2026-09-10
+date-modified: 2026-11-24
 draft: true
 aliases:
   - /notes/literature-review/multimodal/paligemma.html
-  - /notes/literature-review/language/paligemma.html
+  - /notes/literature-review/multimodality/paligemma.html
 categories:
-  - Multimodality
+  - Vision
+  - Language
   - VLM
 ---
 
@@ -22,7 +23,7 @@ PaliGemma combines image features with a language model so that a task prompt sp
 
 ## Previous Attempts
 
-[CLIP](clip.qmd) compares image and text embeddings to recognize or retrieve matching content.
+[CLIP](../vision/clip.qmd) compares image and text embeddings to recognize or retrieve matching content.
 Generative VLMs instead condition a language model on visual information and train it to produce an answer.
 PaliGemma adopts that generative interface with existing SigLIP and Gemma components. [Sections 2–3](https://arxiv.org/html/2407.07726v1#S3).
 

@@ -74,9 +74,6 @@ website:
         - section: "Language"
           href: notes/literature-review/language/index.qmd
           contents: "notes/literature-review/language/*.qmd"
-        - section: "Multimodality"
-          href: notes/literature-review/multimodality/index.qmd
-          contents: "notes/literature-review/multimodality/*.qmd"
     - id: study-notes
       title: "Study Notes"
       style: floating
