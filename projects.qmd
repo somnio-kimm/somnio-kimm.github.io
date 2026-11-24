@@ -3,7 +3,7 @@ title: "Projects"
 draft: false
 ---
 
-## Personal projects
+## Personal Projects
 
 ### TellingByfAIce
 
@@ -29,7 +29,7 @@ Mar 2025 – Apr 2025\
 
 - Built and evaluated ML pipelines to forecast electricity consumption.
 
-## Academic projects
+## Academic Projects
 
 ### Vibrational GPS
 
