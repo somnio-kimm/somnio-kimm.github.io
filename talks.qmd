@@ -3,11 +3,12 @@ title: "Talks"
 draft: false
 ---
 
-<!-- Entries are listed newest first. -->
+<!-- Within each section, entries are listed newest first. -->
+
+## Seminar
 
 ### Generative Models
 
-**Seminar**\
 7 November 2025\
 [PDF](/files/generative-models.pdf)
 
@@ -15,7 +16,6 @@ draft: false
 
 ### State-Space Models
 
-**Seminar**\
 21 October 2025\
 [PDF](/files/state-space-models.pdf)
 
