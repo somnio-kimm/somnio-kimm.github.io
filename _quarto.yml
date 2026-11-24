@@ -54,9 +54,6 @@ website:
             text: Study Notes
           - href: notes/study-notes/glossary.qmd
             text: Glossary
-          - text: "---"
-          - href: notes/recent.qmd
-            text: Recently Modified
   sidebar:
     - id: notes
       title: "Literature Review"
