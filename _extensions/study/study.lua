@@ -12,7 +12,7 @@ function Pandoc(doc)
   local count = 0
 
   doc = doc:walk({Div = function(div)
-    if div.classes:includes("glossary-cards") then return cards.page(doc.meta) end
+    if div.classes:includes("glossary-cards") then return cards.page() end
   end, Span = function(span)
     if not span.classes:includes("term") then return nil end
     local key = span.attributes.key

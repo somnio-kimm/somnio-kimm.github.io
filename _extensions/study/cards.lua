@@ -103,27 +103,6 @@ function M.get(key)
   return by_key[key]
 end
 
--- Notes that annotate each card with `.term`, from the wiki index. Drafts are
--- listed only when the site is rendered with `draft-mode: visible`.
-local function related_notes(meta)
-  local index = project.wiki_index()
-  if not index then return {} end
-  local visible = deck.text(meta["draft-mode"] or (meta.website and meta.website["draft-mode"])) == "visible"
-  local notes = {}
-  for rel, page in pairs(index.pages) do
-    if not rel:match("/index%.qmd$") and not rel:match("/template%.qmd$") and (visible or not page.draft) then
-      for _, key in ipairs(page.terms or {}) do
-        notes[key] = notes[key] or {}
-        table.insert(notes[key], {title = page.title, path = rel, draft = page.draft})
-      end
-    end
-  end
-  for _, list in pairs(notes) do
-    table.sort(list, function(a, b) return a.title:lower() < b.title:lower() end)
-  end
-  return notes
-end
-
 local function raw(html) return pandoc.RawBlock("html", html) end
 
 -- One layer of a card. In HTML it is a native disclosure; `collapsed` layers
@@ -137,7 +116,9 @@ local function layer(blocks, content, class, label, collapsed)
   blocks:insert(pandoc.Div(inner, pandoc.Attr("", {class})))
 end
 
-local function card_html(card, notes)
+-- A card shows its own layers only. Which notes annotate it stays in the wiki
+-- index (`terms` of each page, from _wiki/build_index.py); the glossary does not list them.
+local function card_html(card)
   local title = pandoc.write(pandoc.Pandoc({pandoc.Plain(card.title)}), "html"):gsub("\n$", "")
   local blocks = pandoc.Blocks({
     raw('<h2 class="deck-card-title">' .. title .. '</h2>'),
@@ -147,15 +128,6 @@ local function card_html(card, notes)
   layer(blocks, card.definition, "concept-definition", "Definition", false)
   layer(blocks, card.statement, "concept-statement", "Statement", true)
   layer(blocks, card.proof, "concept-proof", "Proof", true)
-  if notes then
-    local html = {'<div class="concept-related"><h3>Related notes</h3><ul>'}
-    for _, note in ipairs(notes) do
-      html[#html + 1] = '<li><a href="/' .. deck.escape(note.path:gsub("%.qmd$", ".html")) .. '">'
-        .. deck.escape(note.title) .. '</a>' .. (note.draft and ' <span class="concept-draft">(draft)</span>' or '') .. '</li>'
-    end
-    html[#html + 1] = '</ul></div>'
-    blocks:insert(raw(table.concat(html, "\n")))
-  end
   return pandoc.Div(blocks, pandoc.Attr("term-" .. card.key, {"deck-card", "concept-card"}, {
     ["data-tag"] = table.concat(card.tags, " "),
   }))
@@ -176,16 +148,15 @@ local function card_plain(card)
 end
 
 -- Replaces `::: {.glossary-cards}` with every card, A–Z, and the deck controls.
-function M.page(meta)
+function M.page()
   local html = quarto.doc.is_format("html:js")
-  local notes = html and related_notes(meta) or {}
   local list, all_tags, per_tag = pandoc.Blocks({}), {}, {}
   for _, card in ipairs(M.all()) do
     for _, tag in ipairs(card.tags) do
       all_tags[#all_tags + 1] = tag
       per_tag[tag] = (per_tag[tag] or 0) + 1
     end
-    list:insert(html and card_html(card, notes[card.key]) or card_plain(card))
+    list:insert(html and card_html(card) or card_plain(card))
   end
   if not html then return pandoc.Div(list) end
 

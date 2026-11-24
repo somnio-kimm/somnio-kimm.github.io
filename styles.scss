@@ -170,6 +170,42 @@ main.content :is(.math.display, mjx-container[display="true"]) {
 }
 .quarto-grid-item.card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(59, 47, 38, 0.14); }
 
+// ---- Tags: one shape everywhere ----
+// A note's categories, under its title and on the cards of a note list, look
+// like the subjects on a glossary card (.deck-tag in _extensions/study/deck.css):
+// small quiet pills on one line. When they do not fit, that line scrolls sideways
+// (no scrollbar is drawn), so many tags never push the content down.
+// The padding leaves room for a focus ring inside the scrolling box.
+#title-block-header .quarto-categories,
+.quarto-listing div.listing-categories {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.3rem;
+  padding: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+#title-block-header .quarto-categories { margin: 0.5rem -0.25rem -0.25rem; }
+.quarto-listing div.listing-categories { margin: 0 -0.25rem; }
+#title-block-header .quarto-categories .quarto-category,
+.quarto-listing div.listing-categories div.listing-category {
+  flex: none;
+  margin: 0;
+  padding: 0.05rem 0.6rem;
+  border: 0;
+  border-radius: 999px;
+  color: rgba($body-color, 0.75);
+  background: $site-tint;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  text-transform: none;
+  white-space: nowrap;
+  opacity: 1;
+  a { color: inherit; text-decoration: none; }
+  &:hover { color: $primary; }
+}
+
 // Home page: four plain logo links in one row under the name.
 // On narrow screens the photo sits directly under the menu bar; keep it clear of it.
 @media (max-width: 991.98px) {

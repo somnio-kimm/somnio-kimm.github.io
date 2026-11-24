@@ -30,7 +30,7 @@ function run(tests) {
             const errors = [];
             page.on("pageerror", error => errors.push(error.message));
             await fn(page, width);
-            assert.deepEqual(errors, []);
+            assert.deepEqual(errors, [], `the page reported errors: ${errors.join(" | ")}`);
             await context.close();
             console.log(`PASS ${width}px: ${label}`);
           }

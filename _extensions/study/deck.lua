@@ -1,17 +1,12 @@
 -- The generic half of the card deck on the glossary page (cards.lua fills it).
 -- A deck is `<div class="deck" data-deck="NAME">` holding controls(), a
 -- `.deck-list` of `.deck-card` elements, and footer(). deck.js adds search,
--- filters, practice and flashcard study; deck.css styles all of it.
+-- filters and the flashcard popup; deck.css styles all of it.
 local M = {}
 
 function M.escape(s)
   return (s:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
     :gsub('"', "&quot;"):gsub("'", "&#39;"))
-end
-
--- Plain text of a metadata value; "" when it is missing.
-function M.text(value)
-  return value and pandoc.utils.stringify(value) or ""
 end
 
 -- Checks subject tags and returns them sorted without duplicates.
@@ -48,15 +43,16 @@ local function row(attributes, text, count)
     .. (count or "") .. '</span></button>'
 end
 
--- One facet = one dropdown menu. Its button names the filter and what is
--- chosen; its list has one row per value with the number of cards.
+-- One facet = one dropdown menu. Its button names the filter and shows how
+-- many values are chosen (the badge keeps its width when empty, so the button
+-- never changes size); its list has one row per value with the number of cards.
 -- `key` is both the URL parameter and the card attribute (`data-KEY`, values
 -- separated by spaces).
 -- facet = {key, label, all, total, values = {{value, text, count}}}
 local function facet_html(facet)
   local html = {'<details class="deck-menu">',
-    '<summary>' .. M.escape(facet.label) .. ': <span class="deck-menu-state" data-facet-state="' .. facet.key .. '">'
-      .. M.escape(facet.all) .. '</span></summary>',
+    '<summary>' .. M.escape(facet.label) .. ' <span class="deck-badge" data-facet-count="' .. facet.key
+      .. '" data-zero></span></summary>',
     '<div class="deck-menu-panel" role="group" aria-label="' .. M.escape(facet.label)
       .. '" data-facet="' .. facet.key .. '">',
     row('data-value="" aria-pressed="true"', facet.all, facet.total)}
@@ -68,55 +64,58 @@ local function facet_html(facet)
 end
 
 -- The controls: one row above the cards with the search box, one menu per
--- filter, and the Study menu. Under it, only while a search or filter is on,
--- the number of cards shown and "Clear filters". They start hidden: without
--- JavaScript the page is the plain list of cards with every answer open.
+-- filter, and the Study button, which opens the flashcard popup. Under it,
+-- while a filter is on: one removable chip per chosen value, on one line that
+-- scrolls sideways. The controls start hidden: without JavaScript the page is
+-- the plain list of cards with every answer open.
 -- deck = {name, search_label, placeholder, facets}
 function M.controls(deck)
-  local id = deck.name
   local html = {'<div class="deck-controls" hidden>',
     '<div class="deck-bar">',
-    '<input id="' .. id .. '-search" class="deck-search" type="search" aria-label="' .. M.escape(deck.search_label)
+    '<input id="' .. deck.name .. '-search" class="deck-search" type="search" aria-label="' .. M.escape(deck.search_label)
       .. '" placeholder="' .. M.escape(deck.placeholder) .. '" autocomplete="off">'}
   for _, facet in ipairs(deck.facets) do html[#html + 1] = facet_html(facet) end
-  html[#html + 1] = '<details class="deck-menu">\n<summary>Study</summary>\n<div class="deck-menu-panel">'
-  html[#html + 1] = row('data-study="due"', "Due cards")
-  html[#html + 1] = row('data-study="all"', "All shown cards")
-  html[#html + 1] = '<label><input id="' .. id .. '-practice" class="deck-practice" type="checkbox"> Hide answers</label>'
+  -- The Study button is an icon: two cards lying on each other, which fan
+  -- out under the pointer (deck.css). deck.js gives it its label.
   html[#html + 1] = [[
-<button type="button" class="deck-forget" hidden>Reset progress</button>
+<button type="button" class="deck-study-open" aria-label="Study" title="Study">
+<span class="deck-stack" aria-hidden="true"><span></span><span></span></span>
+</button>
 </div>
-</details>
-</div>
-<div class="deck-options">
-<p class="deck-count" role="status" aria-live="polite"></p>
-<button type="button" class="deck-reset" hidden>Clear filters</button>
-</div>
-</div>
-<div class="deck-study" hidden>
-<p class="deck-study-status" role="status" aria-live="polite"></p>
-<progress class="deck-study-progress" value="0" max="1"></progress>
-<button type="button" class="deck-study-exit">Back to all cards</button>
+<div class="deck-picked"></div>
 </div>]]
   return table.concat(html, "\n")
 end
 
--- Flashcard buttons and the empty-search message, below the cards.
+-- Below the cards: the empty-search message, and the popup. The popup is a
+-- <dialog> that deck.js opens over the page; while it is open the card being
+-- read or studied is moved into `.deck-study-card` and back afterwards.
+-- A study session has two answers per card: "Learning" brings the card back at
+-- the end of the round, "Mastered" does not. The card's layers are revealed by
+-- clicking the card or with Space.
 function M.footer()
   return [[
-<div class="deck-study-actions" hidden>
-<button type="button" class="deck-primary deck-study-reveal">Show answer</button>
-<button type="button" class="deck-study-again">Again</button>
-<button type="button" class="deck-primary deck-study-good">Got it</button>
-<button type="button" class="deck-study-skip">Skip</button>
-<p class="deck-hint">Keys: Space shows the next part · 1 again · 2 got it · → skip · Esc leaves.
-<span class="deck-study-schedule"></span></p>
+<p class="deck-empty" hidden>No matching cards. Try another search, or choose All under Subject.</p>
+<dialog class="deck-study" aria-label="Study">
+<div class="deck-study-box">
+<div class="deck-study-head">
+<p class="deck-study-status" role="status" aria-live="polite"></p>
+<progress class="deck-study-progress" value="0" max="1"></progress>
+<button type="button" class="deck-study-exit" aria-label="Close">×</button>
 </div>
-<p class="deck-empty" hidden>No matching cards. Try another search or clear the filters.</p>]]
+<div class="deck-study-card"></div>
+<div class="deck-study-actions">
+<button type="button" class="deck-study-again">Learning</button>
+<button type="button" class="deck-primary deck-study-good">Mastered</button>
+<button type="button" class="deck-study-restart">Study again</button>
+<button type="button" class="deck-primary deck-study-done">Back to the cards</button>
+</div>
+</div>
+</dialog>]]
 end
 
 function M.add_dependency()
-  quarto.doc.add_html_dependency({name = "study-deck", version = "4.0.1",
+  quarto.doc.add_html_dependency({name = "study-deck", version = "4.2.0",
     scripts = {{path = "deck.js", attribs = {defer = ""}}}, stylesheets = {"deck.css"}})
 end
 

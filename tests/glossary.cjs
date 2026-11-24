@@ -1,13 +1,13 @@
 // The glossary page: every study card (terms, formal definitions, results and
-// proofs) in one deck with search, filters, practice and flashcard study.
-const {assert, origin, drafts, run, inBothThemes, fitsViewport} = require("./helpers.cjs");
+// proofs) in one deck with search, filters and flashcard study in a popup.
+const {assert, origin, run, inBothThemes, fitsViewport} = require("./helpers.cjs");
 
 const url = `${origin}/notes/study-notes/glossary.html`;
 const visibleCards = page => page.locator(".deck-card:visible");
 const openLayers = page => page.locator(".deck-card details[open]");
 const status = page => page.locator(".deck-study-status").textContent();
 
-// The filters and the study buttons live in dropdown menus of the bar above the cards.
+// A filter lives in a dropdown menu of the bar above the cards.
 // `inMenu` opens the menu that holds `selector`, runs `action` on that element, and closes the menu.
 async function inMenu(page, selector, action) {
   const menu = page.locator(`.deck-menu:has(${selector})`);
@@ -17,8 +17,8 @@ async function inMenu(page, selector, action) {
 }
 // Clicks one row of a filter ("tag" = subject; "" = its "All" row).
 const pick = (page, key, value) => inMenu(page, `[data-facet="${key}"] button[data-value="${value}"]`, row => row.click());
-const practice = (page, on) => inMenu(page, ".deck-practice", box => box.setChecked(on));
-const study = (page, mode) => inMenu(page, `[data-study="${mode}"]`, row => row.click());
+// The Study button opens the flashcard popup with the cards that are shown.
+const study = page => page.locator(".deck-study-open").click();
 
 async function listChecks(page, width) {
   await page.goto(url, {waitUntil: "networkidle"});
@@ -35,13 +35,15 @@ async function listChecks(page, width) {
   // Definitions start open; statements and proofs start closed.
   assert(formal > 0);
   assert.equal(await openLayers(page).count(), layers - formal);
-  // Practice hides every answer; each one opens on its own with the keyboard.
-  await practice(page, true);
-  assert.equal(await openLayers(page).count(), 0);
-  await page.locator(".deck-card summary").first().press("Enter");
-  assert.equal(await openLayers(page).count(), 1);
-  await practice(page, false);
-  assert.equal(await openLayers(page).count(), layers - formal);
+  // The list has no "hide answers" switch: hiding answers is what the Study popup is for.
+  assert.equal(await page.locator(".deck-controls input[type=checkbox]").count(), 0);
+
+  // A subject tag on a card is a small pill, clearly smaller than the card's title.
+  const sizes = await page.locator(".deck-card").first().evaluate(card => ["h2", ".deck-tag"].map(part => {
+    const el = card.querySelector(part);
+    return {font: parseFloat(getComputedStyle(el).fontSize), height: el.getBoundingClientRect().height};
+  }));
+  assert(sizes[1].font <= 0.7 * sizes[0].font && sizes[1].height < sizes[0].height, `tag ${JSON.stringify(sizes[1])} is not clearly smaller than title ${JSON.stringify(sizes[0])}`);
 
   // One concept is one card: the term and its formal definition are layers of it.
   const convex = page.locator("#term-convex-function");
@@ -62,19 +64,18 @@ async function listChecks(page, width) {
   assert.equal(await result.locator(".concept-proof details[open]").count(), 1);
   if (width === 1440) assert((await result.boundingBox()).width > narrow, "an open formal card spans the row");
 
-  // Search covers every layer, including closed proofs. The count and
-  // "Clear filters" show up only while something narrows the list.
-  assert.equal(await page.locator(".deck-count").textContent(), "");
-  assert.equal(await page.locator(".deck-reset").isVisible(), false);
+  // Search covers every layer, including closed proofs. The controls show no
+  // count of cards and no "Clear filters": emptying the box brings every card back.
+  assert.equal(await page.locator(".deck-controls").getByText(/\d+ of \d+ cards|Clear filters/).count(), 0);
   await page.locator(".deck-search").fill("LATENT variable");
   assert.equal(await page.locator("#term-latent-variable").isVisible(), true);
-  assert.match(await page.locator(".deck-count").textContent(), new RegExp(`^\\d+ of ${total} cards$`));
+  assert.equal(await page.locator(".deck-controls").getByText(/\d+ of \d+ cards|Clear filters/).count(), 0);
   await page.locator(".deck-search").fill("factorisation");
   assert.equal(await page.locator("#term-linearity-expectation").isVisible(), true);
   assert(await visibleCards(page).count() < total);
   await page.locator(".deck-search").fill("zzzz-no-such-card");
   assert.equal(await page.locator(".deck-empty").isVisible(), true);
-  await page.locator(".deck-reset").click();
+  await page.locator(".deck-search").fill("");
   assert.equal(await visibleCards(page).count(), total);
 
   // The subject filter lives in the URL and survives a reload.
@@ -111,14 +112,18 @@ async function listChecks(page, width) {
     assert.deepEqual(here, await box());
     await page.goto(url, {waitUntil: "networkidle"});
   }
-  // The search box and the two menu buttons are equally tall.
-  const heights = await page.locator(".deck-search, .deck-menu > summary").evaluateAll(items => items.map(el => Math.round(el.getBoundingClientRect().height)));
+  // The search box, the Subject button and the Study button are equally tall.
+  const heights = await page.locator(".deck-search, .deck-menu > summary, .deck-study-open").evaluateAll(items => items.map(el => Math.round(el.getBoundingClientRect().height)));
   assert.equal(heights.length, 3);
-  assert.equal(new Set(heights).size, 1, `search box and menu buttons differ in height: ${heights}`);
-  // The Subject button says what is chosen, and each row shows its number of cards.
+  assert.equal(new Set(heights).size, 1, `search box and buttons differ in height: ${heights}`);
+  // The Subject button shows how many subjects are chosen, and each row its number of cards.
   const subject = page.locator('.deck-menu:has([data-facet="tag"])');
-  const state = page.locator('[data-facet-state="tag"]');
-  assert.equal(await state.textContent(), "All");
+  const badge = page.locator('[data-facet-count="tag"]');
+  const chips = page.locator(".deck-token");
+  const searchWidth = () => page.locator(".deck-search").evaluate(el => Math.round(el.getBoundingClientRect().width));
+  const unfiltered = await searchWidth();
+  assert.equal(await badge.isVisible(), false);
+  assert.equal(await chips.count(), 0);
   assert.equal(await subject.locator('[data-value=""] .deck-n').textContent(), String(total));
   assert.equal(await subject.locator('[data-value="physics"] .deck-n').textContent(), String(await taggedWith("physics")));
   // The menu stays open while rows are picked, and its panel stays on screen.
@@ -126,49 +131,112 @@ async function listChecks(page, width) {
   await subject.locator('[data-value="physics"]').click();
   await subject.locator('[data-value="robotics"]').click();
   assert.equal(await subject.evaluate(el => el.open), true);
-  assert.equal(await state.textContent(), "Physics, Robotics");
+  assert.equal(await badge.textContent(), "2");
+  assert.equal(await badge.isVisible(), true);
+  // Choosing subjects never changes the length of the search box.
+  assert.equal(await searchWidth(), unfiltered);
+  // Each chosen subject is a chip under the row; its × takes that subject off.
+  assert.deepEqual(await chips.evaluateAll(items => items.map(el => el.firstChild.textContent)), ["Physics", "Robotics"]);
+  // A chip is as small as a subject on a card.
+  const look = selector => page.locator(selector).first().evaluate(el => {
+    const style = getComputedStyle(el);
+    return [style.fontSize, style.backgroundColor, style.borderRadius];
+  });
+  assert.deepEqual(await look(".deck-token"), await look(".deck-card:not([hidden]) .deck-tag"));
+  // The chips stay on one line, which scrolls sideways when they do not fit: with
+  // every subject chosen the line is no taller than with two.
+  const chipLine = () => page.locator(".deck-picked").evaluate(row => ({
+    height: Math.round(row.getBoundingClientRect().height),
+    overflow: getComputedStyle(row).overflowX,
+    lines: new Set([...row.children].map(chip => Math.round(chip.getBoundingClientRect().top))).size,
+    inside: row.getBoundingClientRect().right <= document.documentElement.clientWidth,
+  }));
+  const two = await chipLine();
+  for (const value of ["computer-software", "machine-learning", "mathematics"]) await subject.locator(`[data-value="${value}"]`).click();
+  assert.deepEqual(await chipLine(), {height: two.height, overflow: "auto", lines: 1, inside: true});
+  assert.equal(await chips.count(), 5);
+  for (const value of ["computer-software", "machine-learning", "mathematics"]) await subject.locator(`[data-value="${value}"]`).click();
+  assert.equal(await chips.count(), 2);
   const panel = await subject.locator(".deck-menu-panel").boundingBox();
   assert(panel.x >= 0 && panel.x + panel.width <= width, "the open menu fits the screen");
-  // Opening another menu closes it; so do Escape and a click outside.
-  const studyMenu = page.locator('.deck-menu:has([data-study="all"])');
-  await studyMenu.locator("summary").click();
-  assert.equal(await subject.evaluate(el => el.open), false);
-  assert.equal(await page.locator('[data-study="all"]').isVisible(), true);
-  assert.equal(await page.locator('[data-study="all"] .deck-n').textContent(), String(await visibleCards(page).count()));
+  // Escape closes the menu; so does a click outside it.
   await page.keyboard.press("Escape");
-  assert.equal(await studyMenu.evaluate(el => el.open), false);
+  assert.equal(await subject.evaluate(el => el.open), false);
   await subject.locator("summary").click();
+  assert.equal(await subject.evaluate(el => el.open), true);
   await page.locator(".deck-search").click();
   assert.equal(await subject.evaluate(el => el.open), false);
-  await page.locator(".deck-reset").click();
-  assert.equal(await state.textContent(), "All");
+  await chips.first().locator("button").click();
+  assert.equal(new URL(page.url()).searchParams.get("tag"), "robotics");
+  assert.equal(await badge.textContent(), "1");
+  assert.equal(await searchWidth(), unfiltered);
+  // "All" in the menu takes every subject off; with no chips their line is gone.
+  await pick(page, "tag", "");
+  assert.equal(await chips.count(), 0);
+  assert.equal(await page.locator(".deck-picked").isVisible(), false);
+  assert.equal(await badge.isVisible(), false);
   // A tag on a card filters the whole deck.
   await page.locator('#term-latent-variable .deck-tag[data-value="mathematics"]').click();
   assert.equal(await visibleCards(page).count(), await taggedWith("mathematics"));
   assert.equal(new URL(page.url()).searchParams.get("tag"), "mathematics");
 
-  // A link to a card that the filter hides clears the filter and opens every layer.
+  // A link to a card opens it in the popup with every layer open, also when the filter hides that card.
+  const popup = page.locator("dialog.deck-study");
   for (const link of ["?tag=robotics#term-latent-variable", "?tag=physics#term-affine-map"]) {
     await page.goto(url + link, {waitUntil: "networkidle"});
-    const target = page.locator(new URL(page.url()).hash);
-    assert.equal(await target.isVisible(), true);
-    assert.equal(await target.locator("details:not([open])").count(), 0);
-    assert.equal(new URL(page.url()).search, "");
+    const hash = new URL(page.url()).hash;
+    assert.equal(await popup.locator(hash).isVisible(), true);
+    assert.equal(await popup.locator("details:not([open])").count(), 0);
+    assert.equal(await popup.locator("button:visible").count(), 1, "only the close button: there is nothing to answer");
+    await popup.locator(".deck-study-exit").click();
+    assert.equal(await popup.isVisible(), false);
+    // The filter is as the link set it, so the card is hidden again, and the address no longer names it.
+    assert.equal(new URL(page.url()).hash, "");
+    assert.notEqual(new URL(page.url()).searchParams.get("tag"), null);
+    assert.equal(await page.locator(hash).isVisible(), false);
   }
   await inBothThemes(page, async () => assert(await fitsViewport(page), "no horizontal overflow"));
 
-  // Related notes never point at a draft that the site does not publish.
+  // Clicking a card in the list opens that card alone, large, with every layer open.
   await page.goto(url, {waitUntil: "networkidle"});
-  if (drafts) {
-    const link = page.locator('#term-parameterised-function .concept-related a[href$="neural-network.html"]');
-    assert.equal(await link.count(), 1);
-  } else {
-    assert.equal(await page.locator(".concept-draft").count(), 0);
-    assert.equal(await page.locator('.concept-related a[href$="neural-network.html"]').count(), 0);
-  }
+  const one = page.locator("#term-convex-function");
+  const small = (await one.boundingBox()).width;
+  await one.locator(".concept-definition p").first().click();
+  const place = await page.evaluate(() => Math.round(window.scrollY));
+  assert.equal(await popup.locator("#term-convex-function").isVisible(), true);
+  assert.equal(await popup.locator(".deck-card").count(), 1);
+  assert.equal(await popup.locator("details:not([open])").count(), 0);
+  assert.equal(await page.locator(".deck-list #term-convex-function").count(), 0);
+  assert.equal(new URL(page.url()).hash, "#term-convex-function");
+  assert((await popup.boundingBox()).width > small, "the popup is larger than the card in the list");
+  // Closing it puts the card back as it was, and the page has not moved.
+  await page.keyboard.press("Escape");
+  assert.equal(await popup.isVisible(), false);
+  assert.equal(await page.locator(".deck-list #term-convex-function").count(), 1);
+  assert.deepEqual(await one.locator("details").evaluateAll(items => items.map(el => el.open)), [true, false]);
+  assert.equal(await page.evaluate(() => Math.round(window.scrollY)), place);
+  // The title is a link, so the keyboard opens the card too.
+  await one.locator(".deck-card-link").press("Enter");
+  assert.equal(await popup.locator("#term-convex-function").isVisible(), true);
+  await popup.locator(".deck-study-exit").click();
+  // A layer's own toggle still opens it in the list, without the popup.
+  await one.locator(".concept-statement summary").click();
+  assert.equal(await popup.isVisible(), false);
+  assert.deepEqual(await one.locator("details").evaluateAll(items => items.map(el => el.open)), [true, true]);
+  await one.locator(".concept-statement summary").click();
+
+  // The subjects of a card stay on one line; the row scrolls sideways when they do not fit.
+  const rows = await page.locator(".deck-card-meta").evaluateAll(items => items.map(row => ({
+    wrap: getComputedStyle(row).flexWrap,
+    overflow: getComputedStyle(row).overflowX,
+    lines: new Set([...row.children].map(tag => Math.round(tag.getBoundingClientRect().top))).size,
+  })));
+  assert(rows.every(row => row.wrap === "nowrap" && row.overflow === "auto" && row.lines === 1));
+  // Cards do not list the notes that use them.
+  assert.equal(await page.locator(".concept-related").count(), 0);
+  assert.equal(await page.getByText("Related notes").count(), 0);
 
   // Printing shows every card and layer, then restores what was open.
-  await practice(page, true);
   await pick(page, "tag", "robotics");
   await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
   await page.emulateMedia({media: "print"});
@@ -176,66 +244,99 @@ async function listChecks(page, width) {
   assert.equal(await openLayers(page).count(), layers);
   await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
   await page.emulateMedia({media: "screen"});
-  assert.equal(await openLayers(page).count(), 0);
+  assert.equal(await openLayers(page).count(), layers - formal);
 }
 
-// One card at a time: reveal each layer, grade the card, keep the result for later visits.
-async function flashcardChecks(page) {
+// One card at a time in a popup: reveal each layer, then say whether you knew it.
+async function flashcardChecks(page, width) {
   await page.goto(url, {waitUntil: "networkidle"});
+  const popup = page.locator("dialog.deck-study");
+  const inList = page.locator(".deck-list .deck-card:visible");
+  const button = page.locator(".deck-study-open"); // the icon of two cards, with no menu behind it
+  const scrolled = () => page.evaluate(() => Math.round(window.scrollY));
+  // The Study button quizzes the cards that are shown, so it is off when there are none.
+  await page.locator(".deck-search").fill("zzzz-no-such-card");
+  assert.equal(await button.isDisabled(), true);
   await page.locator(".deck-search").fill("expectation");
   const size = await visibleCards(page).count();
   assert(size >= 3, "the study search finds terms and formal cards");
-  const dueButton = page.locator('[data-study="due"]'); // enabled only while a shown card is due
-  assert.equal(await dueButton.isDisabled(), false);
+  assert.equal(await button.isDisabled(), false);
+  assert.equal(await button.getAttribute("aria-label"), `Study these ${size} cards`);
+  assert.equal(await page.locator(".deck-menu").count(), 1, "Subject is the only dropdown");
+  assert.equal(await popup.isVisible(), false);
 
-  await study(page, "all");
-  assert.equal(await page.locator(".deck-bar").isVisible(), false);
-  assert.equal(await visibleCards(page).count(), 1);
+  // One click opens the popup over the page: the list stays behind it, less the card being studied.
+  await study(page);
+  assert.equal(await popup.isVisible(), true);
+  assert.equal(await popup.locator(".deck-card").count(), 1);
+  assert.equal(await inList.count(), size - 1);
+  assert.equal(await page.locator(".deck-bar").isVisible(), true);
+  const place = await scrolled();
+  const box = await popup.boundingBox();
+  const screen = page.viewportSize();
+  assert(box.x >= 0 && box.y >= 0 && box.x + box.width <= screen.width && box.y + box.height <= screen.height, "the popup fits the screen");
+  if (width !== 1440) assert.equal(Math.round(box.width), screen.width, "on a phone the popup is the whole screen");
   assert.equal(await status(page), `Card 1 of ${size}`);
   assert.equal(await page.locator(".deck-current details[open]").count(), 0, "a card starts with its answers hidden");
-  assert.equal(await page.locator(".deck-study-good").isVisible(), false, "no grading before the answer is shown");
+  assert.equal(await popup.getByText("Keys:").count(), 0, "the popup does not list the keyboard shortcuts");
+  // A card has two answers, always there and the only ones: "Learning" and "Mastered".
+  const answers = () => popup.locator(".deck-study-actions button:visible").allTextContents();
+  assert.deepEqual(await answers(), ["Learning", "Mastered"]);
 
-  // Mouse or touch: reveal layer by layer, then miss the card; it returns at the end.
-  const reveal = page.locator(".deck-study-reveal");
-  while (await reveal.isVisible()) await reveal.click();
-  assert.equal(await page.locator(".deck-current details:not([open])").count(), 0);
+  // Mouse or touch: each click on the card turns over one more layer. "Learning" brings the card back at the end.
+  const closed = () => popup.locator(".deck-current details:not([open])").count();
+  for (let left = await closed(); left > 0; left--) {
+    await popup.locator(".deck-current h2").click();
+    assert.equal(await closed(), left - 1);
+  }
+  assert.deepEqual(await answers(), ["Learning", "Mastered"]);
   await page.locator(".deck-study-again").click();
   assert.equal(await status(page), `Card 2 of ${size + 1}`);
 
-  // Keyboard: Space reveals the next layer, 2 marks the card as known.
+  // Keyboard: Space turns over the next layer, 2 is "Mastered".
   for (let card = 0; card < size; card++) {
-    for (let layer = 0; layer < 5 && await reveal.isVisible(); layer++) await page.keyboard.press("Space");
-    assert.equal(await page.locator(".deck-study-good").isVisible(), true);
+    for (let left = await closed(); left > 0; left--) {
+      await page.keyboard.press("Space");
+      assert.equal(await closed(), left - 1);
+    }
     await page.keyboard.press("2");
   }
-  assert.equal(await status(page), `Finished. ${size - 1} of ${size} cards recalled on the first try.`);
-  assert.equal(await visibleCards(page).count(), 0);
+  assert.equal(await status(page), `Finished. ${size - 1} of ${size} cards mastered on the first try.`);
+  assert.equal(await popup.locator(".deck-card").count(), 0);
+  assert.equal(await inList.count(), size);
+  assert.deepEqual(await answers(), ["Study again", "Back to the cards"]);
   assert(await fitsViewport(page));
+  // "Study again" starts over with the same cards, and 1 is "Learning".
+  await page.locator(".deck-study-restart").click();
+  assert.equal(await status(page), `Card 1 of ${size}`);
+  await page.keyboard.press("1");
+  assert.equal(await status(page), `Card 2 of ${size + 1}`);
+  // × closes the popup, and the page has not moved.
   await page.locator(".deck-study-exit").click();
-  assert.equal(await page.locator(".deck-bar").isVisible(), true);
-  assert.equal(await visibleCards(page).count(), size);
+  assert.equal(await popup.isVisible(), false);
+  assert.equal(await inList.count(), size);
+  assert.equal(await scrolled(), place);
 
-  // Known cards are not due again today, also after a reload.
-  assert.equal(await dueButton.isDisabled(), true);
-  assert.equal(await dueButton.locator(".deck-n").textContent(), "0");
-  await page.reload({waitUntil: "networkidle"});
-  assert.equal(await dueButton.isDisabled(), true);
-  page.once("dialog", dialog => dialog.accept());
-  await inMenu(page, ".deck-forget", button => button.click());
-  assert.equal(await dueButton.isDisabled(), false);
-  assert.equal(await page.locator(".deck-forget").evaluate(el => el.hidden), true);
-
-  // Escape leaves study mode without grading anything.
-  await study(page, "due");
+  // Every round asks all the shown cards again: nothing is remembered between rounds.
+  await study(page);
+  assert.equal(await status(page), `Card 1 of ${size}`);
+  // Escape closes the popup.
   await page.keyboard.press("Escape");
-  assert.equal(await visibleCards(page).count(), size);
-  assert.equal(await dueButton.isDisabled(), false);
+  assert.equal(await popup.isVisible(), false);
+  assert.equal(await inList.count(), size);
+  // So does a click on the dimmed page beside it (a phone has no such space).
+  if (width === 1440) {
+    await study(page);
+    await page.mouse.click(8, 450);
+    assert.equal(await popup.isVisible(), false);
+    assert.equal(await inList.count(), size);
+  }
 }
 
 run(async ({each, noScript}) => {
   await each("cards, layers, search, filters, menus, deep links, flashcards, layout, print", async (page, width) => {
     await listChecks(page, width);
-    await flashcardChecks(page);
+    await flashcardChecks(page, width);
   });
   await noScript("every card and layer remains readable", async page => {
     await page.goto(url);

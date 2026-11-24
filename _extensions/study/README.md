@@ -15,7 +15,7 @@ Everything it shows comes from one place: the cards in `notes/study-notes/_cards
 | `study.lua` | Filter entry point, and the definition bubbles |
 | `cards.lua` | Reads and checks the card files; builds the glossary page |
 | `deck.lua` | The two panels above the cards (find, study), subject links, text helpers |
-| `deck.js`, `deck.css` | Search, filters, practice, and flashcard study on the page |
+| `deck.js`, `deck.css` | Search, filters, and the flashcard popup on the page |
 | `study-terms.js`, `study-terms.css` | Behaviour and style of the definition bubbles |
 | `../wiki/project.lua` | Project paths and the wiki index (shared with the wiki filter) |
 
@@ -94,13 +94,12 @@ Without JavaScript and in print the definition is shown inline; other formats ge
 ## The glossary page
 
 - **Layers.** A card shows its definition; the statement and the proof start closed and open one by one. While one of those is open, the card takes the full width.
-- **Controls.** The page has no sidebar. One row above the cards holds the search box, the **Subject** menu, and the **Study** menu. Only one menu is open at a time; it closes on Escape or a click outside it.
-- **Search and filters.** Search covers all text on a card, including closed layers. The Subject menu lists every subject with its number of cards, and its button shows what is chosen. Several subjects can be on at once (a card needs any of them), and the menu stays open while you pick. A subject that would add no cards is disabled. While a search or filter is on, the number of cards shown and *Clear filters* appear under the row. A subject on a card filters by it.
-- **Links.** The state is in the URL: `glossary.html?tag=mathematics,physics&search=latent`. `#term-latent-variable` opens that card with every layer, clearing a filter that would hide it. The search parameter is `search`, not `q`: Quarto's site search owns `q` and removes it on load.
-- **Practice.** *Hide answers* in the Study menu closes every layer; each opens on its own.
-- **Flashcard study.** *Due cards* or *All shown cards* in the Study menu shows the filtered cards one at a time in random order. Reveal each layer (definition, then statement, then proof), then choose **Again** or **Got it**. A missed card returns at the end of the round. Keys: Space reveals the next layer and then marks the card known, `1` again, `2` got it, `→` skip, Esc leave.
-- **Schedule.** A card you know moves up one box and is due again after 1, 3, 7, 14, then 30 days; a missed card starts over. This progress is stored in the browser (`localStorage`) and never leaves it. *Reset progress* clears it.
-- **Related notes.** Each card lists the notes that annotate it, collected from `.term` annotations by `_wiki/build_index.py`. Draft notes are listed only when the site is rendered with `draft-mode: visible`, so a production render never links to an unpublished page.
+- **One card, large.** Clicking a card (anywhere but a subject or a layer's toggle), or its title from the keyboard, opens that card alone in a popup with every layer open. Its subjects stay on one line and scroll sideways if there are many.
+- **Controls.** The page has no sidebar. One row above the cards holds the search box, the **Subject** menu, and the **Study** button. The menu closes on Escape or a click outside it.
+- **Search and filters.** Search covers all text on a card, including closed layers. The Subject menu lists every subject with its number of cards, and its button shows how many are chosen. The button never changes width, so the search box keeps its length. Several subjects can be on at once (a card needs any of them), and the menu stays open while you pick. A subject that would add no cards is disabled. While a subject is chosen, a line under the row shows each one as a small chip with an × that takes it off; the line stays one line and scrolls sideways. *All* in the menu takes every subject off. There is no count of cards and no clear button. A subject on a card filters by it.
+- **Links.** The state is in the URL: `glossary.html?tag=mathematics,physics&search=latent`. `#term-latent-variable` opens that card in the popup with every layer, also when the filter hides it in the list. The search parameter is `search`, not `q`: Quarto's site search owns `q` and removes it on load.
+- **Flashcard study.** The Study button (an icon of two cards) opens a popup over the page (the whole screen on a phone) that shows the filtered cards one at a time in random order, answers hidden. The page behind keeps its place; ×, Esc, or a click beside the popup closes it. At the end, *Study again* repeats the same cards. A click on the card (or Space) turns over its next layer: definition, then statement, then proof. Each card has two answers, **Learning** and **Mastered**; a card marked Learning returns at the end of the round. Keys: Space next layer, `1` Learning, `2` Mastered, Esc close. Nothing is stored: every round asks all the shown cards.
+- **Related notes.** The glossary does not list the notes that annotate a card. The link is still recorded: `_wiki/build_index.py` keeps each note's `.term` annotations as `terms` in the wiki index.
 - **Without JavaScript and in print**, every card is listed with all layers open.
 
 ## Tests

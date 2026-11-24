@@ -12,7 +12,7 @@
 /* The search box, then one dropdown menu per filter and the Study menu. */
 .deck-controls { margin-block: 1.5rem; }
 .deck-bar { position: relative; display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.6rem; }
-.deck-search, .deck-menu > summary {
+.deck-search, .deck-menu > summary, .deck .deck-study-open {
   padding: 0.6rem 0.85rem;
   color: var(--bs-body-color);
   background: var(--deck-surface);
@@ -20,6 +20,27 @@
   border-radius: 0.5rem;
   font: inherit;
 }
+/* The Study button: two cards lying on each other. Under the pointer (or
+   keyboard focus) they fan out, with a little overshoot, as if picked up. */
+.deck .deck-study-open { display: grid; place-items: center; padding-inline: 1rem; }
+.deck .deck-study-open:not(:disabled):hover { color: var(--deck-accent); border-color: var(--deck-accent); }
+.deck-stack { position: relative; display: block; width: 1.7rem; height: 1.5rem; }
+.deck-stack span {
+  position: absolute;
+  top: 0.05rem;
+  left: 0.35rem;
+  width: 1rem;
+  height: 1.4rem;
+  border: 1.5px solid currentColor;
+  border-radius: 0.2rem;
+  background: var(--deck-surface);
+  transition: transform 0.28s cubic-bezier(0.34, 1.7, 0.5, 1);
+}
+.deck-stack span:first-child { transform: translateX(-0.12rem) rotate(-7deg); }
+.deck-stack span:last-child { transform: translateX(0.14rem) rotate(5deg); }
+.deck-study-open:not(:disabled):is(:hover, :focus-visible) .deck-stack span:first-child { transform: translateX(-0.36rem) rotate(-17deg); }
+.deck-study-open:not(:disabled):is(:hover, :focus-visible) .deck-stack span:last-child { transform: translate(0.38rem, -0.04rem) rotate(15deg); }
+@media (prefers-reduced-motion: reduce) { .deck-stack span { transition: none; } }
 .deck-search { flex: 1 1 14rem; min-width: 0; }
 /* No margin: the site gives every <details> a bottom margin, which would make
    the row taller than the menu buttons and so the search box taller than them. */
@@ -36,7 +57,22 @@
 .deck-menu > summary::-webkit-details-marker { display: none; }
 .deck-menu > summary::after { content: "▾"; opacity: 0.6; }
 .deck-menu[open] > summary { border-color: var(--deck-accent); }
-.deck-menu-state { max-width: 12rem; overflow: hidden; text-overflow: ellipsis; }
+/* How many values are chosen. It keeps its place when empty, so the button
+   never changes width and the search box never changes length. */
+.deck-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  color: var(--deck-on-accent);
+  background: var(--deck-accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.deck-badge[data-zero] { visibility: hidden; }
 /* The open menu floats over the cards, under the right end of its button. */
 .deck-menu-panel {
   position: absolute;
@@ -65,39 +101,54 @@
 .deck .deck-menu-panel button[aria-pressed="true"] { color: var(--deck-accent); background: none; font-weight: 600; }
 .deck .deck-menu-panel button:not(:disabled):hover { background: var(--site-tint, var(--bs-tertiary-bg)); }
 .deck-n { color: var(--bs-secondary-color); font-weight: 400; font-variant-numeric: tabular-nums; }
-.deck-menu-panel label { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.6rem; font-size: 0.9rem; cursor: pointer; }
-/* On a phone the two menus share a second row under the search box (a long
-   list of chosen subjects is cut with "…"), and a menu opens as wide as the bar. */
+/* On a phone the two menus share a second row under the search box, and a
+   menu opens as wide as the bar. */
 @media (max-width: 767.98px) {
   .deck-search { flex-basis: 100%; }
   .deck-menu { position: static; flex: 1 1 0; min-width: 0; }
-  .deck-menu:last-child { flex: 0 0 auto; }
-  .deck-menu-state { flex: 0 1 auto; min-width: 0; max-width: none; }
   .deck-menu > summary::after { margin-left: auto; }
   .deck-menu-panel { left: 0; }
 }
-/* Shown only while a search or filter is on (deck.js empties the count and hides the button). */
-.deck-options > :not(:empty, [hidden]) { margin-top: 0.75rem; }
-.deck-count { margin: 0; font-size: 0.9rem; }
-.deck-study {
-  margin-block: 1.5rem;
-  padding: 1.1rem;
-  background: var(--deck-surface);
-  border: 1px solid var(--bs-border-color);
-  border-radius: 0.75rem;
+/* Shown only while a search or filter is on (deck.js empties the chips and the
+   count and hides the button): the chosen values as chips, each with an × that
+   takes it off, then the number of cards shown and "Clear filters". */
+/* The chosen values as chips under the row, each with an × that takes it off.
+   They stay on one line, which scrolls sideways (no scrollbar is drawn), and a
+   chip looks like a subject on a card (.deck-tag). The padding leaves room for
+   a focus ring inside the scrolling box. With nothing chosen the line is gone. */
+.deck-picked {
+  display: flex;
+  gap: 0.3rem;
+  margin: 0.5rem -0.25rem -0.25rem;
+  padding: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
-.deck-hint { margin: 0.4rem 0 0; font-size: 0.9rem; color: var(--bs-secondary-color); }
-.deck-options, .deck-study, .deck-study-actions, .deck-card-meta {
+.deck-picked::-webkit-scrollbar { display: none; }
+.deck-picked:empty { display: none; }
+.deck-token {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  padding-left: 0.6rem;
+  border-radius: 999px;
+  color: var(--bs-secondary-color);
+  background: var(--site-tint, var(--bs-tertiary-bg));
+  font-size: 0.75rem;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.deck .deck-token button { padding: 0.05rem 0.55rem 0.05rem 0.3rem; border: 0; background: none; font-size: 0.9rem; line-height: 1.25; }
+.deck-study-head, .deck-study-actions, .deck-card-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
 }
-.deck-options { gap: 0.5rem 1rem; }
 .deck-card summary { cursor: pointer; font-weight: 600; }
 
-/* Buttons and tags share one chip shape. */
-.deck button, .deck-tag {
+/* Buttons share one chip shape. */
+.deck button {
   border: 1px solid var(--bs-border-color);
   border-radius: 0.5rem;
   padding: 0.3rem 0.75rem;
@@ -105,9 +156,20 @@
   background: var(--deck-surface);
   font: inherit;
   font-size: 0.9rem;
-  text-decoration: none;
   overflow-wrap: anywhere;
   cursor: pointer;
+}
+/* A subject on a card is a small quiet pill, so it cannot be mistaken for the
+   card's title: no border, a faint fill, and much smaller type. */
+.deck-tag {
+  padding: 0.05rem 0.6rem;
+  border-radius: 999px;
+  color: var(--bs-secondary-color);
+  background: var(--site-tint, var(--bs-tertiary-bg));
+  font-size: 0.75rem;
+  line-height: 1.5;
+  text-decoration: none;
+  white-space: nowrap;
 }
 .deck button:disabled { opacity: 0.4; cursor: default; }
 .deck button[aria-pressed="true"], .deck button.deck-primary:not(:disabled) {
@@ -139,7 +201,19 @@
 .deck-grid .deck-card { margin: 0; }
 .deck-card:target { outline: 2px solid var(--deck-accent); }
 .deck-card h2.deck-card-title { font-size: 1.2rem; margin: 0 0 0.6rem; padding: 0; border: 0; }
-.deck-card-meta { margin-bottom: 0.8rem; font-size: 0.9rem; }
+/* The subjects stay on one line however many there are: the row scrolls
+   sideways (no scrollbar is drawn), so a card never grows taller for its tags.
+   The padding leaves room for a tag's focus ring inside the scrolling box. */
+.deck-card-meta {
+  flex-wrap: nowrap;
+  gap: 0.3rem;
+  margin: -0.25rem -0.25rem 0.55rem;
+  padding: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.deck-card-meta::-webkit-scrollbar { display: none; }
+.deck-card-meta .deck-tag { flex: none; }
 .deck-card details { margin-top: 0.7rem; border-top: 1px solid var(--bs-border-color); }
 .deck-card summary { padding-block: 0.5rem; font-size: 0.9rem; }
 .deck-card details > :last-child { margin-bottom: 0.3rem; }
@@ -154,28 +228,56 @@
 .deck-grid .deck-card:has(details[data-collapsed][open]) { grid-column: 1 / -1; }
 .concept-prompt > :last-child { margin-bottom: 0; }
 .concept-definition p { margin: 0 0 0.4rem; }
-.concept-related { margin-top: 0.8rem; padding-top: 0.75rem; border-top: 1px solid var(--bs-border-color); }
-/* Three classes so this wins over the site's heading-line rule. */
-.deck .deck-card .concept-related h3 { font-size: 0.9rem; margin: 0 0 0.4rem; padding: 0; border: 0; }
-.concept-related ul { margin: 0; padding-left: 1.1rem; font-size: 0.9rem; }
-.concept-draft { font-size: 0.9rem; }
+/* A card in the list opens large in the popup when clicked (deck.js); its
+   title is the link that does the same from the keyboard. */
+.deck-list .deck-card { cursor: pointer; transition: border-color 0.15s; }
+.deck-list .deck-card:hover { border-color: color-mix(in srgb, var(--deck-accent) 50%, var(--bs-border-color)); }
+.deck .deck-card-link { color: inherit; font-weight: inherit; text-decoration: none; }
+.deck .deck-list .deck-card-link:hover { color: var(--deck-accent); }
 
-/* ---- Flashcard study: one card at a time ---- */
-.deck-study { justify-content: space-between; }
+/* ---- Flashcard study: a popup over the page, one card at a time ---- */
+/* The page behind stays where it was, dimmed, and does not scroll meanwhile.
+   No `display` here: a closed <dialog> must stay hidden. */
+.deck-study {
+  width: min(46rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  overflow: auto;
+  color: var(--bs-body-color);
+  background: var(--deck-surface);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 1rem;
+  box-shadow: 0 1.5rem 3rem -1.5rem color-mix(in srgb, var(--bs-body-color) 70%, transparent);
+}
+.deck-study::backdrop { background: color-mix(in srgb, var(--bs-body-color) 45%, transparent); }
+html:has(.deck-study[open]) { overflow: hidden; }
+/* The box fills the dialog, so a click on the dialog element itself is a click beside the popup. */
+.deck-study-box { display: grid; gap: 1.25rem; padding: 1.5rem; }
+.deck-study-head { flex-wrap: nowrap; gap: 0.9rem; }
 .deck-study-status { margin: 0; font-weight: 600; }
-.deck-study-progress { flex: 1 1 8rem; height: 0.5rem; accent-color: var(--deck-accent); }
-.deck-studying .deck-list { display: block; }
-.deck-studying .deck-card { max-width: 46rem; margin-inline: auto; padding: 1.6rem; }
-.deck-studying .deck-card:not(.deck-current) { display: none; }
-.deck-studying .deck-card h2.deck-card-title { font-size: 1.5rem; }
-.deck-studying .concept-related { display: none; }
-.deck-study-actions { justify-content: center; margin-block: 1.25rem; }
+.deck-study-progress { flex: 1 1 4rem; min-width: 2rem; height: 0.5rem; accent-color: var(--deck-accent); }
+/* The × keeps to the right edge also when nothing else is in the head (reading one card). */
+.deck .deck-study-exit { margin-left: auto; padding: 0 0.35rem; border: 0; background: none; font-size: 1.6rem; line-height: 1; }
+/* In the popup the card drops its own box: the popup is the box. Its title is plain text there. */
+.deck-study-card .deck-card { margin: 0; padding: 0; border: 0; background: none; }
+.deck-study-card .deck-card h2.deck-card-title { font-size: 1.5rem; }
+.deck-study-card .deck-card-link { pointer-events: none; }
+/* While studying, the card is clickable: a click turns over its next layer. */
+.deck-study-card:focus { outline: none; }
+.deck-study[data-use="study"] .deck-study-card { cursor: pointer; }
+/* Nothing to choose when a single card is being read. */
+.deck-study-actions:not(:has(button:not([hidden]))) { display: none; }
+.deck-study-actions { justify-content: center; }
 .deck-study-actions button { padding: 0.55rem 1.4rem; font-size: 1rem; }
-.deck-study-actions .deck-hint { flex-basis: 100%; text-align: center; }
+/* On a phone the popup is the whole screen. */
+@media (max-width: 575.98px) {
+  .deck-study { width: 100%; max-width: none; height: 100%; max-height: none; margin: 0; border: 0; border-radius: 0; }
+  .deck-study-box { padding: 1.25rem 1rem; }
+}
 
 @media print {
-  .deck-controls, .deck-study, .deck-study-actions, .deck-empty { display: none !important; }
-  .deck .deck-card[hidden], .deck-studying .deck-card:not(.deck-current) { display: block !important; }
+  .deck-controls, .deck-study, .deck-empty { display: none !important; }
+  .deck .deck-card[hidden] { display: block !important; }
   .deck-grid { display: block; }
   .deck-card { break-inside: avoid; margin-bottom: 1rem; }
 }
