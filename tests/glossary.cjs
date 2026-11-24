@@ -7,12 +7,8 @@ const visibleCards = page => page.locator(".deck-card:visible");
 const openLayers = page => page.locator(".deck-card details[open]");
 const status = page => page.locator(".deck-study-status").textContent();
 
-// Clicks one button of a filter ("letter" = A–Z, "tag" = subject), opening its toggle first.
-async function pick(page, key, value) {
-  const picker = page.locator(`.deck-facet-picker:has([data-facet="${key}"])`);
-  if (!(await picker.evaluate(el => el.open))) await picker.locator("summary").click();
-  await page.locator(`[data-facet="${key}"] button[data-value="${value}"]`).click();
-}
+// Clicks one button of a filter ("tag" = subject; "" = its "All" button).
+const pick = (page, key, value) => page.locator(`[data-facet="${key}"] button[data-value="${value}"]`).click();
 
 async function listChecks(page, width) {
   await page.goto(url, {waitUntil: "networkidle"});
@@ -21,7 +17,7 @@ async function listChecks(page, width) {
   const layers = await page.locator(".deck-card details").count();
   const formal = await page.locator(".deck-card details[data-collapsed]").count();
   assert(total >= 72);
-  assert.equal(await page.locator(".deck-controls").isVisible(), true);
+  assert.equal(await page.locator(".deck-side").isVisible(), true);
   const labels = await page.locator(".deck-card-title").allTextContents();
   assert.deepEqual(labels, [...labels].sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1));
   const taggedWith = tag => cards.evaluateAll((items, name) => items.filter(el => el.dataset.tag.split(" ").includes(name)).length, tag);
@@ -67,32 +63,25 @@ async function listChecks(page, width) {
   await page.locator(".deck-reset").click();
   assert.equal(await visibleCards(page).count(), total);
 
-  // First letter and subject combine, live in the URL, and survive a reload.
-  await pick(page, "letter", "L");
-  await pick(page, "tag", "mathematics");
-  const combined = await visibleCards(page).evaluateAll(items => items.map(el => ({
-    title: el.querySelector(".deck-card-title").textContent,
-    tags: el.dataset.tag.split(" "),
-  })));
-  assert(combined.length > 0 && combined.every(item => item.title.toUpperCase().startsWith("L") && item.tags.includes("mathematics")));
-  assert.equal(new URL(page.url()).searchParams.get("letter"), "L");
+  // The subject filter lives in the URL and survives a reload.
+  const tagsShown = () => visibleCards(page).evaluateAll(items => items.map(el => el.dataset.tag.split(" ")));
+  await pick(page, "tag", "robotics");
+  const robotics = await tagsShown();
+  assert(robotics.length > 0 && robotics.every(tags => tags.includes("robotics")));
+  assert.equal(new URL(page.url()).searchParams.get("tag"), "robotics");
   await page.reload({waitUntil: "networkidle"});
-  assert.equal(await page.locator('[data-facet="letter"] [data-value="L"]').getAttribute("aria-pressed"), "true");
-  assert.equal(await visibleCards(page).count(), combined.length);
-  // Several values of one filter can be on at once; a card needs any one of them.
-  await pick(page, "letter", "A");
-  const letters = await visibleCards(page).evaluateAll(items => items.map(el => el.dataset.letter));
-  assert(letters.includes("A") && letters.includes("L") && letters.every(letter => "AL".includes(letter)));
-  assert.deepEqual(new URL(page.url()).searchParams.get("letter").split(",").sort(), ["A", "L"]);
-  assert.equal(await page.locator('.deck-facet-picker:has([data-facet="letter"]) summary').textContent(), "A–Z · A, L");
-  await pick(page, "letter", "L");
-  assert((await visibleCards(page).evaluateAll(items => items.map(el => el.dataset.letter))).every(letter => letter === "A"));
-  await pick(page, "letter", "");
-  assert.equal(new URL(page.url()).searchParams.get("letter"), null);
-  await page.locator(".deck-reset").click();
-  // A letter with no cards is disabled.
-  const missingLetter = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"].find(letter => !labels.some(label => label.toUpperCase().startsWith(letter)));
-  if (missingLetter) assert.equal(await page.locator(`[data-facet="letter"] [data-value="${missingLetter}"]`).isDisabled(), true);
+  assert.equal(await page.locator('[data-facet="tag"] [data-value="robotics"]').getAttribute("aria-pressed"), "true");
+  assert.equal(await visibleCards(page).count(), robotics.length);
+  // Several subjects can be on at once; a card needs any one of them.
+  await pick(page, "tag", "physics");
+  const both = await tagsShown();
+  assert(both.length > robotics.length && both.every(tags => tags.includes("robotics") || tags.includes("physics")));
+  assert.deepEqual(new URL(page.url()).searchParams.get("tag").split(",").sort(), ["physics", "robotics"]);
+  await pick(page, "tag", "robotics");
+  assert((await tagsShown()).every(tags => tags.includes("physics")));
+  await pick(page, "tag", "");
+  assert.equal(new URL(page.url()).searchParams.get("tag"), null);
+  assert.equal(await visibleCards(page).count(), total);
 
   // On a wide screen the filters and study buttons are the only thing in the
   // page sidebar; on a phone, where that sidebar is folded away, they stay above the cards.
@@ -108,7 +97,7 @@ async function listChecks(page, width) {
   assert.equal(new URL(page.url()).searchParams.get("tag"), "mathematics");
 
   // A link to a card that the filter hides clears the filter and opens every layer.
-  for (const link of ["?tag=robotics#term-latent-variable", "?letter=Z#term-affine-map"]) {
+  for (const link of ["?tag=robotics#term-latent-variable", "?tag=physics#term-affine-map"]) {
     await page.goto(url + link, {waitUntil: "networkidle"});
     const target = page.locator(new URL(page.url()).hash);
     assert.equal(await target.isVisible(), true);
@@ -145,11 +134,11 @@ async function flashcardChecks(page) {
   await page.locator(".deck-search").fill("expectation");
   const size = await visibleCards(page).count();
   assert(size >= 3, "the study search finds terms and formal cards");
-  const count = page.locator(".deck-due");
-  assert((await count.textContent()).endsWith(`${size} due for review`));
+  const dueButton = page.locator('[data-study="due"]'); // enabled only while a shown card is due
+  assert.equal(await dueButton.isDisabled(), false);
 
   await page.locator('[data-study="all"]').click();
-  assert.equal(await page.locator(".deck-controls").isVisible(), false);
+  assert.equal(await page.locator(".deck-side").isVisible(), false);
   assert.equal(await visibleCards(page).count(), 1);
   assert.equal(await status(page), `Card 1 of ${size}`);
   assert.equal(await page.locator(".deck-current details[open]").count(), 0, "a card starts with its answers hidden");
@@ -172,24 +161,24 @@ async function flashcardChecks(page) {
   assert.equal(await visibleCards(page).count(), 0);
   assert(await fitsViewport(page));
   await page.locator(".deck-study-exit").click();
-  assert.equal(await page.locator(".deck-controls").isVisible(), true);
+  assert.equal(await page.locator(".deck-side").isVisible(), true);
   assert.equal(await visibleCards(page).count(), size);
 
   // Known cards are not due again today, also after a reload.
-  assert((await count.textContent()).endsWith("0 due for review"));
+  assert.equal(await dueButton.isDisabled(), true);
   assert.equal(await page.locator('[data-study="due"]').isDisabled(), true);
   await page.reload({waitUntil: "networkidle"});
-  assert((await count.textContent()).endsWith("0 due for review"));
+  assert.equal(await dueButton.isDisabled(), true);
   page.once("dialog", dialog => dialog.accept());
   await page.locator(".deck-forget").click();
-  assert((await count.textContent()).endsWith(`${size} due for review`));
+  assert.equal(await dueButton.isDisabled(), false);
   assert.equal(await page.locator(".deck-forget").isVisible(), false);
 
   // Escape leaves study mode without grading anything.
   await page.locator('[data-study="due"]').click();
   await page.keyboard.press("Escape");
   assert.equal(await visibleCards(page).count(), size);
-  assert((await count.textContent()).endsWith(`${size} due for review`));
+  assert.equal(await dueButton.isDisabled(), false);
 }
 
 run(async ({each, noScript}) => {
@@ -199,7 +188,7 @@ run(async ({each, noScript}) => {
   });
   await noScript("every card and layer remains readable", async page => {
     await page.goto(url);
-    assert.equal(await page.locator(".deck-controls").isVisible(), false);
+    assert.equal(await page.locator(".deck-side").isVisible(), false);
     assert.equal(await page.locator(".deck-study-actions").isVisible(), false);
     assert.equal(await page.locator(".deck-card details:not([open])").count(), 0);
     assert.equal(await page.locator(".deck-card details p").first().isVisible(), true);

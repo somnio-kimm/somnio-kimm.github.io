@@ -21,7 +21,7 @@
     // buttons can move out of the deck into the page sidebar (see placeSide).
     const el = Object.fromEntries(Object.entries({
       controls: ".deck-controls", side: ".deck-side", search: ".deck-search", practice: ".deck-practice",
-      count: ".deck-count", due: ".deck-due", empty: ".deck-empty", reset: ".deck-reset", forget: ".deck-forget",
+      count: ".deck-count", empty: ".deck-empty", reset: ".deck-reset", forget: ".deck-forget",
       studyDue: '[data-study="due"]', studyAll: '[data-study="all"]',
       study: ".deck-study", status: ".deck-study-status", bar: ".deck-study-progress", exit: ".deck-study-exit",
       actions: ".deck-study-actions", reveal: ".deck-study-reveal", again: ".deck-study-again",
@@ -32,7 +32,6 @@
     const facets = [...root.querySelectorAll("[data-facet]")].map(group => ({
       key: group.dataset.facet,
       buttons: [...group.querySelectorAll("button[data-value]")],
-      summary: group.closest(".deck-facet-picker").querySelector("summary"),
       chosen: new Set(),
     }));
     const cards = [...root.querySelectorAll(".deck-card")].map(element => ({
@@ -67,14 +66,9 @@
           button.setAttribute("aria-pressed", String(pressed));
           button.disabled = Boolean(value) && !pressed && !available.has(value);
         });
-        // The toggle names what is chosen, so a folded filter still says what it does.
-        const names = facet.buttons.filter(button => facet.chosen.has(button.dataset.value)).map(button => button.textContent);
-        facet.summary.textContent = facet.summary.dataset.label
-          + (names.length ? ` · ${names.length > 3 ? `${names.length} chosen` : names.join(", ")}` : "");
       });
       const due = shown.filter(isDue).length;
       el.count.textContent = `${shown.length} of ${plural(cards.length, "card")}`;
-      el.due.textContent = `${due} due for review`;
       el.empty.hidden = shown.length > 0;
       el.studyDue.disabled = due === 0;
       el.studyAll.disabled = shown.length === 0;

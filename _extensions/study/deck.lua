@@ -42,22 +42,22 @@ function M.tag_links(tags)
   return table.concat(html)
 end
 
--- One facet = one group of filter buttons behind a toggle that carries its
--- name (deck.js adds the chosen value to it). `key` is both the URL parameter
--- and the card attribute (`data-KEY`, values separated by spaces).
--- facet = {key, label, all, values = {{value, text, hint}}, compact}
+-- One facet = one panel with its name and a group of filter buttons, always
+-- visible. `key` is both the URL parameter and the card attribute (`data-KEY`,
+-- values separated by spaces).
+-- facet = {key, label, all, values = {{value, text, hint}}}
 local function facet_html(facet)
-  local html = {'<details class="deck-facet-picker">',
-    '<summary data-label="' .. M.escape(facet.label) .. '">' .. M.escape(facet.label) .. '</summary>',
-    '<div class="deck-facet' .. (facet.compact and " deck-facet-compact" or "")
-      .. '" role="group" aria-label="' .. M.escape(facet.label) .. '" data-facet="' .. facet.key .. '">',
+  local html = {'<div class="deck-panel">',
+    '<p class="deck-panel-title">' .. M.escape(facet.label) .. '</p>',
+    '<div class="deck-facet" role="group" aria-label="' .. M.escape(facet.label)
+      .. '" data-facet="' .. facet.key .. '">',
     '<button type="button" data-value="" aria-pressed="true">' .. M.escape(facet.all) .. '</button>'}
   for _, item in ipairs(facet.values) do
     html[#html + 1] = '<button type="button" data-value="' .. M.escape(item.value) .. '" aria-pressed="false"'
       .. (item.hint and (' aria-label="' .. M.escape(item.hint) .. '"') or "") .. '>'
       .. M.escape(item.text) .. '</button>'
   end
-  html[#html + 1] = '</div>\n</details>'
+  html[#html + 1] = '</div>\n</div>'
   return table.concat(html, "\n")
 end
 
@@ -69,6 +69,7 @@ end
 function M.controls(deck)
   local id = deck.name
   local html = {'<div class="deck-controls" hidden>',
+    '<div class="deck-side">',
     '<div class="deck-panel">',
     '<label class="deck-panel-title" for="' .. id .. '-search">' .. M.escape(deck.search_label) .. '</label>',
     '<input id="' .. id .. '-search" class="deck-search" type="search" placeholder="'
@@ -78,13 +79,9 @@ function M.controls(deck)
 <p class="deck-count" role="status" aria-live="polite"></p>
 <button type="button" class="deck-reset">Clear filters</button>
 </div>
-</div>
-<div class="deck-side">
-<div class="deck-panel">
-<p class="deck-panel-title">Filter</p>]]
+</div>]]
   for _, facet in ipairs(deck.facets) do html[#html + 1] = facet_html(facet) end
   html[#html + 1] = [[
-</div>
 <div class="deck-panel">
 <p class="deck-panel-title">Study</p>
 <div class="deck-study-start">
@@ -95,7 +92,6 @@ function M.controls(deck)
 <div class="deck-options">]]
   html[#html + 1] = '<label><input id="' .. id .. '-practice" class="deck-practice" type="checkbox"> Hide answers for practice</label>'
   html[#html + 1] = [[
-<p class="deck-due" role="status" aria-live="polite"></p>
 </div>
 </div>
 </div>
@@ -123,7 +119,7 @@ function M.footer()
 end
 
 function M.add_dependency()
-  quarto.doc.add_html_dependency({name = "study-deck", version = "3.5.0",
+  quarto.doc.add_html_dependency({name = "study-deck", version = "3.6.0",
     scripts = {{path = "deck.js", attribs = {defer = ""}}}, stylesheets = {"deck.css"}})
 end
 

@@ -158,7 +158,6 @@ local function card_html(card, notes)
   end
   return pandoc.Div(blocks, pandoc.Attr("term-" .. card.key, {"deck-card", "concept-card"}, {
     ["data-tag"] = table.concat(card.tags, " "),
-    ["data-letter"] = card.label:sub(1, 1):upper(),
   }))
 end
 
@@ -187,11 +186,7 @@ function M.page(meta)
   end
   if not html then return pandoc.Div(list) end
 
-  local letters, tag_values = {}, {}
-  for code = string.byte("A"), string.byte("Z") do
-    local letter = string.char(code)
-    letters[#letters + 1] = {value = letter, text = letter, hint = "Cards starting with " .. letter}
-  end
+  local tag_values = {}
   for _, tag in ipairs(deck.tags(all_tags, "the cards")) do
     tag_values[#tag_values + 1] = {value = tag, text = deck.tag_label(tag)}
   end
@@ -202,7 +197,6 @@ function M.page(meta)
       search_label = "Search cards",
       placeholder = "e.g. latent, convex, expectation, robotics",
       facets = {
-        {key = "letter", label = "A–Z", all = "All", values = letters, compact = true},
         {key = "tag", label = "Subject", all = "All", values = tag_values},
       },
     })),
