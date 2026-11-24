@@ -10,15 +10,11 @@ listing:
   filter-ui: true
   sort-ui: [title, date-modified]
   field-display-names:
-    date-modified: "Updated"
+    date-modified: "Modified"
   fields: [title, description, categories, date-modified]
   date-format: "YYYY-MM-DD"
 draft: false
 ---
 
-Choose a collection:
-
-- [Literature Review](literature-review/index.qmd): papers I have read and broken down in my own words.
-- [Study Notes](study-notes/index.qmd): notes from mathematics, machine learning, robotics, physics, and computing.
-
-Or browse all individual notes below.
+- [Literature Review](literature-review/index.qmd)
+- [Study Notes](study-notes/index.qmd)

@@ -14,7 +14,7 @@ Everything it shows comes from one place: the cards in `notes/study-notes/_cards
 |---|---|
 | `study.lua` | Filter entry point, and the definition bubbles |
 | `cards.lua` | Reads and checks the card files; builds the glossary page |
-| `deck.lua` | The controls above the cards, tag links, text helpers |
+| `deck.lua` | The two panels above the cards (find, study), subject links, text helpers |
 | `deck.js`, `deck.css` | Search, filters, practice, and flashcard study on the page |
 | `study-terms.js`, `study-terms.css` | Behaviour and style of the definition bubbles |
 | `../wiki/project.lua` | Project paths and the wiki index (shared with the wiki filter) |
@@ -94,8 +94,8 @@ Without JavaScript and in print the definition is shown inline; other formats ge
 ## The glossary page
 
 - **Layers.** A card shows its definition; the statement and the proof start closed and open one by one. While one of those is open, the card takes the full width.
-- **Search and filters.** Search covers all text on a card, including closed layers. First letter, content (*With statement*, *With proof*), and tag combine; a value that would leave no cards is disabled. A `#tag` on a card filters by it.
-- **Links.** The state is in the URL: `glossary.html?tag=mathematics&has=proof&letter=L&search=latent`. `#term-latent-variable` opens that card with every layer, clearing a filter that would hide it. The search parameter is `search`, not `q`: Quarto's site search owns `q` and removes it on load.
+- **Search and filters.** Search covers all text on a card, including closed layers. The two filters, first letter (A–Z) and subject, each open from a toggle that also shows the chosen value. They combine; a value that would leave no cards is disabled. A `#tag` on a card filters by it.
+- **Links.** The state is in the URL: `glossary.html?tag=mathematics&letter=L&search=latent`. `#term-latent-variable` opens that card with every layer, clearing a filter that would hide it. The search parameter is `search`, not `q`: Quarto's site search owns `q` and removes it on load.
 - **Practice.** *Hide answers for practice* closes every layer; each opens on its own.
 - **Flashcard study.** *Review due cards* or *Study all as flashcards* shows the filtered cards one at a time in random order. Reveal each layer (definition, then statement, then proof), then choose **Again** or **Got it**. A missed card returns at the end of the round. Keys: Space reveals the next layer and then marks the card known, `1` again, `2` got it, `→` skip, Esc leave.
 - **Schedule.** A card you know moves up one box and is due again after 1, 3, 7, 14, then 30 days; a missed card starts over. This progress is stored in the browser (`localStorage`) and never leaves it. *Reset progress* clears it.

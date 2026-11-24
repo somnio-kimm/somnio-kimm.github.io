@@ -9,14 +9,16 @@
 .deck [hidden] { display: none; }
 
 /* ---- Controls ---- */
-.deck-controls, .deck-study {
-  margin-block: 1.5rem;
+/* Two panels: one to find cards, one to study them. */
+.deck-controls { display: grid; gap: 1rem; margin-block: 1.5rem; }
+.deck-panel, .deck-study {
   padding: 1.1rem;
   background: var(--deck-surface);
   border: 1px solid var(--bs-border-color);
   border-radius: 0.75rem;
 }
-.deck-controls > label { display: block; font-weight: 600; margin-bottom: 0.4rem; }
+.deck-study { margin-block: 1.5rem; }
+.deck-panel-title { display: block; font-weight: 600; margin: 0 0 0.5rem; }
 .deck-search {
   width: 100%;
   padding: 0.65rem 0.8rem;
@@ -27,14 +29,15 @@
   font: inherit;
 }
 .deck-hint { margin: 0.4rem 0 0; font-size: 0.9rem; color: var(--bs-secondary-color); }
-.deck-count { margin: 0.8rem 0 0; font-size: 0.9rem; }
+.deck-count, .deck-due { margin: 0; font-size: 0.9rem; }
 .deck-facet, .deck-options, .deck-study-start, .deck-study, .deck-study-actions, .deck-card-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
 }
-.deck-facet, .deck-options, .deck-study-start, .deck-facet-picker { margin-top: 0.9rem; }
+/* Each filter is a toggle: its name, and its buttons when opened. */
+.deck-facet-picker, .deck-options { margin-top: 0.9rem; }
 .deck-facet-picker .deck-facet { margin-top: 0.6rem; }
 .deck-options { justify-content: space-between; }
 .deck-options label { display: flex; align-items: center; gap: 0.5rem; }

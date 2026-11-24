@@ -25,7 +25,7 @@
     const facets = [...root.querySelectorAll("[data-facet]")].map(group => ({
       key: group.dataset.facet,
       buttons: [...group.querySelectorAll("button[data-value]")],
-      picker: group.closest(".deck-facet-picker"),
+      summary: group.closest(".deck-facet-picker").querySelector("summary"),
       value: "",
     }));
     const cards = [...root.querySelectorAll(".deck-card")].map(element => ({
@@ -41,7 +41,6 @@
       .map(link => ({link, url: new URL(link.href)}))
       .filter(item => item.url.pathname === window.location.pathname);
     const sidebarFacets = facets.filter(facet => sidebarLinks.some(item => item.url.searchParams.has(facet.key)));
-    const label = facet => facet.buttons.find(button => button.dataset.value === facet.value)?.textContent || facet.value;
     const setOpen = isOpen => cards.forEach(card => card.details.forEach(details => { details.open = isOpen(details); }));
     // The list at rest: practice hides every answer; otherwise layers marked
     // data-collapsed (formal text, proofs) stay closed until someone opens them.
@@ -63,8 +62,9 @@
           button.setAttribute("aria-pressed", String(value === facet.value));
           button.disabled = Boolean(value) && value !== facet.value && !available.has(value);
         });
-        const summary = facet.picker?.querySelector("summary");
-        if (summary) summary.textContent = summary.dataset.label + (facet.value ? ` · ${label(facet)}` : "");
+        // The toggle shows the chosen value, so a folded filter still says what it does.
+        const chosen = facet.buttons.find(button => button.dataset.value === facet.value);
+        facet.summary.textContent = facet.summary.dataset.label + (facet.value ? ` · ${chosen?.textContent || facet.value}` : "");
       });
       if (sidebarFacets.length) {
         sidebarLinks.forEach(({link, url}) => {
@@ -75,8 +75,8 @@
         });
       }
       const due = shown.filter(isDue).length;
-      find(".deck-count").textContent = [`${shown.length} of ${plural(cards.length, "card")}`,
-        ...facets.filter(facet => facet.value).map(label), `${due} due for review`].join(" · ");
+      find(".deck-count").textContent = `${shown.length} of ${plural(cards.length, "card")}`;
+      find(".deck-due").textContent = `${due} due for review`;
       find(".deck-empty").hidden = shown.length > 0;
       find('[data-study="due"]').disabled = due === 0;
       find('[data-study="all"]').disabled = shown.length === 0;
@@ -226,7 +226,7 @@
       facet.value = button.dataset.value;
       filter();
     })));
-    // "#tag" links on a card filter the whole deck by that value.
+    // A subject link on a card filters the whole deck by that subject.
     root.addEventListener("click", event => {
       const link = event.target.closest("a[data-facet-link]");
       if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
@@ -288,9 +288,6 @@
 
     restList();
     readURL();
-    facets.forEach(facet => {
-      if (facet.picker) facet.picker.open = window.matchMedia("(min-width: 768px)").matches;
-    });
     controls.hidden = false;
     revealAnchor();
   });

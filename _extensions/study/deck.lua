@@ -25,56 +25,73 @@ function M.tags(list, owner)
   return tags
 end
 
--- "#tag" links on a card; deck.js turns a click into the tag filter.
+-- How a subject tag is shown to readers: "machine-learning" -> "Machine Learning".
+function M.tag_label(tag)
+  local words = tag:gsub("%-", " ")
+  local label = words:gsub("(%a)(%w*)", function(first, rest) return first:upper() .. rest end)
+  return label
+end
+
+-- Subject links on a card; deck.js turns a click into the subject filter.
 function M.tag_links(tags)
   local html = {}
   for _, tag in ipairs(tags) do
     html[#html + 1] = '<a class="deck-tag" href="?tag=' .. tag .. '" data-facet-link="tag" data-value="'
-      .. tag .. '">#' .. tag .. '</a>'
+      .. tag .. '">' .. M.escape(M.tag_label(tag)) .. '</a>'
   end
   return table.concat(html)
 end
 
--- One facet = one group of filter buttons. `key` is both the URL parameter and
--- the card attribute (`data-KEY`, values separated by spaces).
--- facet = {key, label, all, values = {{value, text, hint}}, compact, collapsible}
+-- One facet = one group of filter buttons behind a toggle that carries its
+-- name (deck.js adds the chosen value to it). `key` is both the URL parameter
+-- and the card attribute (`data-KEY`, values separated by spaces).
+-- facet = {key, label, all, values = {{value, text, hint}}, compact}
 local function facet_html(facet)
-  local html = {'<div class="deck-facet' .. (facet.compact and " deck-facet-compact" or "")
-    .. '" role="group" aria-label="' .. M.escape(facet.label) .. '" data-facet="' .. facet.key .. '">',
+  local html = {'<details class="deck-facet-picker">',
+    '<summary data-label="' .. M.escape(facet.label) .. '">' .. M.escape(facet.label) .. '</summary>',
+    '<div class="deck-facet' .. (facet.compact and " deck-facet-compact" or "")
+      .. '" role="group" aria-label="' .. M.escape(facet.label) .. '" data-facet="' .. facet.key .. '">',
     '<button type="button" data-value="" aria-pressed="true">' .. M.escape(facet.all) .. '</button>'}
   for _, item in ipairs(facet.values) do
     html[#html + 1] = '<button type="button" data-value="' .. M.escape(item.value) .. '" aria-pressed="false"'
       .. (item.hint and (' aria-label="' .. M.escape(item.hint) .. '"') or "") .. '>'
       .. M.escape(item.text) .. '</button>'
   end
-  html[#html + 1] = '</div>'
-  local group = table.concat(html, "\n")
-  if not facet.collapsible then return group end
-  return '<details class="deck-facet-picker" open><summary data-label="' .. M.escape(facet.label) .. '">'
-    .. M.escape(facet.label) .. '</summary>\n' .. group .. '\n</details>'
+  html[#html + 1] = '</div>\n</details>'
+  return table.concat(html, "\n")
 end
 
--- Controls above the cards. They start hidden: without JavaScript the page is
--- the plain list of cards with every answer open.
--- deck = {name, search_label, placeholder, hint, practice_label, practice, facets}
+-- Two panels above the cards: one to find cards, one to study them. They start
+-- hidden: without JavaScript the page is the plain list of cards with every
+-- answer open.
+-- deck = {name, search_label, placeholder, facets}
 function M.controls(deck)
   local id = deck.name
   local html = {'<div class="deck-controls" hidden>',
-    '<label for="' .. id .. '-search">' .. M.escape(deck.search_label) .. '</label>',
+    '<div class="deck-panel">',
+    '<label class="deck-panel-title" for="' .. id .. '-search">' .. M.escape(deck.search_label) .. '</label>',
     '<input id="' .. id .. '-search" class="deck-search" type="search" placeholder="'
       .. M.escape(deck.placeholder) .. '" autocomplete="off">'}
-  if deck.hint then html[#html + 1] = '<p class="deck-hint">' .. M.escape(deck.hint) .. '</p>' end
   for _, facet in ipairs(deck.facets) do html[#html + 1] = facet_html(facet) end
-  html[#html + 1] = '<div class="deck-options"><label><input id="' .. id .. '-practice" class="deck-practice" type="checkbox"'
-    .. (deck.practice and " checked" or "") .. '> ' .. M.escape(deck.practice_label) .. '</label>'
-    .. '<button type="button" class="deck-reset">Clear filters</button></div>'
   html[#html + 1] = [[
+<div class="deck-options">
+<p class="deck-count" role="status" aria-live="polite"></p>
+<button type="button" class="deck-reset">Clear filters</button>
+</div>
+</div>
+<div class="deck-panel">
+<p class="deck-panel-title">Study</p>
 <div class="deck-study-start">
 <button type="button" class="deck-primary" data-study="due">Review due cards</button>
 <button type="button" data-study="all">Study all as flashcards</button>
 <button type="button" class="deck-forget" hidden>Reset progress</button>
 </div>
-<p class="deck-count" role="status" aria-live="polite"></p>
+<div class="deck-options">]]
+  html[#html + 1] = '<label><input id="' .. id .. '-practice" class="deck-practice" type="checkbox"> Hide answers for practice</label>'
+  html[#html + 1] = [[
+<p class="deck-due" role="status" aria-live="polite"></p>
+</div>
+</div>
 </div>
 <div class="deck-study" hidden>
 <p class="deck-study-status" role="status" aria-live="polite"></p>
@@ -99,7 +116,7 @@ function M.footer()
 end
 
 function M.add_dependency()
-  quarto.doc.add_html_dependency({name = "study-deck", version = "3.2.0",
+  quarto.doc.add_html_dependency({name = "study-deck", version = "3.4.0",
     scripts = {{path = "deck.js", attribs = {defer = ""}}}, stylesheets = {"deck.css"}})
 end
 

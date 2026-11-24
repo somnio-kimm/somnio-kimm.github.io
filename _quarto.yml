@@ -56,7 +56,7 @@ website:
             text: Glossary
           - text: "---"
           - href: notes/recent.qmd
-            text: Recently Updated
+            text: Recently Modified
   sidebar:
     - id: notes
       title: "Literature Review"
@@ -87,8 +87,6 @@ website:
       contents:
         - href: notes/study-notes/index.qmd
           text: "All study notes"
-        - href: notes/study-notes/glossary.qmd
-          text: "Glossary"
         - section: "Mathematics"
           href: notes/study-notes/mathematics/index.qmd
           contents: "notes/study-notes/mathematics/*.qmd"
@@ -112,20 +110,18 @@ website:
       contents:
         - href: notes/study-notes/glossary.qmd
           text: "All cards A–Z"
-        - section: "By subject"
-          contents:
-            - href: notes/study-notes/glossary.html?tag=computer-hardware
-              text: "Computer Hardware"
-            - href: notes/study-notes/glossary.html?tag=computer-software
-              text: "Computer Software"
-            - href: notes/study-notes/glossary.html?tag=machine-learning
-              text: "Machine Learning"
-            - href: notes/study-notes/glossary.html?tag=mathematics
-              text: "Mathematics"
-            - href: notes/study-notes/glossary.html?tag=physics
-              text: "Physics"
-            - href: notes/study-notes/glossary.html?tag=robotics
-              text: "Robotics"
+        - href: notes/study-notes/glossary.html?tag=computer-hardware
+          text: "Computer Hardware"
+        - href: notes/study-notes/glossary.html?tag=computer-software
+          text: "Computer Software"
+        - href: notes/study-notes/glossary.html?tag=machine-learning
+          text: "Machine Learning"
+        - href: notes/study-notes/glossary.html?tag=mathematics
+          text: "Mathematics"
+        - href: notes/study-notes/glossary.html?tag=physics
+          text: "Physics"
+        - href: notes/study-notes/glossary.html?tag=robotics
+          text: "Robotics"
   page-footer:
     center: "© 2026 Soo Min Kimm"
 
@@ -133,8 +129,9 @@ format:
   html:
     from: markdown+wikilinks_title_after_pipe
     include-in-header: _includes/favicon.html
+    include-after-body: _includes/nav-hover.html   # closes the Notes menu when the pointer leaves
     theme: [cosmo, styles.scss]   # one sepia theme; no dark mode
-    toc: true
+    toc: false          # "On this page" is turned on for notes in their _metadata.yml
     toc-depth: 3
     code-copy: true
     code-overflow: wrap

@@ -12,7 +12,7 @@ Personal site of **Soo Min Kimm** — research notes, publications, and talks. B
 - `_extensions/study/` — study-note filter: shows a card's short meaning as a definition bubble in notes, and builds the [glossary](notes/study-notes/glossary.qmd) page with search, filters, and flashcard study; see its `README.md` to add a card
 - `tests/` — browser checks for the glossary page and definition bubbles
 - `_extensions/wiki/` + `_wiki/build_index.py` — wiki layer: `[[wikilinks]]`, a *Linked from* backlinks list on every note, built from both wikilinks and ordinary `.qmd` links (see `CLAUDE.md`)
-- `notes/recent.qmd` — *Recently Updated* change log sorted by `date-modified`
+- `notes/recent.qmd` — *Recently Modified* change log sorted by `date-modified`
 - `_quarto.yml` — site config, navbar, and subject sidebars; subject names link to overview pages, and arrows expand their notes
 - `styles.scss` — design tokens (fonts, sepia colours) and site-wide rules; one theme, no dark mode
 - `styles.scss` — theme tweaks

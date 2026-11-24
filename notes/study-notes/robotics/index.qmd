@@ -8,9 +8,8 @@ listing:
   sort: "title"
   fields: [title, description]
 draft: false
+toc: false
 ---
-
-Start with [policies and learning regimes](policies.qmd), then use [action horizons and feedback](action-horizons.qmd) to distinguish prediction from execution.
 
 ## Supporting concepts
 
@@ -21,7 +20,5 @@ Start with [policies and learning regimes](policies.qmd), then use [action horiz
 | [Autoencoders](../machine-learning/autoencoders.qmd) | Relate conditional latent variables to action-chunk reconstruction. |
 | [Attention](../machine-learning/attention.qmd) and [representations](../machine-learning/representations.qmd) | Distinguish action queries, observation features, physical coordinates, and token IDs. |
 | [Loss functions](../machine-learning/loss.qmd) and [distribution shift](../machine-learning/distribution-shift.qmd) | Understand action averaging and changes in observations induced by a deployed policy. |
-
-The [action literature reviews](../../literature-review/action/index.qmd) connect these concepts to specific robot-policy models and experiments.
 
 ## Robotics notes

@@ -4,7 +4,6 @@ description: "Every term, formal definition, result, and proof from the study no
 date: 2026-10-02
 date-modified: 2026-11-24
 draft: false
-toc: false
 listing-page: true
 sidebar: glossary
 ---

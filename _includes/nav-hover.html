@@ -1,0 +1,22 @@
+<script>
+// On wide screens the Notes menu opens while the pointer is over it (styles.scss).
+// A click on "Notes" also opens it through Bootstrap, which would leave it open
+// after the pointer has gone, so close it when the pointer leaves. Keyboard use
+// is not affected: the menu then stays open until Escape or a choice.
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".navbar .nav-item.dropdown").forEach(item => {
+    item.addEventListener("mouseleave", () => {
+      const toggle = item.querySelector(".dropdown-toggle.show");
+      if (!toggle || !window.matchMedia("(min-width: 992px)").matches) return;
+      const dropdown = window.bootstrap && window.bootstrap.Dropdown.getInstance(toggle);
+      if (dropdown) dropdown.hide();
+      else {
+        toggle.classList.remove("show");
+        toggle.setAttribute("aria-expanded", "false");
+        item.querySelector(".dropdown-menu").classList.remove("show");
+      }
+      toggle.blur();
+    });
+  });
+});
+</script>

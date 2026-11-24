@@ -14,7 +14,7 @@ listing:
   filter-ui: true
   sort-ui: [title, date-modified]
   field-display-names:
-    date-modified: "Updated"
+    date-modified: "Modified"
   fields: [title, description, categories, date-modified]
   date-format: "YYYY-MM-DD"
 draft: false

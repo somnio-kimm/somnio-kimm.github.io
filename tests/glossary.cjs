@@ -7,10 +7,10 @@ const visibleCards = page => page.locator(".deck-card:visible");
 const openLayers = page => page.locator(".deck-card details[open]");
 const status = page => page.locator(".deck-study-status").textContent();
 
-// Clicks a filter button, first opening its group if it is collapsed (phones).
+// Clicks one button of a filter ("letter" = A–Z, "tag" = subject), opening its toggle first.
 async function pick(page, key, value) {
   const picker = page.locator(`.deck-facet-picker:has([data-facet="${key}"])`);
-  if (await picker.count() && !(await picker.evaluate(el => el.open))) await picker.locator("summary").click();
+  if (!(await picker.evaluate(el => el.open))) await picker.locator("summary").click();
   await page.locator(`[data-facet="${key}"] button[data-value="${value}"]`).click();
 }
 
@@ -43,10 +43,10 @@ async function listChecks(page, width) {
   // Equations stay in Quarto's normal math pipeline.
   await page.waitForFunction(() => document.querySelector(".deck-card mjx-container"));
   assert(await cards.locator("mjx-container").count() > 10);
-  // A card is marked as having a proof exactly when it shows one.
-  const proved = await cards.evaluateAll(items => items.filter(el => (el.dataset.has || "").split(" ").includes("proof")).length);
-  assert(proved > 0);
-  assert.equal(await page.locator(".concept-proof details").count(), proved);
+  // A proof always comes with the statement it proves.
+  const proofs = await page.locator(".deck-card:has(.concept-proof)").count();
+  assert(proofs > 0);
+  assert.equal(await page.locator(".deck-card:has(.concept-proof):has(.concept-statement)").count(), proofs);
   // Statement and proof open separately, and the open card takes the whole row.
   const result = page.locator("#term-absolute-value-subdifferential");
   const narrow = (await result.boundingBox()).width;
@@ -67,7 +67,7 @@ async function listChecks(page, width) {
   await page.locator(".deck-reset").click();
   assert.equal(await visibleCards(page).count(), total);
 
-  // First letter, content and tag combine, live in the URL, and survive a reload.
+  // First letter and subject combine, live in the URL, and survive a reload.
   await pick(page, "letter", "L");
   await pick(page, "tag", "mathematics");
   const combined = await visibleCards(page).evaluateAll(items => items.map(el => ({
@@ -79,12 +79,6 @@ async function listChecks(page, width) {
   await page.reload({waitUntil: "networkidle"});
   assert.equal(await page.locator('[data-facet="letter"] [data-value="L"]').getAttribute("aria-pressed"), "true");
   assert.equal(await visibleCards(page).count(), combined.length);
-  await page.locator(".deck-reset").click();
-  await pick(page, "has", "proof");
-  assert.equal(await page.locator("#term-jensen-differentiable").isVisible(), true);
-  assert((await visibleCards(page).evaluateAll(items => items.map(el => el.dataset.has || "")))
-    .every(has => has.split(" ").includes("proof")));
-  assert.equal(new URL(page.url()).searchParams.get("has"), "proof");
   await page.locator(".deck-reset").click();
   // A letter with no cards is disabled.
   const missingLetter = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"].find(letter => !labels.some(label => label.toUpperCase().startsWith(letter)));
@@ -118,7 +112,7 @@ async function listChecks(page, width) {
   assert.equal(new URL(page.url()).searchParams.get("tag"), "mathematics");
 
   // A link to a card that the filter hides clears the filter and opens every layer.
-  for (const link of ["?tag=robotics#term-latent-variable", "?has=proof#term-affine-map"]) {
+  for (const link of ["?tag=robotics#term-latent-variable", "?letter=Z#term-affine-map"]) {
     await page.goto(url + link, {waitUntil: "networkidle"});
     const target = page.locator(new URL(page.url()).hash);
     assert.equal(await target.isVisible(), true);
@@ -155,7 +149,7 @@ async function flashcardChecks(page) {
   await page.locator(".deck-search").fill("expectation");
   const size = await visibleCards(page).count();
   assert(size >= 3, "the study search finds terms and formal cards");
-  const count = page.locator(".deck-count");
+  const count = page.locator(".deck-due");
   assert((await count.textContent()).endsWith(`${size} due for review`));
 
   await page.locator('[data-study="all"]').click();

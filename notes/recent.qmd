@@ -1,5 +1,5 @@
 ---
-title: "Recently Updated"
+title: "Recently Modified"
 listing-page: true
 listing:
   contents:
@@ -13,7 +13,7 @@ listing:
   sort-ui: [title, date-modified]
   fields: [date-modified, title, categories]
   field-display-names:
-    date-modified: "Updated"
+    date-modified: "Modified"
   date-format: "YYYY-MM-DD"
 draft: false
 ---

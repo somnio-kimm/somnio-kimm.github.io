@@ -65,10 +65,6 @@ local function read_card(div, file)
   card.text = plain(card.definition)
   if card.text == "" and not card.statement then error("No definition or concept-statement in " .. where) end
   if card.proof and not card.statement then error("A concept-proof needs a concept-statement to prove in " .. where) end
-  -- Which formal layers the card has; the page can filter on these.
-  card.layers = {}
-  if card.statement then card.layers[#card.layers + 1] = "statement" end
-  if card.proof then card.layers[#card.layers + 1] = "proof" end
   return card
 end
 
@@ -161,7 +157,6 @@ local function card_html(card, notes)
     blocks:insert(raw(table.concat(html, "\n")))
   end
   return pandoc.Div(blocks, pandoc.Attr("term-" .. card.key, {"deck-card", "concept-card"}, {
-    ["data-has"] = table.concat(card.layers, " "),
     ["data-tag"] = table.concat(card.tags, " "),
     ["data-letter"] = card.label:sub(1, 1):upper(),
   }))
@@ -185,24 +180,20 @@ end
 function M.page(meta)
   local html = quarto.doc.is_format("html:js")
   local notes = html and related_notes(meta) or {}
-  local list, used_layers, all_tags = pandoc.Blocks({}), {}, {}
+  local list, all_tags = pandoc.Blocks({}), {}
   for _, card in ipairs(M.all()) do
-    for _, name in ipairs(card.layers) do used_layers[name] = true end
     for _, tag in ipairs(card.tags) do all_tags[#all_tags + 1] = tag end
     list:insert(html and card_html(card, notes[card.key]) or card_plain(card))
   end
   if not html then return pandoc.Div(list) end
 
-  local letters, layer_values, tag_values = {}, {}, {}
+  local letters, tag_values = {}, {}
   for code = string.byte("A"), string.byte("Z") do
     local letter = string.char(code)
     letters[#letters + 1] = {value = letter, text = letter, hint = "Cards starting with " .. letter}
   end
-  for _, name in ipairs({"statement", "proof"}) do
-    if used_layers[name] then layer_values[#layer_values + 1] = {value = name, text = "With " .. name} end
-  end
   for _, tag in ipairs(deck.tags(all_tags, "the cards")) do
-    tag_values[#tag_values + 1] = {value = tag, text = "#" .. tag}
+    tag_values[#tag_values + 1] = {value = tag, text = deck.tag_label(tag)}
   end
   deck.add_dependency()
   return pandoc.Div({
@@ -210,12 +201,9 @@ function M.page(meta)
       name = "glossary",
       search_label = "Search cards",
       placeholder = "e.g. latent, convex, expectation, robotics",
-      hint = "Search titles, definitions, statements, proofs, tags, and related notes. Results stay in A–Z order.",
-      practice_label = "Hide answers for practice",
       facets = {
-        {key = "letter", label = "Browse by first letter", all = "All", values = letters, compact = true},
-        {key = "has", label = "Filter by content", all = "All cards", values = layer_values},
-        {key = "tag", label = "Filter by tag", all = "All tags", values = tag_values, collapsible = true},
+        {key = "letter", label = "A–Z", all = "All", values = letters, compact = true},
+        {key = "tag", label = "Subject", all = "All", values = tag_values},
       },
     })),
     pandoc.Div(list, pandoc.Attr("", {"deck-list", "deck-grid"})),
