@@ -1,6 +1,7 @@
 ---
 title: 'Mamba: Linear-Time Sequence Modeling with Selective State Spaces'
 description: "Input-dependent state-space parameters, associative scan, and the distinction between selectivity and a generic gate."
+date: 2026-09-10
 date-modified: 2026-09-10
 draft: true
 categories:

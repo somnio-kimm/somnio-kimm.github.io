@@ -1,6 +1,7 @@
 ---
 title: "Diffusion and noise prediction"
 description: "Explain the noisy input, sampled training target, conditional mean, and iterative generation."
+date: 2026-09-10
 date-modified: 2026-09-11
 draft: true
 categories:

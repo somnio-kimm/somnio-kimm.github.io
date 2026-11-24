@@ -1,6 +1,7 @@
 ---
 title: 'π0.5: A Vision-Language-Action Model with Open-World Generalization'
 description: "Discrete-action pretraining, continuous-action post-training, tokenized state, and hierarchical inference in the π0.5 paper."
+date: 2026-09-10
 date-modified: 2026-09-10
 draft: true
 categories:

@@ -1,6 +1,7 @@
 ---
 title: 'DETR: Object Detection as Set Prediction'
 description: "Parallel learned object queries, one-to-one Hungarian matching, and separate assignment and training costs."
+date: 2026-09-10
 date-modified: 2026-09-10
 draft: true
 categories:

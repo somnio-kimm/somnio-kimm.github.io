@@ -1,6 +1,7 @@
 ---
 title: 'Energy-based models and Langevin sampling'
 description: "Relative densities, score gradients, stochastic updates, and the limits of finite-step sampling."
+date: 2026-09-10
 date-modified: 2026-09-11
 draft: true
 categories:

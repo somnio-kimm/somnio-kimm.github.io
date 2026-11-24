@@ -7,6 +7,8 @@ project:
     - publications.qmd
     - talks.qmd
     - cv.qmd
+    - background.qmd
+    - projects.qmd
     - notes/
     - "!notes/**/template.qmd"
   resources:
@@ -21,23 +23,25 @@ editor:
 
 website:
   title: "Deep Chat of Perplexity"
-  description: "Soo Min Kimm — research notes, publications, and talks."
+  description: "Soo Min Kimm: research notes, publications, and talks."
   favicon: images/favicon.svg
   site-url: "https://somnio-kimm.github.io"
   repo-url: "https://github.com/somnio-kimm/somnio-kimm.github.io"
   repo-branch: master
-  repo-actions: [edit, source, issue]
   search:
     location: navbar
     type: overlay
   navbar:
-    background: primary
     pinned: true
     left:
       - href: index.qmd
         text: Home
+      - href: background.qmd
+        text: Background
       - href: cv.qmd
-        text: CV
+        text: Experience
+      - href: projects.qmd
+        text: Projects
       - href: publications.qmd
         text: Publications
       - href: talks.qmd
@@ -53,13 +57,6 @@ website:
           - text: "---"
           - href: notes/recent.qmd
             text: Recently Updated
-    right:
-      - icon: github
-        href: https://github.com/somnio-kimm
-        aria-label: GitHub
-      - icon: linkedin
-        href: https://www.linkedin.com/in/somnio-kimm/
-        aria-label: LinkedIn
   sidebar:
     - id: notes
       title: "Literature Review"
@@ -91,7 +88,7 @@ website:
         - href: notes/study-notes/index.qmd
           text: "All study notes"
         - href: notes/study-notes/glossary.qmd
-          text: "Glossary cards"
+          text: "Glossary"
         - section: "Mathematics"
           href: notes/study-notes/mathematics/index.qmd
           contents: "notes/study-notes/mathematics/*.qmd"
@@ -114,7 +111,7 @@ website:
       collapse-level: 2
       contents:
         - href: notes/study-notes/glossary.qmd
-          text: "All terms A–Z"
+          text: "All cards A–Z"
         - section: "By subject"
           contents:
             - href: notes/study-notes/glossary.html?tag=computer-hardware
@@ -130,15 +127,13 @@ website:
             - href: notes/study-notes/glossary.html?tag=robotics
               text: "Robotics"
   page-footer:
-    center: "© 2026 Soo Min Kimm · Built with [Quarto](https://quarto.org)"
+    center: "© 2026 Soo Min Kimm"
 
 format:
   html:
     from: markdown+wikilinks_title_after_pipe
     include-in-header: _includes/favicon.html
-    theme:
-      light: [cosmo, styles.scss]
-      dark: [darkly, styles.scss]
+    theme: [cosmo, styles.scss]   # one sepia theme; no dark mode
     toc: true
     toc-depth: 3
     code-copy: true

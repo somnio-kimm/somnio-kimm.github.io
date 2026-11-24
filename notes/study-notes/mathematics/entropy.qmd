@@ -1,6 +1,7 @@
 ---
 title: "Entropy, cross-entropy, and divergence"
 description: "Information measures, binary and categorical losses, logit-to-probability maps, and Gaussian KL in one connected account."
+date: 2026-09-10
 date-modified: 2026-09-11
 draft: true
 categories:

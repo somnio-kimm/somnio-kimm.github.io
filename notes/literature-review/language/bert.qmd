@@ -1,6 +1,7 @@
 ---
 title: 'BERT: Bidirectional Language Pretraining'
 description: "Input embeddings, masked-language targets, next-sentence prediction, and task-specific fine-tuning."
+date: 2026-06-19
 date-modified: 2026-09-10
 draft: true
 categories:

@@ -1,6 +1,7 @@
 ---
 title: 'Diffusion Policy'
 description: "Why a robot policy predicts noise during training, how observation and action horizons differ, and what reaches the controller."
+date: 2026-09-10
 date-modified: 2026-09-10
 draft: true
 categories:

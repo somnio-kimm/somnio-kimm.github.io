@@ -9,5 +9,3 @@ listing:
   fields: [title, description]
 draft: false
 ---
-
-These reviews examine language representations, pretraining objectives, and the architectures used to model text.

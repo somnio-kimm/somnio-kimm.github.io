@@ -1,0 +1,53 @@
+---
+title: "Projects"
+draft: false
+---
+
+## Personal projects
+
+### TellingByfAIce
+
+Seoul, South Korea\
+Jun 2025 – Jul 2025\
+[GitHub](https://github.com/somnio-kimm/telling_by_faice)
+
+- Built a real-time facial-expression game integrating YOLO face detection, a fine-tuned ViT emotion classifier, FastAPI, and Godot.
+
+### Antarctic Glacier Analysis
+
+Seoul, South Korea\
+Apr 2025 – May 2025\
+[GitHub](https://github.com/somnio-kimm/antarctic_glacier_analysis)
+
+- Designed a U-Net based GAN model for spatiotemporal prediction of Antarctic glacier coverage from satellite imagery.
+
+### Energy Consumption Analysis
+
+Seoul, South Korea\
+Mar 2025 – Apr 2025\
+[GitHub](https://github.com/somnio-kimm/energy_consumption_analysis)
+
+- Built and evaluated ML pipelines to forecast electricity consumption.
+
+## Academic projects
+
+### Vibrational GPS
+
+University of Illinois Urbana-Champaign, USA\
+Jan 2021 – May 2021
+
+- Designed an ESP32 wearable's PCB and power architecture and characterized voltage regulation and dual vibration motors for Bluetooth haptic navigation.
+
+### Black-Box Circuit Modelling
+
+University of Illinois Urbana-Champaign, USA\
+Feb 2020 – May 2020
+
+- Applied vector fitting methods to circuit response data to reconstruct frequency-domain models.
+
+### Morse Code to Light
+
+University of Illinois Urbana-Champaign, USA\
+Nov 2017 – Dec 2017
+
+- Designed a circuit that translated Morse code into numeric output displayed on 7-segment LEDs.

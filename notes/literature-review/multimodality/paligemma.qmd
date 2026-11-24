@@ -1,6 +1,7 @@
 ---
 title: 'PaliGemma: A Vision–Language Model for Transfer'
 description: "SigLIP image features, Gemma text generation, prefix attention, and the distinction between component and VLM training."
+date: 2026-06-19
 date-modified: 2026-09-10
 draft: true
 aliases:

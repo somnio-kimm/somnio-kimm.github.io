@@ -1,6 +1,7 @@
 ---
 title: 'Neural Network'
 description: "Feedforward networks as compositions of parameterised functions, with layers, nonlinearities, and the distinction between prediction and learning."
+date: 2026-09-11
 date-modified: 2026-09-11
 draft: true
 categories:

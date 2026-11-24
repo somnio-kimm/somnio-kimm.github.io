@@ -9,5 +9,3 @@ listing:
   fields: [title, description]
 draft: false
 ---
-
-These notes develop mathematical definitions, assumptions, and derivations used across the other subjects.

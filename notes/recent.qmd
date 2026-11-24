@@ -1,6 +1,6 @@
 ---
 title: "Recently Updated"
-subtitle: "Every note, newest change first — the wiki's change log."
+listing-page: true
 listing:
   contents:
     - "**/*.qmd"
@@ -9,7 +9,6 @@ listing:
     - "!recent.qmd"
   type: table
   sort: "date-modified desc"
-  categories: true
   filter-ui: [title, categories]
   sort-ui: [title, date-modified]
   fields: [date-modified, title, categories]
@@ -18,6 +17,3 @@ listing:
   date-format: "YYYY-MM-DD"
 draft: false
 ---
-
-Each note's **Updated** date comes from its `date-modified` field.
-Use the search box above, or follow the **Linked from** list at the bottom of any note to see what builds on it.

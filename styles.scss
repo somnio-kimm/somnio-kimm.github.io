@@ -1,16 +1,112 @@
 /*-- scss:defaults --*/
-$primary: #2a76dd;
-$font-size-root: 17px;
-$font-family-sans-serif: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+// Design tokens: one sepia theme, no dark mode. Change colours and fonts here.
+// Fonts: body text and h3 in Inter, h2 in Space Grotesk, h1 in Space Mono (code-like).
+$web-font-path: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&family=Space+Mono:wght@700&display=swap";
+$font-family-sans-serif: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+$headings-font-family: "Space Grotesk", $font-family-sans-serif;
+$site-font-h1: "Space Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+$headings-font-weight: 700;
+// Type scale, the same on every page (1rem = 18px):
+//   page title 2rem, section heading 1.5rem, entry or card title 1.2rem,
+//   body text 1rem, small labels (menus, tags, hints) 0.9rem.
+$font-size-root: 18px;
+$line-height-base: 1.65;    // space between lines of body text
+$h1-font-size: 2rem;
+$h2-font-size: 1.5rem;
+$h3-font-size: 1.2rem;
+$h4-font-size: 1rem;
+$site-small: 0.9rem;
+$toc-font-size: $site-small;
+
+$body-bg: #f8f1e3;        // paper
+$body-color: #3b2f26;     // ink
+$primary: #8a4b20;        // links, filled buttons
+$link-color: $primary;
+$border-color: #e0d5c1;
+$site-surface: #fdf9f0;   // cards, definition bubbles, menus
+$site-tint: #efe3cc;      // highlighted terms, code blocks
+$site-rule: #cbbda3;      // lines under headings (darker than borders so they read clearly)
+
+$navbar-bg: $body-bg;
+$navbar-fg: $body-color;
+$navbar-hl: $primary;
 $navbar-padding-y: 0.5rem;
-$toc-font-size: 0.85rem;
+$dropdown-bg: $site-surface;
+$input-bg: $site-surface;
+$code-block-bg: $site-tint;
 
 /*-- scss:rules --*/
-.navbar-title { font-weight: 700; letter-spacing: 0.2px; }
+// The same tokens for plain CSS; the study extension's stylesheets use them.
+:root {
+  --site-surface: #{$site-surface};
+  --site-tint: #{$site-tint};
+  --site-border: #{$border-color};
+  --site-accent: #{$primary};
+  --site-on-accent: #{color-contrast($primary)};
+}
 
-// Make the notes listing cards a little softer.
-.quarto-grid-item.card { border-radius: 0.6rem; transition: transform 0.12s ease, box-shadow 0.12s ease; }
-.quarto-grid-item.card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+h1 { font-family: $site-font-h1; letter-spacing: -0.04em; }
+// The name on the home page is the one page title set in the body font.
+.about-entity h1.title { font-family: $font-family-sans-serif; font-weight: 400; letter-spacing: -0.02em; }
+h2, .navbar-title { font-family: $headings-font-family; letter-spacing: -0.015em; }
+h3, h4, .listing-title { font-family: $font-family-sans-serif; font-weight: 600; letter-spacing: -0.01em; }
+
+// Keep every page on the type scale above: Quarto sizes these parts on its own.
+main.content {
+  h1, .about-entity .title { font-size: $h1-font-size; }
+  // Section headings carry a double line, entry headings a single line.
+  h2 { font-size: $h2-font-size; border-bottom: 4px double $site-rule; padding-bottom: 0.4rem; }
+  h3, .listing-title { font-size: $h3-font-size; }
+  h3:not(.listing-title) { border-bottom: 1px solid $site-rule; padding-bottom: 0.3rem; }
+  h4 { font-size: $h4-font-size; }
+}
+// Notes show only their title (and category tags) at the top. The description and
+// the dates stay in each note's settings, where the listings and sorting use them.
+// (The long selector is needed to win over Quarto's own rule for the date block.)
+#title-block-header.quarto-title-block.default :is(.description, .quarto-title-meta) { display: none; }
+// Space between the page header and whatever follows.
+main.content > #title-block-header { margin-bottom: 1.75rem; }
+#title-block-header :is(.subtitle, .description),
+.about-entity .subtitle,
+.quarto-listing .listing-description { font-size: 1rem; }
+#quarto-sidebar .sidebar-item-text, #title-block-header .quarto-title-meta { font-size: $site-small; }
+
+// ---- Navigation: main links in a plain top bar, notes in a section sidebar ----
+.navbar { border-bottom: 1px solid $border-color; }
+.navbar-title { font-weight: 700; }
+.navbar .nav-link.active { font-weight: 600; }
+#quarto-sidebar :is(.sidebar-link.active, [aria-current="page"]) { color: $primary; font-weight: 600; }
+
+// The Notes dropdown: a soft rounded panel, with a tint on the item under the pointer.
+.navbar .dropdown-menu {
+  min-width: 14rem;
+  padding: 0.4rem;
+  border: 1px solid $border-color;
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 32px rgba(59, 47, 38, 0.14);
+}
+.navbar .dropdown-item {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  color: $body-color;
+
+  &:hover, &:focus { background: $site-tint; color: $body-color; }
+}
+.navbar .dropdown-divider { margin: 0.3rem 0.5rem; border-color: $border-color; }
+// In the folded menu on narrow screens the items sit under "Notes", indented
+// beside a thin line, without a box around them.
+@media (max-width: 991.98px) {
+  .navbar .dropdown-menu {
+    margin: 0 0 0.5rem 0.6rem;
+    padding: 0 0 0 0.5rem;
+    background: transparent;
+    border: 0;
+    border-left: 2px solid $site-rule;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
 
 // Keep long note titles and section arrows inside the mobile sidebar.
 @media (max-width: 991.98px) {
@@ -31,11 +127,74 @@ $toc-font-size: 0.85rem;
   }
 }
 
+// ---- Content ----
+// A wide equation scrolls sideways instead of widening the page on a phone.
+main.content :is(.math.display, mjx-container[display="true"]) {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+// Subject pages list only a title and a description, so drop the column that
+// Quarto reserves for a date and author.
+.quarto-listing-default .quarto-post .metadata { display: none; }
+
+.quarto-grid-item.card {
+  background: var(--site-surface);
+  border-color: var(--site-border);
+  border-radius: 0.75rem;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+// The "Updated" date on a listing card: one small line at the bottom of the card.
+.quarto-grid-item .card-other-values {
+  width: auto;
+  margin: auto 0 0;
+  font-size: $site-small;
+  color: rgba($body-color, 0.75);
+  td { padding: 0.4rem 0.4rem 0 0; border: 0; }
+}
+.quarto-grid-item.card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(59, 47, 38, 0.14); }
+
+// Home page: four plain logo links in one row under the name.
+// On narrow screens the photo sits directly under the menu bar; keep it clear of it.
+@media (max-width: 991.98px) {
+  div[class*="quarto-about-"] .about-entity { padding-top: 2rem; }
+}
+
+// The long selector is needed to win over Quarto's own button style.
+// It also keeps them in one row on narrow screens, where Quarto would stack them.
+div[class*="quarto-about-"] .about-entity .about-links {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+div[class*="quarto-about-"] .about-entity .about-links .about-link {
+  width: auto;
+  border: 0;
+  background: none;
+  padding: 0.4rem;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: $body-color;
+
+  &:hover { color: var(--site-accent); }
+  // The link's name stays in the page for screen readers but is not drawn.
+  .about-link-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+}
+
 // ---- wiki (see _extensions/wiki) ----
 .wiki-backlinks {
   margin-top: 3rem;
   padding-top: 1rem;
-  border-top: 1px solid rgba(128, 128, 128, 0.35);
+  border-top: 1px solid $border-color;
   font-size: 0.95em;
   ul { columns: 2 16rem; margin-bottom: 0; }
 }

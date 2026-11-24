@@ -12,6 +12,7 @@ Unknown targets render as plain text and log a warning; links to drafts
 render as plain text so production pages never point to a missing page.
 ]==]
 
+local project = require("./project")
 local index, current
 
 local function normalise(s)
@@ -20,18 +21,13 @@ local function normalise(s)
   return s
 end
 
+-- The index is usable only when this page's project-relative path is known.
 local function load_index()
-  if index ~= nil then return index end
-  local dir = quarto.project.directory
-  local f = dir and io.open(pandoc.path.join({dir, "_wiki", "wiki-index.json"}), "r")
-  if not f then
-    quarto.log.warning("wiki: _wiki/wiki-index.json not found; wikilinks left as text")
-    index = false
-    return index
+  if index == nil then
+    local dir = quarto.project.directory
+    index = dir and project.wiki_index() or false
+    if index then current = pandoc.path.make_relative(quarto.doc.input_file, dir) end
   end
-  index = quarto.json.decode(f:read("a"))
-  f:close()
-  current = pandoc.path.make_relative(quarto.doc.input_file, dir)
   return index
 end
 
@@ -65,12 +61,12 @@ function Link(el)
   if not is_wiki then return nil end
   el.classes = el.classes:filter(function(c) return c ~= "wikilink" end)
   if not load_index() then return missing(el.content, "wikilink-missing") end
-  local target, anchor = el.target, ""
+  local written, target, anchor = el.target, el.target, ""
   local hash = target:find("#", 1, true)
   if hash then target, anchor = target:sub(1, hash - 1), target:sub(hash) end
   local path, ambiguous = resolve(target)
   if not path then
-    quarto.log.warning("wiki: unresolved wikilink [[" .. el.target .. "]] in " .. current)
+    quarto.log.warning("wiki: unresolved wikilink [[" .. written .. "]] in " .. current)
     return missing(el.content, "wikilink-missing")
   end
   if ambiguous then
@@ -88,8 +84,8 @@ function Link(el)
   el.title = page.title
   el.classes:insert("wikilink")
   -- [[name]] without display text: show the page title instead of the raw key
-  if pandoc.utils.stringify(el.content) == el.target:sub(2) or
-     pandoc.utils.stringify(el.content) == target then
+  local shown = pandoc.utils.stringify(el.content)
+  if shown == written or shown == target then
     el.content = pandoc.Inlines(page.title .. (anchor ~= "" and (" § " .. anchor:sub(2)) or ""))
   end
   return el

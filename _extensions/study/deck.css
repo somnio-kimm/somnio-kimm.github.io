@@ -1,0 +1,125 @@
+/* The study-card deck on the glossary page (markup from deck.lua and cards.lua). */
+/* Colours come from the site's design tokens (styles.scss), with fallbacks. */
+.deck {
+  --deck-accent: var(--site-accent, #8a4b20);
+  --deck-on-accent: var(--site-on-accent, #fff);
+  --deck-surface: var(--site-surface, var(--bs-body-bg));
+  scroll-margin-top: 5rem;
+}
+.deck [hidden] { display: none; }
+
+/* ---- Controls ---- */
+.deck-controls, .deck-study {
+  margin-block: 1.5rem;
+  padding: 1.1rem;
+  background: var(--deck-surface);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.75rem;
+}
+.deck-controls > label { display: block; font-weight: 600; margin-bottom: 0.4rem; }
+.deck-search {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  color: var(--bs-body-color);
+  background: var(--deck-surface);
+  border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+  border-radius: 0.5rem;
+  font: inherit;
+}
+.deck-hint { margin: 0.4rem 0 0; font-size: 0.9rem; color: var(--bs-secondary-color); }
+.deck-count { margin: 0.8rem 0 0; font-size: 0.9rem; }
+.deck-facet, .deck-options, .deck-study-start, .deck-study, .deck-study-actions, .deck-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.deck-facet, .deck-options, .deck-study-start, .deck-facet-picker { margin-top: 0.9rem; }
+.deck-facet-picker .deck-facet { margin-top: 0.6rem; }
+.deck-options { justify-content: space-between; }
+.deck-options label { display: flex; align-items: center; gap: 0.5rem; }
+.deck-facet-picker summary, .deck-card summary { cursor: pointer; font-weight: 600; }
+.deck-facet-picker summary { font-size: 0.9rem; }
+
+/* Buttons and tags share one chip shape. */
+.deck button, .deck-tag {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.5rem;
+  padding: 0.3rem 0.75rem;
+  color: inherit;
+  background: var(--deck-surface);
+  font: inherit;
+  font-size: 0.9rem;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.deck button:disabled { opacity: 0.4; cursor: default; }
+.deck-facet-compact { gap: 0.25rem; }
+.deck-facet-compact button { min-width: 2.25rem; min-height: 2.25rem; border-radius: 0.35rem; padding: 0.25rem; }
+.deck button[aria-pressed="true"], .deck button.deck-primary:not(:disabled) {
+  color: var(--deck-on-accent);
+  background: var(--deck-accent);
+  border-color: var(--deck-accent);
+}
+.deck-tag:hover, .deck button:not(:disabled, [aria-pressed="true"], .deck-primary):hover {
+  color: var(--deck-accent);
+  border-color: currentColor;
+}
+.deck :is(button, input, a, summary):focus-visible { outline: 2px solid var(--deck-accent); outline-offset: 3px; }
+
+/* ---- Cards ---- */
+.deck-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 1rem; }
+.deck-card {
+  min-width: 0;
+  margin-block: 0 1rem;
+  padding: 1.2rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.75rem;
+  background: var(--deck-surface);
+  overflow-wrap: anywhere;
+  scroll-margin-top: 6rem;
+}
+.deck-grid .deck-card { margin: 0; }
+.deck-card:target { outline: 2px solid var(--deck-accent); }
+.deck-card h2.deck-card-title { font-size: 1.2rem; margin: 0 0 0.6rem; padding: 0; border: 0; }
+.deck-card-meta { margin-bottom: 0.8rem; font-size: 0.9rem; }
+.deck-card details { margin-top: 0.7rem; border-top: 1px solid var(--bs-border-color); }
+.deck-card summary { padding-block: 0.5rem; font-size: 0.9rem; }
+.deck-card details > :last-child { margin-bottom: 0.3rem; }
+.deck-card :is(.math.display, mjx-container[display="true"]) {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 0.25rem;
+}
+/* A card takes the whole row while its formal text or proof is open. */
+.deck-grid .deck-card:has(details[data-collapsed][open]) { grid-column: 1 / -1; }
+.concept-prompt > :last-child { margin-bottom: 0; }
+.concept-definition p { margin: 0 0 0.4rem; }
+.concept-related { margin-top: 0.8rem; padding-top: 0.75rem; border-top: 1px solid var(--bs-border-color); }
+/* Three classes so this wins over the site's heading-line rule. */
+.deck .deck-card .concept-related h3 { font-size: 0.9rem; margin: 0 0 0.4rem; padding: 0; border: 0; }
+.concept-related ul { margin: 0; padding-left: 1.1rem; font-size: 0.9rem; }
+.concept-draft { font-size: 0.9rem; }
+
+/* ---- Flashcard study: one card at a time ---- */
+.deck-study { justify-content: space-between; }
+.deck-study-status { margin: 0; font-weight: 600; }
+.deck-study-progress { flex: 1 1 8rem; height: 0.5rem; accent-color: var(--deck-accent); }
+.deck-studying .deck-list { display: block; }
+.deck-studying .deck-card { max-width: 46rem; margin-inline: auto; padding: 1.6rem; }
+.deck-studying .deck-card:not(.deck-current) { display: none; }
+.deck-studying .deck-card h2.deck-card-title { font-size: 1.5rem; }
+.deck-studying .concept-related { display: none; }
+.deck-study-actions { justify-content: center; margin-block: 1.25rem; }
+.deck-study-actions button { padding: 0.55rem 1.4rem; font-size: 1rem; }
+.deck-study-actions .deck-hint { flex-basis: 100%; text-align: center; }
+
+@media print {
+  .deck-controls, .deck-study, .deck-study-actions, .deck-empty { display: none !important; }
+  .deck .deck-card[hidden], .deck-studying .deck-card:not(.deck-current) { display: block !important; }
+  .deck-grid { display: block; }
+  .deck-card { break-inside: avoid; margin-bottom: 1rem; }
+}

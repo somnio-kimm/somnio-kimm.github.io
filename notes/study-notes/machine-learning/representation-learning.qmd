@@ -1,6 +1,7 @@
 ---
 title: 'Representation learning and adaptation'
 description: "Learned features, task adaptation, contrastive image–text objectives, and downstream policy training."
+date: 2026-09-10
 date-modified: 2026-09-11
 draft: true
 categories:

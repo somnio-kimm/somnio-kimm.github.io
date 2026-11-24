@@ -1,0 +1,4 @@
+<!-- Computer hardware cards: glossary terms, formal definitions, results and proofs.
+     Add a card anywhere in this file; the page sorts all cards A–Z.
+     Format and rules: _extensions/study/README.md -->
+

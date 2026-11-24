@@ -9,5 +9,3 @@ listing:
   fields: [title, description]
 draft: false
 ---
-
-These reviews examine how models represent images, learn visual features, and detect objects.

@@ -1,6 +1,7 @@
 ---
 title: 'OpenVLA-OFT: Optimizing Speed and Success'
 description: "How parallel action slots, continuous L1 prediction, and optional language-conditioned visual modulation change OpenVLA fine-tuning."
+date: 2026-09-10
 date-modified: 2026-09-10
 draft: true
 categories:

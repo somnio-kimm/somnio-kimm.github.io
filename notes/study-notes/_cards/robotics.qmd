@@ -1,0 +1,36 @@
+<!-- Robotics cards: glossary terms, formal definitions, results and proofs.
+     Add a card anywhere in this file; the page sorts all cards A–Z.
+     Format and rules: _extensions/study/README.md -->
+
+:::: {.concept-card key="action-chunk" tags="robotics"}
+## action chunk
+
+An ordered sequence of proposed robot commands for several control steps.
+The controller may execute only part of the chunk before replacing it.
+::::
+
+:::: {.concept-card key="behavioural-cloning" tags="machine-learning robotics"}
+## behavioural cloning
+
+Learning a policy from demonstrated observations and actions using a supervised learning objective.
+::::
+
+:::: {.concept-card key="bounding-box" tags="machine-learning robotics"}
+## bounding box
+
+A rectangle used to specify the location and extent of a region in an image, under a stated coordinate convention.
+::::
+
+:::: {.concept-card key="discounted-return" tags="machine-learning robotics"}
+## discounted return
+
+A sum of rewards along a trajectory in which later rewards are multiplied by progressively higher powers of a discount factor.
+Its expectation is one common reinforcement-learning objective.
+::::
+
+:::: {.concept-card key="policy" tags="machine-learning robotics"}
+## policy
+
+A rule for choosing actions from available information, such as a state, observation, or history.
+It may return an action directly or specify a distribution from which an action is selected.
+::::

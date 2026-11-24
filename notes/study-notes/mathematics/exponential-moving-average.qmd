@@ -1,6 +1,7 @@
 ---
 title: "Exponential moving averages"
 description: "Track geometrically weighted history while keeping the averaged object and time index explicit."
+date: 2026-09-10
 date-modified: 2026-09-11
 draft: true
 categories:

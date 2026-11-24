@@ -1,6 +1,7 @@
 ---
 title: "Action horizons and feedback"
 description: "Distinguish observed history, predicted windows, executed commands, and transitions between chunks."
+date: 2026-09-10
 date-modified: 2026-09-11
 draft: true
 aliases:

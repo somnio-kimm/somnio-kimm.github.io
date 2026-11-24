@@ -1,15 +1,13 @@
 ---
 title: "Glossary"
-description: "Word cards with short definitions, topic tags, and related study notes."
+description: "Every term, formal definition, result, and proof from the study notes as searchable cards."
+date: 2026-10-02
+date-modified: 2026-11-24
 draft: false
 toc: false
 listing-page: true
 sidebar: glossary
 ---
-
-Search for a word or choose its first letter. Cards are always shown in alphabetical order.
-Use the glossary sidebar or a tag to browse a subject.
-Turn on **Hide definitions for practice** to recall each meaning before revealing it.
 
 ::: {.glossary-cards}
 :::

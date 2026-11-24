@@ -1,22 +1,24 @@
 ---
 title: "Notes"
-subtitle: "Literature reviews and notes from topics I am studying."
 listing:
   contents: "**/*.qmd"
   exclude:
     listing-page: true
   type: grid
+  grid-columns: 2
   sort: "title"
-  categories: true
   filter-ui: true
-  sort-ui: true
-  fields: [title, description, categories]
+  sort-ui: [title, date-modified]
+  field-display-names:
+    date-modified: "Updated"
+  fields: [title, description, categories, date-modified]
+  date-format: "YYYY-MM-DD"
 draft: false
 ---
 
 Choose a collection:
 
-- [Literature Review](literature-review/index.qmd) — papers I have read and broken down in my own words.
-- [Study Notes](study-notes/index.qmd) — notes from mathematics, machine learning, robotics, physics, and computing.
+- [Literature Review](literature-review/index.qmd): papers I have read and broken down in my own words.
+- [Study Notes](study-notes/index.qmd): notes from mathematics, machine learning, robotics, physics, and computing.
 
 Or browse all individual notes below.

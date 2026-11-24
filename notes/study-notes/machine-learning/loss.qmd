@@ -1,6 +1,7 @@
 ---
 title: "Loss functions: MSE, MAE, and Huber"
 description: "Per-example loss, empirical risk, and the mean, median, and robust penalties favoured by common regression objectives."
+date: 2026-09-10
 date-modified: 2026-09-11
 draft: true
 categories:

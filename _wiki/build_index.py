@@ -16,7 +16,7 @@ from pathlib import Path
 
 ROOT = Path(os.environ.get("QUARTO_PROJECT_DIR", Path(__file__).resolve().parent.parent))
 OUT = ROOT / "_wiki" / "wiki-index.json"
-SKIP_DIRS = {"_site", "_extensions", "_wiki", ".quarto", ".git", "node_modules", "tests"}
+SKIP_DIRS = {"_site", "_extensions", "_wiki", "_cards", ".quarto", ".git", "node_modules", "tests"}
 
 FRONTMATTER = re.compile(r"\A---\s*\n(.*?)\n---\s*\n", re.S)
 WIKILINK = re.compile(r"\[\[([^\[\]|#]+)(?:#[^\[\]|]*)?(?:\|[^\[\]]*)?\]\]")

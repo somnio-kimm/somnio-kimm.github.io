@@ -9,5 +9,3 @@ listing:
   fields: [title, description]
 draft: false
 ---
-
-These reviews examine the objectives and mechanisms behind generative models, knowledge distillation, and sequence models.

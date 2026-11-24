@@ -1,6 +1,6 @@
 ---
 title: "Study Notes"
-subtitle: "Connected explanations across mathematics, science, and engineering."
+date-modified: 2026-11-24
 listing-page: true
 listing:
   contents:
@@ -9,20 +9,16 @@ listing:
     - "!template.qmd"
     - "!glossary.qmd"
   type: grid
+  grid-columns: 2
   sort: "title"
-  categories: true
   filter-ui: true
-  sort-ui: true
-  fields: [title, description, categories]
+  sort-ui: [title, date-modified]
+  field-display-names:
+    date-modified: "Updated"
+  fields: [title, description, categories, date-modified]
+  date-format: "YYYY-MM-DD"
 draft: false
 ---
-
-Each page develops one connected family of ideas, with sections for concepts best understood together.
-Substantial supporting topics have their own linked pages.
-Definitions and main results stay visible; expand a derivation or proof for the supporting steps.
-Notes explain the motivation, what kind of object the concept is, how it works, and where it applies or breaks down.
-Hover over, focus on, or tap a pastel-highlighted term for a short supporting definition.
-Use the [glossary cards](glossary.qmd) to search definitions, filter related concepts by tag, or practise recalling meanings.
 
 | Subject | Scope |
 |---|---|
@@ -32,5 +28,3 @@ Use the [glossary cards](glossary.qmd) to search definitions, filter related con
 | [Physics](physics/index.qmd) | Physical systems, circuits, electronics, signals, and control. |
 | [Computer Hardware](computer-hardware/index.qmd) | Digital logic, processors, memory, and computer architecture. |
 | [Computer Software](computer-software/index.qmd) | Programming, algorithms, systems, and computational operations. |
-
-Browse a subject above, or use the filters below to find a note.

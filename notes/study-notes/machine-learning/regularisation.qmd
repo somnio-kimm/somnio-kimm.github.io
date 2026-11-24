@@ -1,6 +1,7 @@
 ---
 title: "Regularisation"
-date-modified: 2026-09-29
+date: 2026-09-29
+date-modified: 2026-11-24
 draft: true
 categories:
   - Machine Learning
@@ -13,7 +14,7 @@ J(w)=L_{\text{train}}(w)+\lambda R(w).
 \]Here:
 - \(w\) is the collection of model parameters that training changes.
 - \(L_{\text{train}}(w)\) measures prediction error on the fixed training dataset.
-- \(R(w)\) penalises a specified property of the parameters—for example, large weight magnitudes.
+- \(R(w)\) penalises a specified property of the parameters, for example large weight magnitudes.
 - \(\lambda\geq 0\) controls the strength of that penalty and is held fixed during this training run.
 - \(J(w)\) is the total objective the optimiser now tries to minimise.
 The important change is that a reduction in training error may no longer be worth its accompanying increase in the penalty. Training can favour a solution with slightly worse training fit if it better satisfies the chosen preference.

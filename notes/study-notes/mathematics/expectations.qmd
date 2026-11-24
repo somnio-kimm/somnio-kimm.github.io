@@ -1,6 +1,7 @@
 ---
 title: "Expectations, Jensen’s inequality, and Monte Carlo estimation"
 description: "Distribution-weighted averages, convexity, sample estimators, and latent reconstruction expectations."
+date: 2026-09-10
 date-modified: 2026-09-11
 draft: true
 categories:

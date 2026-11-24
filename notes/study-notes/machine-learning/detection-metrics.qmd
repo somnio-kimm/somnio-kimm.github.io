@@ -1,6 +1,7 @@
 ---
 title: "Object detection metrics"
 description: "Interpret IoU, precision, recall, and average precision under a specified matching protocol."
+date: 2026-09-10
 date-modified: 2026-09-11
 draft: true
 categories:

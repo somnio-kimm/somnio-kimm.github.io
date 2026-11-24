@@ -10,7 +10,6 @@ listing:
 draft: false
 ---
 
-These notes connect policy learning, action representations, and generation to the commands a robot executes.
 Start with [policies and learning regimes](policies.qmd), then use [action horizons and feedback](action-horizons.qmd) to distinguish prediction from execution.
 
 ## Supporting concepts

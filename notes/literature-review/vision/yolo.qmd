@@ -1,6 +1,7 @@
 ---
 title: 'YOLO: Unified, Real-Time Object Detection'
 description: "Original YOLO's grid ownership, box confidence, squared-error objective, and localization constraints."
+date: 2026-09-10
 date-modified: 2026-09-10
 draft: true
 categories:

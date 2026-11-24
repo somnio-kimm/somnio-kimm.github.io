@@ -1,77 +1,51 @@
 ---
-title: "Curriculum Vitae"
+title: "Experience"
 draft: false
 ---
 
-## Education
-
-- **M.S. in Electrical and Computer Engineering**, University of Illinois Urbana-Champaign, May 2025
-  - Thesis: [*Ionospheric Outflow: From Fundamental Theory to Modern Modeling Frameworks*](https://hdl.handle.net/2142/129196)
-- **B.S. in Electrical Engineering and Mathematics**, University of Illinois Urbana-Champaign, May 2021
-
-## Experience
+## Work Experience
 
 ### Tommoro Robotics
 
-**Researcher** · Seoul, South Korea · Dec 2025 – Present
+**Researcher**\
+Seoul, South Korea\
+Dec 2025 – Present
 
-- Designed and implemented an adapter-based inference package supporting multiple models, robots, and transports.
-- Implemented real-time chunking, knowledge insulation, and classifier-free guidance; integrated FAST action tokenization; collected data; trained π0.5 policies; and demonstrated them on RB-Y1 and AI Worker.
+- Designed an adapter-based inference package supporting diverse models, robots, and transport protocols with real-time chunking and guidance.
+- Trained π0.5 policies integrating FAST action tokenization and executed multi-stage pre/post-training pipelines on mixed UMI and teleop datasets.
+- Advanced cross-embodiment deployments on RB-Y1 and AI Worker, enabling cross-hand knowledge transfer from 2-finger to 5-finger using contact dynamics.
 
-### Biointelligence Lab, Seoul National University
+## Academic Experience
 
-**Intern** · Seoul, South Korea · Sep 2025 – Nov 2025
+### Embodied AI
 
-- Supported AI Worker pick-and-place inference using ACT and Diffusion Policy models.
+**Intern**\
+Biointelligence Lab, Seoul National University, South Korea\
+Sep 2025 – Nov 2025
 
-### Analogue Signal Processing, University of Illinois Urbana-Champaign
+- Supported AI Worker pick-and-place inference with ACT and diffusion-policy models.
 
-**Teaching Assistant** · Urbana, Illinois, USA · Aug 2018 – May 2021; Aug 2022 – May 2023
+### Analogue Signal Processing
 
-- Assisted with building and troubleshooting filters and radio circuits and measuring signal outcomes.
+**Teaching Assistant**\
+University of Illinois Urbana-Champaign, USA\
+Aug 2018 – May 2021 & Aug 2022 – May 2023
 
-### Heliophysics Research and Applications, University of Illinois Urbana-Champaign
+- Assisted with building and troubleshooting filters, radio circuits, and measuring signal outcomes.
 
-**Research Assistant** · Urbana, Illinois, USA · Aug 2021 – May 2022
+### Heliophysics Research
 
-- Investigated ionospheric outflow with the Seven-Ion Polar Wind Outflow Model, analyzing density, velocity, and ion reactions under present-day and early-Earth conditions.
+**Research Assistant**\
+University of Illinois Urbana-Champaign, USA\
+Aug 2021 – May 2022
+
+- Investigated ionospheric outflow with the Seven-Ion Polar Wind Outflow Model, analysing density, velocity, and ion reactions under present-day and early-Earth conditions.
 - Built Python visualization tools, ran Fortran simulations across solar and convection conditions, and added configurable planetary rotation for early-Earth comparisons.
 
-### The N.1 Institute for Health, National University of Singapore
+### Brain Signal Analysis
 
-**Research Assistant** · Singapore · May 2019 – Jul 2019
+**Research Assistant**\
+The N.1 Institute for Health, National University of Singapore\
+May 2019 – Jul 2019
 
-- Developed MATLAB processing for previously collected non-human-primate hippocampal recordings using band-pass and median filters, FFT analysis, and signal preparation for spike sorting.
-
-## Projects
-
-### TellingByfAIce
-
-*Jun 2025 – Jul 2025*
-
-- Built a real-time facial-expression game integrating YOLO face detection, a fine-tuned ViT emotion classifier, FastAPI, and Godot.
-
-### Antarctic Glacier Analysis
-
-*Apr 2025 – May 2025*
-
-- Designed a U-Net-based GAN for spatiotemporal prediction of Antarctic glacier coverage from satellite imagery.
-
-### Vibrational GPS
-
-*Jan 2021 – May 2021*
-
-- Designed an ESP32 wearable's PCB and power architecture and characterized voltage regulation and dual vibration motors for Bluetooth haptic navigation.
-
-## Publication
-
-**Habilis-β: A Fast-Motion and Long-Lasting On-Device Vision-Language-Action Model**
-
-Tommoro Robotics (2026). *arXiv:2602.18813*.
-
-[arXiv](https://arxiv.org/abs/2602.18813) · [Publication details](publications.qmd)
-
-## Skills
-
-- **Programming / Software:** Python, C++, Fortran, SQL, EAGLE
-- **Languages:** Korean, English, Japanese, Chinese
+- Developed MATLAB processing for previously collected non-human-primate hippocampal recordings using band-pass/median filters, FFT analysis, and signal preparation for spike sorting.

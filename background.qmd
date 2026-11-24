@@ -1,0 +1,21 @@
+---
+title: "Background"
+draft: false
+---
+
+## Education
+
+### M.S. in Electrical and Computer Engineering
+
+University of Illinois Urbana-Champaign, USA\
+May 2025
+
+### B.S. in Electrical Engineering<br>B.S. in Mathematics {#bachelors}
+
+University of Illinois Urbana-Champaign, USA\
+May 2021
+
+## Skills
+
+- **Languages:** Korean, English, Japanese, Chinese
+- **Technical Skills:** Python, C++, Fortran, SQL

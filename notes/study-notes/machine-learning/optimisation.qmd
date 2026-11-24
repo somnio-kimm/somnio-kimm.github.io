@@ -1,6 +1,7 @@
 ---
 title: "Optimisation"
-date-modified: 2026-09-29
+date: 2026-09-29
+date-modified: 2026-11-24
 draft: true
 categories:
   - Machine Learning
@@ -29,7 +30,7 @@ L(\boldsymbol{\theta}_t)
 \]
 
 So far, we have imagined computing the gradient of the loss over the entire training dataset before every update. With a large dataset, that can be expensive.
-Instead, we can use a small subset of examples—a mini-batch—to choose each update.
+Instead, we can use a small subset of examples, called a mini-batch, to choose each update.
 Let:
 - \(\boldsymbol{\theta}\) collect the model’s parameters.
 - \(\ell_i(\boldsymbol{\theta})\) be the loss on training example \(i\).
@@ -52,7 +53,7 @@ Mini-batch SGD, commonly also called SGD	A randomly selected batch
 
 
 With uniform random sampling, the mini-batch gradient equals the full gradient on average, evaluated at the same fixed parameters. An individual estimate can still point in a different direction.
-Increasing \(w\) can therefore improve the mini-batch while worsening the full training loss—even when the step is small.
+Increasing \(w\) can therefore improve the mini-batch while worsening the full training loss, even when the step is small.
 
 | Cause | What went wrong? |
 |---|---|
@@ -91,7 +92,7 @@ An RMSProp-style update uses this scale:
 =
 \theta_t-\eta\frac{g_t}{\sqrt{v_t}+\epsilon}.
 \]Here, \(\epsilon>0\) is a small constant that prevents division by zero. Each parameter has its own \(v_t\).
-A larger recent gradient scale produces a larger denominator, reducing the update relative to ordinary SGD. This is not a measurement of curvature or certainty—it is a running statistic of squared gradients.
+A larger recent gradient scale produces a larger denominator, reducing the update relative to ordinary SGD. This is not a measurement of curvature or certainty; it is a running statistic of squared gradients.
 Adam combines this scaling idea with momentum: a running average of gradients supplies the numerator, while a running average of squared gradients supplies the scale. We’ll add its exact correction next.
 
 Adam combines the two mechanisms we have built. For each parameter, it maintains:

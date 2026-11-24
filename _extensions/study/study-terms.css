@@ -1,11 +1,12 @@
-/* Definitions remain readable inline if JavaScript is unavailable or in print. */
+/* Definitions remain readable inline if JavaScript is unavailable or in print.
+   Colours come from the site's design tokens (styles.scss), with fallbacks. */
 .study-term-label {
   color: inherit;
-  background: #e8e4fa;
+  background: var(--site-tint, #efe3cc);
   border: 0;
-  border-bottom: 1px dotted #76638e;
-  border-radius: 0.2em;
-  padding: 0 0.12em;
+  border-bottom: 1px dotted var(--site-accent, #8a4b20);
+  border-radius: 0.25em;
+  padding: 0 0.15em;
   font: inherit;
   line-height: inherit;
   text-align: inherit;
@@ -16,15 +17,12 @@
 .study-term-definition::after { content: ")"; }
 .study-term-heading { font-weight: 600; }
 .study-term-heading::after { content: ": "; }
-.quarto-dark .study-term-label {
-  background: #4a405b;
-  color: #f2edf9;
-  border-bottom-color: #c7b6e0;
-}
 @media screen {
   .study-term-ready > .study-term-label { cursor: help; }
   .study-term-ready > .study-term-label:hover,
-  .study-term-ready > .study-term-label[aria-expanded="true"] { background: #dcd4f4; }
+  .study-term-ready > .study-term-label[aria-expanded="true"] {
+    background: color-mix(in srgb, var(--site-accent, #8a4b20) 24%, transparent);
+  }
   .study-term-ready > .study-term-label:focus-visible {
     outline: 2px solid currentColor;
     outline-offset: 3px;
@@ -39,12 +37,12 @@
     max-height: calc(100dvh - 24px);
     overflow: auto;
     padding: 0.9rem 2.3rem 0.9rem 1rem;
-    color: #292432;
-    background: #fcfaff;
-    border: 1px solid #c7b9dc;
-    border-radius: 0.6rem;
-    box-shadow: 0 6px 22px rgb(38 23 58 / 18%);
-    font-size: 0.93rem;
+    color: var(--bs-body-color, #3b2f26);
+    background: var(--site-surface, #fdf9f0);
+    border: 1px solid var(--site-border, #e0d5c1);
+    border-radius: 0.75rem;
+    box-shadow: 0 12px 32px rgb(59 47 38 / 16%);
+    font-size: 0.9rem;
     font-weight: 400;
     line-height: 1.5;
     text-align: left;
@@ -74,13 +72,6 @@
     cursor: pointer;
   }
   .study-term-close:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
-  .quarto-dark .study-term-ready > .study-term-label:hover,
-  .quarto-dark .study-term-ready > .study-term-label[aria-expanded="true"] { background: #605174; }
-  .quarto-dark .study-term-ready > .study-term-definition {
-    color: #f2edf9;
-    background: #302a39;
-    border-color: #9380ad;
-  }
 }
 @media print {
   .study-term-label { background: none; border: 0; padding: 0; }

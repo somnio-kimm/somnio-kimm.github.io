@@ -1,18 +1,17 @@
 ---
 title: "Soo Min Kimm"
-subtitle: "Deep Chat of Perplexity"
 about:
   template: trestles
   image: profile.png
   image-shape: round
   links:
+    # Shown as icons only: styles.scss hides the text, which screen readers still read.
     - icon: github
       text: GitHub
       href: https://github.com/somnio-kimm
-    - text: Google Scholar
+    - icon: google
+      text: Google Scholar
       href: https://scholar.google.com/citations?user=3wFHPnEAAAAJ
-    - text: ORCID
-      href: https://orcid.org/0009-0006-5662-9627
     - icon: linkedin
       text: LinkedIn
       href: https://www.linkedin.com/in/somnio-kimm/
@@ -20,11 +19,11 @@ about:
       text: Email
       href: mailto:somnio.kimm@gmail.com
 draft: false
+toc: false
 ---
 
-## What you'll find here
+I am a researcher at Tommoro Robotics in Seoul, working on vision-language-action models for robots.
+I am currently interested in representation learning.
 
-- **[CV](cv.qmd)** — education, experience, projects, and skills.
-- **[Publications](publications.qmd)** — preprints and my M.S. thesis.
-- **[Talks](talks.qmd)** — seminar slides.
-- **[Notes](notes/index.qmd)** — deep dives into the papers I'm reading.
+I like solving puzzles, finding patterns, and making connections between different concepts.
+When something does not work, I want to understand why, not only fix it.

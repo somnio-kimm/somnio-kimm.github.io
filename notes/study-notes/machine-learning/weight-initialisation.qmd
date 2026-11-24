@@ -1,6 +1,7 @@
 ---
 title: "Weight initialisation: signal scale, Xavier, and He"
 description: "Why starting weights matter, what variance and second moments measure, and how fan-in, fan-out, and activation functions determine an initial scale."
+date: 2026-09-16
 date-modified: 2026-09-29
 categories:
   - Machine Learning

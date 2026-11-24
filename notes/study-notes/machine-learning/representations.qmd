@@ -1,6 +1,7 @@
 ---
 title: 'Representations, tokens, and embeddings'
 description: "How physical coordinates, text, and images become the numerical inputs to a model."
+date: 2026-09-10
 date-modified: 2026-09-11
 draft: true
 categories:

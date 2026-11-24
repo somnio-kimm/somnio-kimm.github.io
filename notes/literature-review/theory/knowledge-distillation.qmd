@@ -1,6 +1,7 @@
 ---
 title: 'Distilling the Knowledge in a Neural Network'
 description: "Teacher soft targets, temperature, the T-squared loss factor, and the high-temperature logit-matching limit."
+date: 2026-09-10
 date-modified: 2026-09-10
 draft: true
 categories:
