@@ -4,8 +4,12 @@ description: "Language representations, pretraining, and language-model architec
 listing-page: true
 listing:
   contents: "*.qmd"
-  type: default
+  type: grid
+  grid-columns: 2
   sort: "title"
-  fields: [title, description]
+  field-display-names:
+    date-modified: "Modified"
+  fields: [title, description, categories, date-modified]
+  date-format: "YYYY-MM-DD"
 draft: false
 ---

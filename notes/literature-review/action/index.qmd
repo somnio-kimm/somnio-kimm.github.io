@@ -4,8 +4,12 @@ description: "Robot policies, action representations, and real-time execution."
 listing-page: true
 listing:
   contents: "*.qmd"
-  type: default
+  type: grid
+  grid-columns: 2
   sort: "title"
-  fields: [title, description]
+  field-display-names:
+    date-modified: "Modified"
+  fields: [title, description, categories, date-modified]
+  date-format: "YYYY-MM-DD"
 draft: false
 ---

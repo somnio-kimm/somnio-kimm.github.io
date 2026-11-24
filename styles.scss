@@ -80,18 +80,54 @@ main.content > #title-block-header { margin-bottom: 1.75rem; }
 // Section sidebars start with the "All ..." entry; everything after it is
 // indented one step, so it reads as belonging under that entry.
 #quarto-sidebar .sidebar-menu-container > ul > li:not(:first-child) { padding-left: 1rem; }
+// The notes under a subject have long titles that run to two or three lines.
+// To keep them apart: looser lines inside a title, a gap between titles that
+// is clearly larger than that, slightly smaller text than the subject names,
+// and a thin round-ended line down the side that groups them (as in the Notes menu).
+#quarto-sidebar .sidebar-item-text { line-height: 1.35; }
+#quarto-sidebar .sidebar-section.depth1 {
+  position: relative;
+  margin: 0.15rem 0 0.6rem 0.2rem;
+  padding: 0 0 0 0.9rem;
 
-// The Notes dropdown looks the same on every screen: a plain list beside a
-// thin line, with a tint on the item under the pointer. No box.
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0.3rem;
+    bottom: 0.3rem;
+    left: 0;
+    width: 2px;
+    border-radius: 999px;
+    background: $site-rule;
+  }
+  > .sidebar-item { margin: 0; padding-block: 0.32rem; }
+  .sidebar-item-text { font-size: 0.85rem; }
+}
+
+// The Notes dropdown has one layout on every screen: a panel with round corners
+// that starts under the left edge of "Notes", a round-ended line inside it, and
+// the list beside the line, with a tint on the item under the pointer.
+// The line is drawn as its own shape rather than as a border, so that its two
+// ends are round and it stops a little short of the first and last items.
 .navbar .navbar-nav .nav-item.dropdown .dropdown-menu {
   min-width: 13rem;
-  margin-left: 0.6rem;
-  padding: 0.3rem 0.3rem 0.3rem 0.5rem;   // room around the first and last items' highlight
+  margin-left: 0;
+  padding: 0.5rem 0.5rem 0.5rem 1.9rem;   // the list starts just after the line
   background: $body-bg;
   border: 0;
-  border-left: 2px solid $site-rule;
-  border-radius: 0;
+  border-radius: 0.75rem;
   box-shadow: none;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0.85rem;
+    bottom: 0.85rem;
+    left: 1.1rem;
+    width: 4px;   // thick enough for its round ends to show
+    border-radius: 999px;
+    background: $site-rule;
+  }
 }
 .navbar .dropdown-item {
   padding: 0.4rem 0.75rem;
@@ -102,12 +138,27 @@ main.content > #title-block-header { margin-bottom: 1.75rem; }
   &:hover, &:focus { background: $site-tint; color: $body-color; }
 }
 .navbar .dropdown-divider { margin: 0.3rem 0.5rem; border-color: $border-color; }
-// On wide screens the menu opens as soon as the pointer is over "Notes".
-// Touch screens and the keyboard still open it with a tap or Enter.
-// There it floats over the page, so it gets a faint shadow to stand apart.
+// What differs by screen is only how the menu is shown, not how it is laid out.
+// Narrow: it is part of the folded menu's flow ("relative" lets it hold its line).
+@media (max-width: 991.98px) {
+  .navbar .navbar-nav .nav-item.dropdown .dropdown-menu { position: relative; }
+}
+// Wide: it opens as soon as the pointer is over "Notes" (touch screens and the
+// keyboard still open it with a tap or Enter) and floats over the page, so it
+// gets a faint shadow to stand apart.
 @media (min-width: 992px) {
   // (_includes/nav-hover.html closes a menu that was opened by a click once the pointer leaves.)
   .navbar .nav-item.dropdown:hover > .dropdown-menu { display: block; margin-top: 0; }
+  // An unseen strip under "Notes" that belongs to it: the pointer stays "on
+  // Notes" while it crosses the gap left by the panel's round top corner.
+  .navbar .nav-item.dropdown:hover::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    height: 1rem;
+  }
   .navbar .navbar-nav .nav-item.dropdown .dropdown-menu { box-shadow: 0 8px 20px rgba(59, 47, 38, 0.1); }
 }
 
@@ -150,10 +201,6 @@ main.content :is(.math.display, mjx-container[display="true"]) {
   overflow-y: hidden;
 }
 
-// Subject pages list only a title and a description, so drop the column that
-// Quarto reserves for a date and author.
-.quarto-listing-default .quarto-post .metadata { display: none; }
-
 .quarto-grid-item.card {
   background: var(--site-surface);
   border-color: var(--site-border);
@@ -169,6 +216,14 @@ main.content :is(.math.display, mjx-container[display="true"]) {
   td { padding: 0.4rem 0.4rem 0 0; border: 0; }
 }
 .quarto-grid-item.card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(59, 47, 38, 0.14); }
+
+// ---- Tables ----
+// The first column of a table holds names, such as the subjects on the Notes
+// pages. A name may wrap between its words but never inside one: links are
+// otherwise allowed to break mid-word, which cut "Language" into "Langua" and
+// "ge" on a phone. The column is as wide as its longest word instead.
+main.content table :is(th, td):first-child,
+main.content table :is(th, td):first-child a { word-break: normal; overflow-wrap: normal; }
 
 // ---- Tags: one shape everywhere ----
 // A note's categories, under its title and on the cards of a note list, look

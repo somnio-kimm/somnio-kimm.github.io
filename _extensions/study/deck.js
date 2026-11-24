@@ -232,7 +232,9 @@
       if (el.study.open) el.study.close();
     }
     el.study.addEventListener("cancel", emptyPopup);
-    el.study.addEventListener("close", emptyPopup);
+    // "close" arrives late: if the popup has been opened again by then (a card
+    // clicked right after closing), it must not empty the new one.
+    el.study.addEventListener("close", () => { if (!el.study.open) emptyPopup(); });
 
     // ---- Events ------------------------------------------------------------
     el.search.addEventListener("input", () => filter());
