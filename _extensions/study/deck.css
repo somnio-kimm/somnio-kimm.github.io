@@ -18,6 +18,18 @@
   border-radius: 0.75rem;
 }
 .deck-study { margin-block: 1.5rem; }
+/* The filters and the study buttons. On wide screens deck.js moves this block
+   into the page sidebar, where it drops its boxes, stacks its buttons, and is
+   the only thing shown (the sidebar's own link list is hidden). */
+.deck-side { display: grid; gap: 1rem; }
+.deck-side[hidden] { display: none; }
+.deck-in-sidebar { gap: 1.5rem; font-size: 0.9rem; }
+.deck-in-sidebar .deck-panel { padding: 0; background: none; border: 0; border-radius: 0; }
+.deck-in-sidebar :is(.deck-study-start, .deck-options) { flex-direction: column; align-items: stretch; }
+.deck-in-sidebar .deck-facet-picker:first-of-type { margin-top: 0; }
+#quarto-sidebar .sidebar-menu-container:has(.deck-in-sidebar) > ul { display: none; }
+/* On narrow screens the sidebar would hold only that hidden link, so the bar that opens it goes too. */
+body:has(.deck) .quarto-secondary-nav { display: none; }
 .deck-panel-title { display: block; font-weight: 600; margin: 0 0 0.5rem; }
 .deck-search {
   width: 100%;
@@ -121,7 +133,7 @@
 .deck-study-actions .deck-hint { flex-basis: 100%; text-align: center; }
 
 @media print {
-  .deck-controls, .deck-study, .deck-study-actions, .deck-empty { display: none !important; }
+  .deck-controls, .deck-side, .deck-study, .deck-study-actions, .deck-empty { display: none !important; }
   .deck .deck-card[hidden], .deck-studying .deck-card:not(.deck-current) { display: block !important; }
   .deck-grid { display: block; }
   .deck-card { break-inside: avoid; margin-bottom: 1rem; }

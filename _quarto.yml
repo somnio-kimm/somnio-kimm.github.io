@@ -110,18 +110,9 @@ website:
       contents:
         - href: notes/study-notes/glossary.qmd
           text: "All cards A–Z"
-        - href: notes/study-notes/glossary.html?tag=computer-hardware
-          text: "Computer Hardware"
-        - href: notes/study-notes/glossary.html?tag=computer-software
-          text: "Computer Software"
-        - href: notes/study-notes/glossary.html?tag=machine-learning
-          text: "Machine Learning"
-        - href: notes/study-notes/glossary.html?tag=mathematics
-          text: "Mathematics"
-        - href: notes/study-notes/glossary.html?tag=physics
-          text: "Physics"
-        - href: notes/study-notes/glossary.html?tag=robotics
-          text: "Robotics"
+        # This one link only makes Quarto build the sidebar. On the page it is
+        # hidden, and _extensions/study/deck.js puts the glossary's filters and
+        # study buttons there instead.
   page-footer:
     center: "© 2026 Soo Min Kimm"
 

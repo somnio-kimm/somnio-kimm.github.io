@@ -79,33 +79,29 @@ async function listChecks(page, width) {
   await page.reload({waitUntil: "networkidle"});
   assert.equal(await page.locator('[data-facet="letter"] [data-value="L"]').getAttribute("aria-pressed"), "true");
   assert.equal(await visibleCards(page).count(), combined.length);
+  // Several values of one filter can be on at once; a card needs any one of them.
+  await pick(page, "letter", "A");
+  const letters = await visibleCards(page).evaluateAll(items => items.map(el => el.dataset.letter));
+  assert(letters.includes("A") && letters.includes("L") && letters.every(letter => "AL".includes(letter)));
+  assert.deepEqual(new URL(page.url()).searchParams.get("letter").split(",").sort(), ["A", "L"]);
+  assert.equal(await page.locator('.deck-facet-picker:has([data-facet="letter"]) summary').textContent(), "A–Z · A, L");
+  await pick(page, "letter", "L");
+  assert((await visibleCards(page).evaluateAll(items => items.map(el => el.dataset.letter))).every(letter => letter === "A"));
+  await pick(page, "letter", "");
+  assert.equal(new URL(page.url()).searchParams.get("letter"), null);
   await page.locator(".deck-reset").click();
   // A letter with no cards is disabled.
   const missingLetter = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"].find(letter => !labels.some(label => label.toUpperCase().startsWith(letter)));
   if (missingLetter) assert.equal(await page.locator(`[data-facet="letter"] [data-value="${missingLetter}"]`).isDisabled(), true);
 
-  // The glossary has its own sidebar, whose subject links are tag filters.
-  const sidebar = page.locator("#quarto-sidebar");
-  assert(!(await sidebar.textContent()).includes("All study notes"));
-  const subjectLinks = sidebar.locator('a[href*="?tag="]');
-  assert.equal(await subjectLinks.count(), 6);
-  assert((await subjectLinks.evaluateAll(items => items.map(el => el.href)))
-    .every(href => new URL(href).pathname.endsWith("/glossary.html")));
-  // A subject without cards shows the empty state and stays marked in the sidebar.
-  const toggleSidebar = async () => {
-    if (width === 390) await page.getByRole("button", {name: "Toggle sidebar navigation"}).click();
-  };
-  const hardware = await taggedWith("computer-hardware");
-  await toggleSidebar();
-  await sidebar.locator('a[href*="tag=computer-hardware"]').click();
-  await page.waitForURL("**/glossary.html?tag=computer-hardware", {waitUntil: "networkidle"});
-  assert.equal(await visibleCards(page).count(), hardware);
-  assert.equal(await page.locator(".deck-empty").isVisible(), hardware === 0);
-  assert.equal(await sidebar.locator('a[href*="tag=computer-hardware"]').getAttribute("aria-current"), "page");
-  await toggleSidebar();
-  await sidebar.getByText("All cards A–Z", {exact: true}).click();
-  await page.waitForURL("**/glossary.html", {waitUntil: "networkidle"});
-  assert.equal(await visibleCards(page).count(), total);
+  // On a wide screen the filters and study buttons are the only thing in the
+  // page sidebar; on a phone, where that sidebar is folded away, they stay above the cards.
+  const wide = width === 1440;
+  assert.equal(await page.locator("#quarto-sidebar .deck-side").count(), wide ? 1 : 0);
+  assert.equal(await page.locator(".deck-controls .deck-side").count(), wide ? 0 : 1);
+  assert.equal(await page.locator('.deck-side [data-study="all"]').isVisible(), true);
+  if (wide) assert.equal(await page.locator("#quarto-sidebar .sidebar-menu-container > ul").isVisible(), false);
+  else assert.equal(await page.locator(".quarto-secondary-nav").isVisible(), false);
   // A tag on a card filters the whole deck.
   await page.locator('#term-latent-variable .deck-tag[data-value="mathematics"]').click();
   assert.equal(await visibleCards(page).count(), await taggedWith("mathematics"));

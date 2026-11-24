@@ -61,9 +61,10 @@ local function facet_html(facet)
   return table.concat(html, "\n")
 end
 
--- Two panels above the cards: one to find cards, one to study them. They start
--- hidden: without JavaScript the page is the plain list of cards with every
--- answer open.
+-- The controls: a search panel above the cards, and `.deck-side` holding the
+-- filters and the study buttons, which deck.js moves into the page sidebar on
+-- wide screens. They start hidden: without JavaScript the page is the plain
+-- list of cards with every answer open.
 -- deck = {name, search_label, placeholder, facets}
 function M.controls(deck)
   local id = deck.name
@@ -72,12 +73,17 @@ function M.controls(deck)
     '<label class="deck-panel-title" for="' .. id .. '-search">' .. M.escape(deck.search_label) .. '</label>',
     '<input id="' .. id .. '-search" class="deck-search" type="search" placeholder="'
       .. M.escape(deck.placeholder) .. '" autocomplete="off">'}
-  for _, facet in ipairs(deck.facets) do html[#html + 1] = facet_html(facet) end
   html[#html + 1] = [[
 <div class="deck-options">
 <p class="deck-count" role="status" aria-live="polite"></p>
 <button type="button" class="deck-reset">Clear filters</button>
 </div>
+</div>
+<div class="deck-side">
+<div class="deck-panel">
+<p class="deck-panel-title">Filter</p>]]
+  for _, facet in ipairs(deck.facets) do html[#html + 1] = facet_html(facet) end
+  html[#html + 1] = [[
 </div>
 <div class="deck-panel">
 <p class="deck-panel-title">Study</p>
@@ -90,6 +96,7 @@ function M.controls(deck)
   html[#html + 1] = '<label><input id="' .. id .. '-practice" class="deck-practice" type="checkbox"> Hide answers for practice</label>'
   html[#html + 1] = [[
 <p class="deck-due" role="status" aria-live="polite"></p>
+</div>
 </div>
 </div>
 </div>
@@ -116,7 +123,7 @@ function M.footer()
 end
 
 function M.add_dependency()
-  quarto.doc.add_html_dependency({name = "study-deck", version = "3.4.0",
+  quarto.doc.add_html_dependency({name = "study-deck", version = "3.5.0",
     scripts = {{path = "deck.js", attribs = {defer = ""}}}, stylesheets = {"deck.css"}})
 end
 

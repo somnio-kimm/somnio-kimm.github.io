@@ -17,16 +17,23 @@
   };
 
   document.querySelectorAll(".deck").forEach(root => {
-    const find = selector => root.querySelector(selector);
-    const controls = find(".deck-controls");
-    const search = find(".deck-search");
-    const practice = find(".deck-practice");
-    // One facet per button group; its key is the URL parameter and the card's data attribute.
+    // Every part is looked up once, here, because the filters and the study
+    // buttons can move out of the deck into the page sidebar (see placeSide).
+    const el = Object.fromEntries(Object.entries({
+      controls: ".deck-controls", side: ".deck-side", search: ".deck-search", practice: ".deck-practice",
+      count: ".deck-count", due: ".deck-due", empty: ".deck-empty", reset: ".deck-reset", forget: ".deck-forget",
+      studyDue: '[data-study="due"]', studyAll: '[data-study="all"]',
+      study: ".deck-study", status: ".deck-study-status", bar: ".deck-study-progress", exit: ".deck-study-exit",
+      actions: ".deck-study-actions", reveal: ".deck-study-reveal", again: ".deck-study-again",
+      good: ".deck-study-good", skip: ".deck-study-skip", schedule: ".deck-study-schedule",
+    }).map(([name, selector]) => [name, root.querySelector(selector)]));
+    // One facet per button group; its key is the URL parameter and the card's
+    // data attribute. Several values can be chosen at once.
     const facets = [...root.querySelectorAll("[data-facet]")].map(group => ({
       key: group.dataset.facet,
       buttons: [...group.querySelectorAll("button[data-value]")],
       summary: group.closest(".deck-facet-picker").querySelector("summary"),
-      value: "",
+      chosen: new Set(),
     }));
     const cards = [...root.querySelectorAll(".deck-card")].map(element => ({
       element,
@@ -36,54 +43,46 @@
       values: Object.fromEntries(facets.map(facet => [facet.key, (element.dataset[facet.key] || "").split(" ")])),
       details: [...element.querySelectorAll("details")],
     }));
-    // Sidebar links to this page with a filter in the query, e.g. glossary.html?tag=physics.
-    const sidebarLinks = [...document.querySelectorAll("#quarto-sidebar a.sidebar-link[href]")]
-      .map(link => ({link, url: new URL(link.href)}))
-      .filter(item => item.url.pathname === window.location.pathname);
-    const sidebarFacets = facets.filter(facet => sidebarLinks.some(item => item.url.searchParams.has(facet.key)));
     const setOpen = isOpen => cards.forEach(card => card.details.forEach(details => { details.open = isOpen(details); }));
     // The list at rest: practice hides every answer; otherwise layers marked
     // data-collapsed (formal text, proofs) stay closed until someone opens them.
-    const restList = () => setOpen(details => !practice.checked && !("collapsed" in details.dataset));
+    const restList = () => setOpen(details => !el.practice.checked && !("collapsed" in details.dataset));
 
     // ---- Search and filters ------------------------------------------------
+    // A card passes a facet when nothing is chosen there, or it has any chosen value.
     const matches = (card, words, except) => words.every(word => card.text.includes(word))
-      && facets.every(facet => facet === except || !facet.value || card.values[facet.key].includes(facet.value));
+      && facets.every(facet => facet === except || !facet.chosen.size
+        || card.values[facet.key].some(value => facet.chosen.has(value)));
 
     function filter({updateURL = true, keepHash = false} = {}) {
-      const words = normalise(search.value.trim()).split(/\s+/).filter(Boolean);
+      const words = normalise(el.search.value.trim()).split(/\s+/).filter(Boolean);
       cards.forEach(card => { card.element.hidden = !matches(card, words); });
       const shown = cards.filter(card => !card.element.hidden);
       facets.forEach(facet => {
-        // A value that would leave no cards, given the other filters, is disabled.
+        // A value that would add no cards, given the other filters, is disabled.
         const available = new Set(cards.filter(card => matches(card, words, facet)).flatMap(card => card.values[facet.key]));
         facet.buttons.forEach(button => {
           const value = button.dataset.value;
-          button.setAttribute("aria-pressed", String(value === facet.value));
-          button.disabled = Boolean(value) && value !== facet.value && !available.has(value);
+          const pressed = value ? facet.chosen.has(value) : facet.chosen.size === 0;
+          button.setAttribute("aria-pressed", String(pressed));
+          button.disabled = Boolean(value) && !pressed && !available.has(value);
         });
-        // The toggle shows the chosen value, so a folded filter still says what it does.
-        const chosen = facet.buttons.find(button => button.dataset.value === facet.value);
-        facet.summary.textContent = facet.summary.dataset.label + (facet.value ? ` · ${chosen?.textContent || facet.value}` : "");
+        // The toggle names what is chosen, so a folded filter still says what it does.
+        const names = facet.buttons.filter(button => facet.chosen.has(button.dataset.value)).map(button => button.textContent);
+        facet.summary.textContent = facet.summary.dataset.label
+          + (names.length ? ` · ${names.length > 3 ? `${names.length} chosen` : names.join(", ")}` : "");
       });
-      if (sidebarFacets.length) {
-        sidebarLinks.forEach(({link, url}) => {
-          const active = sidebarFacets.every(facet => (url.searchParams.get(facet.key) || "") === facet.value);
-          link.classList.toggle("active", active);
-          if (active) link.setAttribute("aria-current", "page");
-          else link.removeAttribute("aria-current");
-        });
-      }
       const due = shown.filter(isDue).length;
-      find(".deck-count").textContent = `${shown.length} of ${plural(cards.length, "card")}`;
-      find(".deck-due").textContent = `${due} due for review`;
-      find(".deck-empty").hidden = shown.length > 0;
-      find('[data-study="due"]').disabled = due === 0;
-      find('[data-study="all"]').disabled = shown.length === 0;
-      find(".deck-forget").hidden = Object.keys(progress).length === 0;
+      el.count.textContent = `${shown.length} of ${plural(cards.length, "card")}`;
+      el.due.textContent = `${due} due for review`;
+      el.empty.hidden = shown.length > 0;
+      el.studyDue.disabled = due === 0;
+      el.studyAll.disabled = shown.length === 0;
+      el.forget.hidden = Object.keys(progress).length === 0;
       if (updateURL) {
         const url = new URL(window.location.href);
-        for (const [key, value] of [["search", search.value.trim()], ...facets.map(facet => [facet.key, facet.value])]) {
+        const state = [["search", el.search.value.trim()], ...facets.map(facet => [facet.key, [...facet.chosen].join(",")])];
+        for (const [key, value] of state) {
           if (value) url.searchParams.set(key, value);
           else url.searchParams.delete(key);
         }
@@ -93,19 +92,18 @@
     }
 
     function clearFilters() {
-      search.value = "";
-      facets.forEach(facet => { facet.value = ""; });
+      el.search.value = "";
+      facets.forEach(facet => facet.chosen.clear());
     }
 
     function readURL() {
       const params = new URLSearchParams(window.location.search);
-      search.value = params.get("search") || "";
+      el.search.value = params.get("search") || "";
       facets.forEach(facet => {
-        const wanted = (params.get(facet.key) || "").toLowerCase();
-        // Accept only values offered by a button or a sidebar link.
-        facet.value = [...facet.buttons.map(button => button.dataset.value),
-          ...sidebarLinks.map(item => item.url.searchParams.get(facet.key) || "")]
-          .find(value => value.toLowerCase() === wanted) || "";
+        // Accept only values offered by a button; several are separated by commas.
+        const offered = new Map(facet.buttons.map(button => [button.dataset.value.toLowerCase(), button.dataset.value]));
+        facet.chosen = new Set((params.get(facet.key) || "").toLowerCase().split(",")
+          .map(value => offered.get(value)).filter(Boolean));
       });
       filter({updateURL: false});
     }
@@ -123,6 +121,18 @@
       card.element.scrollIntoView({block: "start"});
     }
 
+    // On wide screens the filters and the study buttons sit in the page sidebar,
+    // under its links. On narrow screens that sidebar is folded away, so they
+    // stay above the cards. The "deck" class keeps deck.css applying to them there.
+    const sidebar = document.querySelector("#quarto-sidebar .sidebar-menu-container");
+    const wide = window.matchMedia("(min-width: 992px)");
+    function placeSide() {
+      const inSidebar = Boolean(sidebar) && wide.matches;
+      el.side.classList.toggle("deck", inSidebar);
+      el.side.classList.toggle("deck-in-sidebar", inSidebar);
+      (inSidebar ? sidebar : el.controls).append(el.side);
+    }
+
     // ---- Flashcard study ---------------------------------------------------
     // Progress is kept per deck in this browser only: {cardId: {box, due}}.
     const storageKey = `study-deck:${root.dataset.deck}`;
@@ -133,12 +143,6 @@
     };
     const isDue = card => !progress[card.id] || progress[card.id].due <= Date.now();
 
-    const study = find(".deck-study");
-    const actions = find(".deck-study-actions");
-    const reveal = find(".deck-study-reveal");
-    const again = find(".deck-study-again");
-    const good = find(".deck-study-good");
-    const skip = find(".deck-study-skip");
     let session = null; // {queue, position, size, missed}
     let current = null;
 
@@ -147,29 +151,28 @@
       if (!pool.length) return;
       session = {queue: shuffle(pool), position: 0, size: pool.length, missed: new Set()};
       root.classList.add("deck-studying");
-      controls.hidden = true;
-      study.hidden = false;
+      el.controls.hidden = el.side.hidden = true;
+      el.study.hidden = false;
       showCard();
     }
 
     function showCard() {
       current?.element.classList.remove("deck-current");
       current = session.queue[session.position] || null;
-      const bar = find(".deck-study-progress");
-      bar.max = session.queue.length;
-      bar.value = session.position;
-      actions.hidden = !current;
+      el.bar.max = session.queue.length;
+      el.bar.value = session.position;
+      el.actions.hidden = !current;
       if (!current) {
         const recalled = session.size - session.missed.size;
-        find(".deck-study-status").textContent = `Finished. ${recalled} of ${plural(session.size, "card")} recalled on the first try.`;
-        find(".deck-study-exit").focus();
+        el.status.textContent = `Finished. ${recalled} of ${plural(session.size, "card")} recalled on the first try.`;
+        el.exit.focus();
         return;
       }
-      find(".deck-study-status").textContent = `Card ${session.position + 1} of ${session.queue.length}`;
+      el.status.textContent = `Card ${session.position + 1} of ${session.queue.length}`;
       current.details.forEach(details => { details.open = false; });
       current.element.classList.add("deck-current");
       updateActions();
-      reveal.focus({preventScroll: true});
+      el.reveal.focus({preventScroll: true});
       root.scrollIntoView({block: "start"});
     }
 
@@ -177,13 +180,13 @@
     function updateActions() {
       const next = current.details.find(details => !details.open);
       const box = progress[current.id]?.box || 0;
-      const focused = actions.contains(document.activeElement);
-      reveal.hidden = skip.hidden = !next;
-      again.hidden = good.hidden = Boolean(next);
-      if (next) reveal.textContent = `Show ${next.querySelector("summary").textContent.toLowerCase()}`;
-      find(".deck-study-schedule").textContent = next ? ""
+      const focused = el.actions.contains(document.activeElement);
+      el.reveal.hidden = el.skip.hidden = !next;
+      el.again.hidden = el.good.hidden = Boolean(next);
+      if (next) el.reveal.textContent = `Show ${next.querySelector("summary").textContent.toLowerCase()}`;
+      el.schedule.textContent = next ? ""
         : `“Got it” brings this card back in ${plural(INTERVALS[Math.min(box + 1, INTERVALS.length - 1)], "day")}.`;
-      if (focused) (next ? reveal : good).focus({preventScroll: true});
+      if (focused) (next ? el.reveal : el.good).focus({preventScroll: true});
     }
 
     function revealNext() {
@@ -214,49 +217,52 @@
       current?.element.classList.remove("deck-current");
       session = current = null;
       root.classList.remove("deck-studying");
-      study.hidden = actions.hidden = true;
-      controls.hidden = false;
+      el.study.hidden = el.actions.hidden = true;
+      el.controls.hidden = el.side.hidden = false;
       restList();
       filter({updateURL: false});
     }
 
     // ---- Events ------------------------------------------------------------
-    search.addEventListener("input", () => filter());
+    el.search.addEventListener("input", () => filter());
+    // A filter button switches its value on or off; the first button ("All") clears the filter.
     facets.forEach(facet => facet.buttons.forEach(button => button.addEventListener("click", () => {
-      facet.value = button.dataset.value;
+      const value = button.dataset.value;
+      if (!value) facet.chosen.clear();
+      else if (!facet.chosen.delete(value)) facet.chosen.add(value);
       filter();
     })));
-    // A subject link on a card filters the whole deck by that subject.
+    // A subject link on a card filters the whole deck by that subject alone.
     root.addEventListener("click", event => {
       const link = event.target.closest("a[data-facet-link]");
       if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
       event.preventDefault();
       if (session) stopStudy();
-      facets.forEach(facet => { facet.value = facet.key === link.dataset.facetLink ? link.dataset.value : ""; });
+      facets.forEach(facet => { facet.chosen = new Set(facet.key === link.dataset.facetLink ? [link.dataset.value] : []); });
       filter();
-      search.focus({preventScroll: true});
+      el.search.focus({preventScroll: true});
       root.scrollIntoView({block: "start"});
     });
-    practice.addEventListener("change", restList);
-    find(".deck-reset").addEventListener("click", () => {
+    el.practice.addEventListener("change", restList);
+    el.reset.addEventListener("click", () => {
       clearFilters();
       filter();
-      search.focus();
+      el.search.focus();
     });
-    root.querySelectorAll("[data-study]").forEach(button => {
+    [el.studyDue, el.studyAll].forEach(button => {
       button.addEventListener("click", () => startStudy(button.dataset.study));
     });
-    find(".deck-forget").addEventListener("click", () => {
+    el.forget.addEventListener("click", () => {
       if (!window.confirm("Forget which cards you have learned in this deck?")) return;
       progress = {};
       saveProgress();
       filter({updateURL: false});
     });
-    reveal.addEventListener("click", revealNext);
-    again.addEventListener("click", () => grade(false));
-    good.addEventListener("click", () => grade(true));
-    skip.addEventListener("click", skipCard);
-    find(".deck-study-exit").addEventListener("click", stopStudy);
+    el.reveal.addEventListener("click", revealNext);
+    el.again.addEventListener("click", () => grade(false));
+    el.good.addEventListener("click", () => grade(true));
+    el.skip.addEventListener("click", skipCard);
+    el.exit.addEventListener("click", stopStudy);
     cards.forEach(card => card.details.forEach(details => details.addEventListener("toggle", () => {
       if (current === card) updateActions();
     })));
@@ -276,6 +282,7 @@
     });
     window.addEventListener("popstate", () => { readURL(); revealAnchor(); });
     window.addEventListener("hashchange", revealAnchor);
+    wide.addEventListener("change", placeSide);
     // Print every card with its answers, then restore what was open.
     let printState;
     window.addEventListener("beforeprint", () => {
@@ -288,7 +295,8 @@
 
     restList();
     readURL();
-    controls.hidden = false;
+    placeSide();
+    el.controls.hidden = false;
     revealAnchor();
   });
 })();
