@@ -8,50 +8,90 @@
 }
 .deck [hidden] { display: none; }
 
-/* ---- Controls ---- */
-/* Two panels: one to find cards, one to study them. */
-.deck-controls { display: grid; gap: 1rem; margin-block: 1.5rem; }
-.deck-panel, .deck-study {
-  padding: 1.1rem;
-  background: var(--deck-surface);
-  border: 1px solid var(--bs-border-color);
-  border-radius: 0.75rem;
-}
-.deck-study { margin-block: 1.5rem; }
-/* The filters and the study buttons. On wide screens deck.js moves this block
-   into the page sidebar, where it drops its boxes, stacks its buttons, and is
-   the only thing shown (the sidebar's own link list is hidden). */
-.deck-side { display: grid; gap: 1rem; }
-.deck-side[hidden] { display: none; }
-.deck-in-sidebar { gap: 1.5rem; font-size: 0.9rem; }
-.deck-in-sidebar .deck-panel { padding: 0; background: none; border: 0; border-radius: 0; }
-.deck-in-sidebar :is(.deck-study-start, .deck-options) { flex-direction: column; align-items: stretch; }
-#quarto-sidebar .sidebar-menu-container:has(.deck-in-sidebar) > ul { display: none; }
-/* On narrow screens the sidebar would hold only that hidden link, so the bar that opens it goes too. */
-body:has(.deck) .quarto-secondary-nav { display: none; }
-.deck-panel-title { display: block; font-weight: 600; margin: 0 0 0.5rem; }
-.deck-search {
-  width: 100%;
-  padding: 0.65rem 0.8rem;
+/* ---- Controls: one row above the cards ---- */
+/* The search box, then one dropdown menu per filter and the Study menu. */
+.deck-controls { margin-block: 1.5rem; }
+.deck-bar { position: relative; display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.6rem; }
+.deck-search, .deck-menu > summary {
+  padding: 0.6rem 0.85rem;
   color: var(--bs-body-color);
   background: var(--deck-surface);
   border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
   border-radius: 0.5rem;
   font: inherit;
 }
-.deck-hint { margin: 0.4rem 0 0; font-size: 0.9rem; color: var(--bs-secondary-color); }
+.deck-search { flex: 1 1 14rem; min-width: 0; }
+.deck-menu { position: relative; }
+.deck-menu > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 100%;
+  white-space: nowrap;
+  cursor: pointer;
+  list-style: none;
+}
+.deck-menu > summary::-webkit-details-marker { display: none; }
+.deck-menu > summary::after { content: "▾"; opacity: 0.6; }
+.deck-menu[open] > summary { border-color: var(--deck-accent); }
+.deck-menu-state { max-width: 12rem; overflow: hidden; text-overflow: ellipsis; }
+/* The open menu floats over the cards, under the right end of its button. */
+.deck-menu-panel {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  display: grid;
+  min-width: 16rem;
+  padding: 0.4rem;
+  background: var(--deck-surface);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.75rem;
+  box-shadow: 0 0.75rem 1.5rem -1rem color-mix(in srgb, var(--bs-body-color) 60%, transparent);
+}
+/* A menu row is plain text: name on the left, number of cards on the right. */
+.deck .deck-menu-panel button {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+.deck .deck-menu-panel button[aria-pressed="true"] { color: var(--deck-accent); background: none; font-weight: 600; }
+.deck .deck-menu-panel button:not(:disabled):hover { background: var(--site-tint, var(--bs-tertiary-bg)); }
+.deck-n { color: var(--bs-secondary-color); font-weight: 400; font-variant-numeric: tabular-nums; }
+.deck-menu-panel label { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.6rem; font-size: 0.9rem; cursor: pointer; }
+/* On a phone the two menus share a second row under the search box (a long
+   list of chosen subjects is cut with "…"), and a menu opens as wide as the bar. */
+@media (max-width: 767.98px) {
+  .deck-search { flex-basis: 100%; }
+  .deck-menu { position: static; flex: 1 1 0; min-width: 0; }
+  .deck-menu:last-child { flex: 0 0 auto; }
+  .deck-menu-state { flex: 0 1 auto; min-width: 0; max-width: none; }
+  .deck-menu > summary::after { margin-left: auto; }
+  .deck-menu-panel { left: 0; }
+}
+/* Shown only while a search or filter is on (deck.js empties the count and hides the button). */
+.deck-options > :not(:empty, [hidden]) { margin-top: 0.75rem; }
 .deck-count { margin: 0; font-size: 0.9rem; }
-.deck-facet, .deck-options, .deck-study-start, .deck-study, .deck-study-actions, .deck-card-meta {
+.deck-study {
+  margin-block: 1.5rem;
+  padding: 1.1rem;
+  background: var(--deck-surface);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.75rem;
+}
+.deck-hint { margin: 0.4rem 0 0; font-size: 0.9rem; color: var(--bs-secondary-color); }
+.deck-options, .deck-study, .deck-study-actions, .deck-card-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
 }
-.deck-options { margin-top: 0.9rem; }
-/* Nothing is left above the cards once the controls have moved into the sidebar. */
-.deck-controls:not(:has(*)) { display: none; }
-.deck-options { justify-content: space-between; }
-.deck-options label { display: flex; align-items: center; gap: 0.5rem; }
+.deck-options { gap: 0.5rem 1rem; }
 .deck-card summary { cursor: pointer; font-weight: 600; }
 
 /* Buttons and tags share one chip shape. */
@@ -80,7 +120,10 @@ body:has(.deck) .quarto-secondary-nav { display: none; }
 .deck :is(button, input, a, summary):focus-visible { outline: 2px solid var(--deck-accent); outline-offset: 3px; }
 
 /* ---- Cards ---- */
-.deck-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 1rem; }
+/* One card per row on a phone, two otherwise: the page is as wide as the
+   site's other pages (about 800px), where a third column would be cramped. */
+.deck-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+@media (min-width: 576px) { .deck-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .deck-card {
   min-width: 0;
   margin-block: 0 1rem;
@@ -129,7 +172,7 @@ body:has(.deck) .quarto-secondary-nav { display: none; }
 .deck-study-actions .deck-hint { flex-basis: 100%; text-align: center; }
 
 @media print {
-  .deck-controls, .deck-side, .deck-study, .deck-study-actions, .deck-empty { display: none !important; }
+  .deck-controls, .deck-study, .deck-study-actions, .deck-empty { display: none !important; }
   .deck .deck-card[hidden], .deck-studying .deck-card:not(.deck-current) { display: block !important; }
   .deck-grid { display: block; }
   .deck-card { break-inside: avoid; margin-bottom: 1rem; }

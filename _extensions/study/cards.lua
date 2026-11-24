@@ -179,25 +179,28 @@ end
 function M.page(meta)
   local html = quarto.doc.is_format("html:js")
   local notes = html and related_notes(meta) or {}
-  local list, all_tags = pandoc.Blocks({}), {}
+  local list, all_tags, per_tag = pandoc.Blocks({}), {}, {}
   for _, card in ipairs(M.all()) do
-    for _, tag in ipairs(card.tags) do all_tags[#all_tags + 1] = tag end
+    for _, tag in ipairs(card.tags) do
+      all_tags[#all_tags + 1] = tag
+      per_tag[tag] = (per_tag[tag] or 0) + 1
+    end
     list:insert(html and card_html(card, notes[card.key]) or card_plain(card))
   end
   if not html then return pandoc.Div(list) end
 
   local tag_values = {}
   for _, tag in ipairs(deck.tags(all_tags, "the cards")) do
-    tag_values[#tag_values + 1] = {value = tag, text = deck.tag_label(tag)}
+    tag_values[#tag_values + 1] = {value = tag, text = deck.tag_label(tag), count = per_tag[tag]}
   end
   deck.add_dependency()
   return pandoc.Div({
     raw(deck.controls({
       name = "glossary",
       search_label = "Search cards",
-      placeholder = "e.g. latent, convex, expectation, robotics",
+      placeholder = "Search " .. #list .. " cards",
       facets = {
-        {key = "tag", label = "Subject", all = "All", values = tag_values},
+        {key = "tag", label = "Subject", all = "All", total = #list, values = tag_values},
       },
     })),
     pandoc.Div(list, pandoc.Attr("", {"deck-list", "deck-grid"})),

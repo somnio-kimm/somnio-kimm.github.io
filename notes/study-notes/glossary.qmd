@@ -5,7 +5,8 @@ date: 2026-10-02
 date-modified: 2026-11-24
 draft: false
 listing-page: true
-sidebar: glossary
+sidebar: false     # the page has no sidebar: its controls are one row above the cards
+toc: false         # with no sidebar and no contents list, the page is as wide as Background or Experience
 ---
 
 ::: {.glossary-cards}

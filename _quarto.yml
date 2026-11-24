@@ -100,16 +100,6 @@ website:
         - section: "Computer Software"
           href: notes/study-notes/computer-software/index.qmd
           contents: "notes/study-notes/computer-software/*.qmd"
-    - id: glossary
-      title: "Glossary"
-      style: floating
-      collapse-level: 2
-      contents:
-        - href: notes/study-notes/glossary.qmd
-          text: "All cards A–Z"
-        # This one link only makes Quarto build the sidebar. On the page it is
-        # hidden, and _extensions/study/deck.js puts the glossary's filters and
-        # study buttons there instead.
   page-footer:
     center: "© 2026 Soo Min Kimm"
 

@@ -7,8 +7,18 @@ const visibleCards = page => page.locator(".deck-card:visible");
 const openLayers = page => page.locator(".deck-card details[open]");
 const status = page => page.locator(".deck-study-status").textContent();
 
-// Clicks one button of a filter ("tag" = subject; "" = its "All" button).
-const pick = (page, key, value) => page.locator(`[data-facet="${key}"] button[data-value="${value}"]`).click();
+// The filters and the study buttons live in dropdown menus of the bar above the cards.
+// `inMenu` opens the menu that holds `selector`, runs `action` on that element, and closes the menu.
+async function inMenu(page, selector, action) {
+  const menu = page.locator(`.deck-menu:has(${selector})`);
+  if (await menu.evaluate(el => !el.open)) await menu.locator("summary").click();
+  await action(menu.locator(selector));
+  await menu.evaluate(el => { el.open = false; });
+}
+// Clicks one row of a filter ("tag" = subject; "" = its "All" row).
+const pick = (page, key, value) => inMenu(page, `[data-facet="${key}"] button[data-value="${value}"]`, row => row.click());
+const practice = (page, on) => inMenu(page, ".deck-practice", box => box.setChecked(on));
+const study = (page, mode) => inMenu(page, `[data-study="${mode}"]`, row => row.click());
 
 async function listChecks(page, width) {
   await page.goto(url, {waitUntil: "networkidle"});
@@ -17,7 +27,7 @@ async function listChecks(page, width) {
   const layers = await page.locator(".deck-card details").count();
   const formal = await page.locator(".deck-card details[data-collapsed]").count();
   assert(total >= 72);
-  assert.equal(await page.locator(".deck-side").isVisible(), true);
+  assert.equal(await page.locator(".deck-bar").isVisible(), true);
   const labels = await page.locator(".deck-card-title").allTextContents();
   assert.deepEqual(labels, [...labels].sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1));
   const taggedWith = tag => cards.evaluateAll((items, name) => items.filter(el => el.dataset.tag.split(" ").includes(name)).length, tag);
@@ -26,11 +36,11 @@ async function listChecks(page, width) {
   assert(formal > 0);
   assert.equal(await openLayers(page).count(), layers - formal);
   // Practice hides every answer; each one opens on its own with the keyboard.
-  await page.locator(".deck-practice").check();
+  await practice(page, true);
   assert.equal(await openLayers(page).count(), 0);
   await page.locator(".deck-card summary").first().press("Enter");
   assert.equal(await openLayers(page).count(), 1);
-  await page.locator(".deck-practice").uncheck();
+  await practice(page, false);
   assert.equal(await openLayers(page).count(), layers - formal);
 
   // One concept is one card: the term and its formal definition are layers of it.
@@ -52,9 +62,13 @@ async function listChecks(page, width) {
   assert.equal(await result.locator(".concept-proof details[open]").count(), 1);
   if (width === 1440) assert((await result.boundingBox()).width > narrow, "an open formal card spans the row");
 
-  // Search covers every layer, including closed proofs.
+  // Search covers every layer, including closed proofs. The count and
+  // "Clear filters" show up only while something narrows the list.
+  assert.equal(await page.locator(".deck-count").textContent(), "");
+  assert.equal(await page.locator(".deck-reset").isVisible(), false);
   await page.locator(".deck-search").fill("LATENT variable");
   assert.equal(await page.locator("#term-latent-variable").isVisible(), true);
+  assert.match(await page.locator(".deck-count").textContent(), new RegExp(`^\\d+ of ${total} cards$`));
   await page.locator(".deck-search").fill("factorisation");
   assert.equal(await page.locator("#term-linearity-expectation").isVisible(), true);
   assert(await visibleCards(page).count() < total);
@@ -83,14 +97,47 @@ async function listChecks(page, width) {
   assert.equal(new URL(page.url()).searchParams.get("tag"), null);
   assert.equal(await visibleCards(page).count(), total);
 
-  // On a wide screen the filters and study buttons are the only thing in the
-  // page sidebar; on a phone, where that sidebar is folded away, they stay above the cards.
+  // The page has no sidebar: search, Subject and Study are one row above the
+  // cards, two cards to a row on a wide screen and one on a phone.
   const wide = width === 1440;
-  assert.equal(await page.locator("#quarto-sidebar .deck-side").count(), wide ? 1 : 0);
-  assert.equal(await page.locator(".deck-controls .deck-side").count(), wide ? 0 : 1);
-  assert.equal(await page.locator('.deck-side [data-study="all"]').isVisible(), true);
-  if (wide) assert.equal(await page.locator("#quarto-sidebar .sidebar-menu-container > ul").isVisible(), false);
-  else assert.equal(await page.locator(".quarto-secondary-nav").isVisible(), false);
+  assert.equal(await page.locator("#quarto-sidebar, .quarto-secondary-nav").count(), 0);
+  const columns = new Set(await visibleCards(page).evaluateAll(items => items.slice(0, 6).map(el => Math.round(el.getBoundingClientRect().left))));
+  assert.equal(columns.size, wide ? 2 : 1);
+  // The page is as wide as the site's other pages, such as Background.
+  if (wide) {
+    const box = () => page.locator("main").evaluate(el => { const r = el.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.width)]; });
+    const here = await box();
+    await page.goto(`${origin}/background.html`, {waitUntil: "networkidle"});
+    assert.deepEqual(here, await box());
+    await page.goto(url, {waitUntil: "networkidle"});
+  }
+  // The Subject button says what is chosen, and each row shows its number of cards.
+  const subject = page.locator('.deck-menu:has([data-facet="tag"])');
+  const state = page.locator('[data-facet-state="tag"]');
+  assert.equal(await state.textContent(), "All");
+  assert.equal(await subject.locator('[data-value=""] .deck-n').textContent(), String(total));
+  assert.equal(await subject.locator('[data-value="physics"] .deck-n').textContent(), String(await taggedWith("physics")));
+  // The menu stays open while rows are picked, and its panel stays on screen.
+  await subject.locator("summary").click();
+  await subject.locator('[data-value="physics"]').click();
+  await subject.locator('[data-value="robotics"]').click();
+  assert.equal(await subject.evaluate(el => el.open), true);
+  assert.equal(await state.textContent(), "Physics, Robotics");
+  const panel = await subject.locator(".deck-menu-panel").boundingBox();
+  assert(panel.x >= 0 && panel.x + panel.width <= width, "the open menu fits the screen");
+  // Opening another menu closes it; so do Escape and a click outside.
+  const studyMenu = page.locator('.deck-menu:has([data-study="all"])');
+  await studyMenu.locator("summary").click();
+  assert.equal(await subject.evaluate(el => el.open), false);
+  assert.equal(await page.locator('[data-study="all"]').isVisible(), true);
+  assert.equal(await page.locator('[data-study="all"] .deck-n').textContent(), String(await visibleCards(page).count()));
+  await page.keyboard.press("Escape");
+  assert.equal(await studyMenu.evaluate(el => el.open), false);
+  await subject.locator("summary").click();
+  await page.locator(".deck-search").click();
+  assert.equal(await subject.evaluate(el => el.open), false);
+  await page.locator(".deck-reset").click();
+  assert.equal(await state.textContent(), "All");
   // A tag on a card filters the whole deck.
   await page.locator('#term-latent-variable .deck-tag[data-value="mathematics"]').click();
   assert.equal(await visibleCards(page).count(), await taggedWith("mathematics"));
@@ -117,7 +164,7 @@ async function listChecks(page, width) {
   }
 
   // Printing shows every card and layer, then restores what was open.
-  await page.locator(".deck-practice").check();
+  await practice(page, true);
   await pick(page, "tag", "robotics");
   await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
   await page.emulateMedia({media: "print"});
@@ -137,8 +184,8 @@ async function flashcardChecks(page) {
   const dueButton = page.locator('[data-study="due"]'); // enabled only while a shown card is due
   assert.equal(await dueButton.isDisabled(), false);
 
-  await page.locator('[data-study="all"]').click();
-  assert.equal(await page.locator(".deck-side").isVisible(), false);
+  await study(page, "all");
+  assert.equal(await page.locator(".deck-bar").isVisible(), false);
   assert.equal(await visibleCards(page).count(), 1);
   assert.equal(await status(page), `Card 1 of ${size}`);
   assert.equal(await page.locator(".deck-current details[open]").count(), 0, "a card starts with its answers hidden");
@@ -161,34 +208,34 @@ async function flashcardChecks(page) {
   assert.equal(await visibleCards(page).count(), 0);
   assert(await fitsViewport(page));
   await page.locator(".deck-study-exit").click();
-  assert.equal(await page.locator(".deck-side").isVisible(), true);
+  assert.equal(await page.locator(".deck-bar").isVisible(), true);
   assert.equal(await visibleCards(page).count(), size);
 
   // Known cards are not due again today, also after a reload.
   assert.equal(await dueButton.isDisabled(), true);
-  assert.equal(await page.locator('[data-study="due"]').isDisabled(), true);
+  assert.equal(await dueButton.locator(".deck-n").textContent(), "0");
   await page.reload({waitUntil: "networkidle"});
   assert.equal(await dueButton.isDisabled(), true);
   page.once("dialog", dialog => dialog.accept());
-  await page.locator(".deck-forget").click();
+  await inMenu(page, ".deck-forget", button => button.click());
   assert.equal(await dueButton.isDisabled(), false);
-  assert.equal(await page.locator(".deck-forget").isVisible(), false);
+  assert.equal(await page.locator(".deck-forget").evaluate(el => el.hidden), true);
 
   // Escape leaves study mode without grading anything.
-  await page.locator('[data-study="due"]').click();
+  await study(page, "due");
   await page.keyboard.press("Escape");
   assert.equal(await visibleCards(page).count(), size);
   assert.equal(await dueButton.isDisabled(), false);
 }
 
 run(async ({each, noScript}) => {
-  await each("cards, layers, search, filters, sidebar, deep links, flashcards, layout, print", async (page, width) => {
+  await each("cards, layers, search, filters, menus, deep links, flashcards, layout, print", async (page, width) => {
     await listChecks(page, width);
     await flashcardChecks(page);
   });
   await noScript("every card and layer remains readable", async page => {
     await page.goto(url);
-    assert.equal(await page.locator(".deck-side").isVisible(), false);
+    assert.equal(await page.locator(".deck-bar").isVisible(), false);
     assert.equal(await page.locator(".deck-study-actions").isVisible(), false);
     assert.equal(await page.locator(".deck-card details:not([open])").count(), 0);
     assert.equal(await page.locator(".deck-card details p").first().isVisible(), true);

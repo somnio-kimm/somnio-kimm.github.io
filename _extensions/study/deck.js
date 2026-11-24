@@ -17,23 +17,29 @@
   };
 
   document.querySelectorAll(".deck").forEach(root => {
-    // Every part is looked up once, here, because the filters and the study
-    // buttons can move out of the deck into the page sidebar (see placeSide).
+    // Every part is looked up once, here.
     const el = Object.fromEntries(Object.entries({
-      controls: ".deck-controls", side: ".deck-side", search: ".deck-search", practice: ".deck-practice",
+      controls: ".deck-controls", search: ".deck-search", practice: ".deck-practice",
       count: ".deck-count", empty: ".deck-empty", reset: ".deck-reset", forget: ".deck-forget",
       studyDue: '[data-study="due"]', studyAll: '[data-study="all"]',
       study: ".deck-study", status: ".deck-study-status", bar: ".deck-study-progress", exit: ".deck-study-exit",
       actions: ".deck-study-actions", reveal: ".deck-study-reveal", again: ".deck-study-again",
       good: ".deck-study-good", skip: ".deck-study-skip", schedule: ".deck-study-schedule",
     }).map(([name, selector]) => [name, root.querySelector(selector)]));
-    // One facet per button group; its key is the URL parameter and the card's
-    // data attribute. Several values can be chosen at once.
+    // One facet per filter menu; its key is the URL parameter and the card's
+    // data attribute. Several values can be chosen at once. `state` is the
+    // text on the menu's button that says what is chosen.
     const facets = [...root.querySelectorAll("[data-facet]")].map(group => ({
       key: group.dataset.facet,
       buttons: [...group.querySelectorAll("button[data-value]")],
+      state: root.querySelector(`[data-facet-state="${group.dataset.facet}"]`),
       chosen: new Set(),
     }));
+    // The dropdown menus of the bar (filters and Study). One is open at a time.
+    const menus = [...root.querySelectorAll(".deck-menu")];
+    const closeMenus = except => menus.forEach(menu => { if (menu !== except) menu.open = false; });
+    const label = button => button.firstElementChild.textContent;
+    const setCount = (button, count) => { button.lastElementChild.textContent = count; };
     const cards = [...root.querySelectorAll(".deck-card")].map(element => ({
       element,
       id: element.id,
@@ -66,10 +72,17 @@
           button.setAttribute("aria-pressed", String(pressed));
           button.disabled = Boolean(value) && !pressed && !available.has(value);
         });
+        const chosen = facet.buttons.filter(button => facet.chosen.has(button.dataset.value));
+        facet.state.textContent = (chosen.length ? chosen : facet.buttons.slice(0, 1)).map(label).join(", ");
       });
       const due = shown.filter(isDue).length;
-      el.count.textContent = `${shown.length} of ${plural(cards.length, "card")}`;
+      // The count and "Clear filters" appear only while something narrows the list.
+      const narrowed = words.length > 0 || facets.some(facet => facet.chosen.size);
+      el.count.textContent = narrowed ? `${shown.length} of ${plural(cards.length, "card")}` : "";
+      el.reset.hidden = !narrowed;
       el.empty.hidden = shown.length > 0;
+      setCount(el.studyDue, due);
+      setCount(el.studyAll, shown.length);
       el.studyDue.disabled = due === 0;
       el.studyAll.disabled = shown.length === 0;
       el.forget.hidden = Object.keys(progress).length === 0;
@@ -115,18 +128,6 @@
       card.element.scrollIntoView({block: "start"});
     }
 
-    // On wide screens the filters and the study buttons sit in the page sidebar,
-    // under its links. On narrow screens that sidebar is folded away, so they
-    // stay above the cards. The "deck" class keeps deck.css applying to them there.
-    const sidebar = document.querySelector("#quarto-sidebar .sidebar-menu-container");
-    const wide = window.matchMedia("(min-width: 992px)");
-    function placeSide() {
-      const inSidebar = Boolean(sidebar) && wide.matches;
-      el.side.classList.toggle("deck", inSidebar);
-      el.side.classList.toggle("deck-in-sidebar", inSidebar);
-      (inSidebar ? sidebar : el.controls).append(el.side);
-    }
-
     // ---- Flashcard study ---------------------------------------------------
     // Progress is kept per deck in this browser only: {cardId: {box, due}}.
     const storageKey = `study-deck:${root.dataset.deck}`;
@@ -145,7 +146,8 @@
       if (!pool.length) return;
       session = {queue: shuffle(pool), position: 0, size: pool.length, missed: new Set()};
       root.classList.add("deck-studying");
-      el.controls.hidden = el.side.hidden = true;
+      closeMenus();
+      el.controls.hidden = true;
       el.study.hidden = false;
       showCard();
     }
@@ -212,20 +214,32 @@
       session = current = null;
       root.classList.remove("deck-studying");
       el.study.hidden = el.actions.hidden = true;
-      el.controls.hidden = el.side.hidden = false;
+      el.controls.hidden = false;
       restList();
       filter({updateURL: false});
     }
 
     // ---- Events ------------------------------------------------------------
     el.search.addEventListener("input", () => filter());
-    // A filter button switches its value on or off; the first button ("All") clears the filter.
+    // A filter row switches its value on or off; the first row ("All") clears the filter.
+    // The menu stays open, so several values can be picked in one go.
     facets.forEach(facet => facet.buttons.forEach(button => button.addEventListener("click", () => {
       const value = button.dataset.value;
       if (!value) facet.chosen.clear();
       else if (!facet.chosen.delete(value)) facet.chosen.add(value);
       filter();
     })));
+    // A menu closes when another one opens, on a click outside it, and on Escape.
+    menus.forEach(menu => menu.addEventListener("toggle", () => { if (menu.open) closeMenus(menu); }));
+    document.addEventListener("click", event => {
+      menus.forEach(menu => { if (!menu.contains(event.target)) menu.open = false; });
+    });
+    root.addEventListener("keydown", event => {
+      const menu = event.key === "Escape" && event.target.closest?.(".deck-menu[open]");
+      if (!menu) return;
+      menu.open = false;
+      menu.querySelector("summary").focus();
+    });
     // A subject link on a card filters the whole deck by that subject alone.
     root.addEventListener("click", event => {
       const link = event.target.closest("a[data-facet-link]");
@@ -276,7 +290,6 @@
     });
     window.addEventListener("popstate", () => { readURL(); revealAnchor(); });
     window.addEventListener("hashchange", revealAnchor);
-    wide.addEventListener("change", placeSide);
     // Print every card with its answers, then restore what was open.
     let printState;
     window.addEventListener("beforeprint", () => {
@@ -289,7 +302,6 @@
 
     restList();
     readURL();
-    placeSide();
     el.controls.hidden = false;
     revealAnchor();
   });
