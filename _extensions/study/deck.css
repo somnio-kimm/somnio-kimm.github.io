@@ -21,7 +21,9 @@
   font: inherit;
 }
 .deck-search { flex: 1 1 14rem; min-width: 0; }
-.deck-menu { position: relative; }
+/* No margin: the site gives every <details> a bottom margin, which would make
+   the row taller than the menu buttons and so the search box taller than them. */
+.deck-menu { position: relative; margin: 0; }
 .deck-menu > summary {
   display: flex;
   align-items: center;

@@ -111,6 +111,10 @@ async function listChecks(page, width) {
     assert.deepEqual(here, await box());
     await page.goto(url, {waitUntil: "networkidle"});
   }
+  // The search box and the two menu buttons are equally tall.
+  const heights = await page.locator(".deck-search, .deck-menu > summary").evaluateAll(items => items.map(el => Math.round(el.getBoundingClientRect().height)));
+  assert.equal(heights.length, 3);
+  assert.equal(new Set(heights).size, 1, `search box and menu buttons differ in height: ${heights}`);
   // The Subject button says what is chosen, and each row shows its number of cards.
   const subject = page.locator('.deck-menu:has([data-facet="tag"])');
   const state = page.locator('[data-facet-state="tag"]');
