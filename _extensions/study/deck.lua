@@ -115,7 +115,7 @@ function M.footer()
 end
 
 function M.add_dependency()
-  quarto.doc.add_html_dependency({name = "study-deck", version = "4.2.0",
+  quarto.doc.add_html_dependency({name = "study-deck", version = "4.3.0",
     scripts = {{path = "deck.js", attribs = {defer = ""}}}, stylesheets = {"deck.css"}})
 end
 

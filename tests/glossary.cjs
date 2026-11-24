@@ -209,6 +209,12 @@ async function listChecks(page, width) {
   assert.equal(await page.locator(".deck-list #term-convex-function").count(), 0);
   assert.equal(new URL(page.url()).hash, "#term-convex-function");
   assert((await popup.boundingBox()).width > small, "the popup is larger than the card in the list");
+  // With one card open there is no line for the × alone: it sits at the right end of the title's line.
+  const [close, heading] = [await popup.locator(".deck-study-exit").boundingBox(), await popup.locator(".deck-card-title").boundingBox()];
+  assert(Math.abs((close.y + close.height / 2) - (heading.y + heading.height / 2)) <= 6, "the × is level with the title");
+  assert(close.x + close.width <= heading.x + heading.width + 1 && close.x > heading.x, "the × is at the right end of the title's line");
+  const titleText = await popup.locator(".deck-card-link").boundingBox();
+  assert(titleText.x + titleText.width <= close.x, "the title's text does not run under the ×");
   // Closing it puts the card back as it was, and the page has not moved.
   await page.keyboard.press("Escape");
   assert.equal(await popup.isVisible(), false);
@@ -279,6 +285,9 @@ async function flashcardChecks(page, width) {
   assert.equal(await status(page), `Card 1 of ${size}`);
   assert.equal(await page.locator(".deck-current details[open]").count(), 0, "a card starts with its answers hidden");
   assert.equal(await popup.getByText("Keys:").count(), 0, "the popup does not list the keyboard shortcuts");
+  // While studying, the count, the progress bar and the × have their own line above the card.
+  const [headRow, studyTitle] = [await popup.locator(".deck-study-head").boundingBox(), await popup.locator(".deck-card-title").boundingBox()];
+  assert(headRow.y + headRow.height <= studyTitle.y, "the head is a line above the title while studying");
   // A card has two answers, always there and the only ones: "Learning" and "Mastered".
   const answers = () => popup.locator(".deck-study-actions button:visible").allTextContents();
   assert.deepEqual(await answers(), ["Learning", "Mastered"]);

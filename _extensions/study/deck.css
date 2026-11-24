@@ -252,8 +252,14 @@
 .deck-study::backdrop { background: color-mix(in srgb, var(--bs-body-color) 45%, transparent); }
 html:has(.deck-study[open]) { overflow: hidden; }
 /* The box fills the dialog, so a click on the dialog element itself is a click beside the popup. */
-.deck-study-box { display: grid; gap: 1.25rem; padding: 1.5rem; }
+.deck-study-box { --deck-pad: 1.5rem; position: relative; display: grid; gap: 1.25rem; padding: var(--deck-pad); }
 .deck-study-head { flex-wrap: nowrap; gap: 0.9rem; }
+/* Reading one card: the head holds only the ×, so it does not get a line of
+   its own. The × sits at the right end of the title's line, and the title
+   keeps clear of it. (While studying, the head also shows the count and the
+   progress bar, and stays a line above the card.) */
+.deck-study[data-use="read"] .deck-study-head { position: absolute; top: calc(var(--deck-pad) + 0.1rem); right: var(--deck-pad); }
+.deck-study[data-use="read"] .deck-card-title { padding-right: 2.75rem; }
 .deck-study-status { margin: 0; font-weight: 600; }
 .deck-study-progress { flex: 1 1 4rem; min-width: 2rem; height: 0.5rem; accent-color: var(--deck-accent); }
 /* The × keeps to the right edge also when nothing else is in the head (reading one card). */
@@ -272,7 +278,8 @@ html:has(.deck-study[open]) { overflow: hidden; }
 /* On a phone the popup is the whole screen. */
 @media (max-width: 575.98px) {
   .deck-study { width: 100%; max-width: none; height: 100%; max-height: none; margin: 0; border: 0; border-radius: 0; }
-  .deck-study-box { padding: 1.25rem 1rem; }
+  .deck-study-box { --deck-pad: 1rem; padding-block: 1.25rem; }
+  .deck-study[data-use="read"] .deck-study-head { top: 1.35rem; }
 }
 
 @media print {
