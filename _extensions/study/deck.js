@@ -1,6 +1,7 @@
-/* The study-card deck on the glossary page: search, filters, and flashcard
-   study in a popup. Every card and answer is already in the HTML,
-   so the page stays readable without this script. Markup comes from deck.lua. */
+/* The study-card deck on the glossary page: search, filters, and a popup that
+   shows one card large or quizzes the shown cards. Every card and answer is
+   already in the HTML, so the page stays readable without this script.
+   Markup comes from deck.lua. */
 (() => {
   const normalise = text => text.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase();
   const plural = (count, noun) => `${count} ${noun}${count === 1 ? "" : "s"}`;
@@ -11,13 +12,18 @@
     }
     return list;
   };
+  // A click with a modifier key is left to the browser (new tab, new window).
+  const modified = event => event.ctrlKey || event.metaKey || event.shiftKey || event.altKey;
+  // A click is "on the card itself" unless it lands on a control of the card's
+  // own (a subject, a layer's toggle, a link) or ends a text selection.
+  const onCardItself = event => !event.target.closest("a, button, summary") && !String(window.getSelection());
 
   document.querySelectorAll(".deck").forEach(root => {
     // Every part is looked up once, here.
     const el = Object.fromEntries(Object.entries({
-      controls: ".deck-controls", list: ".deck-list", search: ".deck-search", open: ".deck-study-open",
-      picked: ".deck-picked", empty: ".deck-empty",
-      study: ".deck-study", slot: ".deck-study-card", status: ".deck-study-status", bar: ".deck-study-progress",
+      controls: ".deck-controls", list: ".deck-list", search: ".deck-search", picked: ".deck-picked",
+      empty: ".deck-empty", start: ".deck-study-open",
+      popup: ".deck-study", slot: ".deck-study-card", status: ".deck-study-status", bar: ".deck-study-progress",
       exit: ".deck-study-exit", again: ".deck-study-again", good: ".deck-study-good",
       restart: ".deck-study-restart", done: ".deck-study-done",
     }).map(([name, selector]) => [name, root.querySelector(selector)]));
@@ -42,11 +48,12 @@
       values: Object.fromEntries(facets.map(facet => [facet.key, (element.dataset[facet.key] || "").split(" ")])),
       details: [...element.querySelectorAll("details")],
     }));
+    // The card that an address such as #term-latent-variable names, if any.
+    const cardAt = hash => cards.find(card => card.id && `#${card.id}` === hash);
     const setOpen = isOpen => cards.forEach(card => card.details.forEach(details => { details.open = isOpen(details); }));
     // The list at rest: layers marked data-collapsed (formal text, proofs)
     // stay closed until someone opens them; the others are open.
     const openAtRest = details => !("collapsed" in details.dataset);
-    const restList = () => setOpen(openAtRest);
 
     // ---- Search and filters ------------------------------------------------
     // A card passes a facet when nothing is chosen there, or it has any chosen value.
@@ -54,10 +61,25 @@
       && facets.every(facet => facet === except || !facet.chosen.size
         || card.values[facet.key].some(value => facet.chosen.has(value)));
 
+    // The chip for one chosen value: its name and an × that takes it off.
+    function chip(facet, button) {
+      const element = document.createElement("span");
+      const remove = document.createElement("button");
+      element.className = "deck-token";
+      element.textContent = label(button);
+      remove.type = "button";
+      remove.textContent = "×";
+      remove.dataset.facet = facet.key;
+      remove.dataset.remove = button.dataset.value;
+      remove.setAttribute("aria-label", `Remove ${label(button)}`);
+      element.append(remove);
+      return element;
+    }
+
     function filter({updateURL = true} = {}) {
       const words = normalise(el.search.value.trim()).split(/\s+/).filter(Boolean);
       cards.forEach(card => { card.element.hidden = !matches(card, words); });
-      const shown = cards.filter(card => !card.element.hidden);
+      const shown = cards.filter(card => !card.element.hidden).length;
       facets.forEach(facet => {
         // A value that would add no cards, given the other filters, is disabled.
         const available = new Set(cards.filter(card => matches(card, words, facet)).flatMap(card => card.values[facet.key]));
@@ -70,27 +92,15 @@
         facet.badge.textContent = facet.chosen.size || "";
         facet.badge.toggleAttribute("data-zero", !facet.chosen.size);
       });
-      // One chip per chosen value, in menu order; its × takes that value off.
+      // One chip per chosen value, in menu order.
       el.picked.replaceChildren(...facets.flatMap(facet => facet.buttons
         .filter(button => facet.chosen.has(button.dataset.value))
-        .map(button => {
-          const chip = document.createElement("span");
-          const remove = document.createElement("button");
-          chip.className = "deck-token";
-          chip.textContent = label(button);
-          remove.type = "button";
-          remove.textContent = "×";
-          remove.dataset.facet = facet.key;
-          remove.dataset.remove = button.dataset.value;
-          remove.setAttribute("aria-label", `Remove ${label(button)}`);
-          chip.append(remove);
-          return chip;
-        })));
-      el.empty.hidden = shown.length > 0;
+        .map(button => chip(facet, button))));
+      el.empty.hidden = shown > 0;
       // The Study button quizzes exactly the cards that are shown.
-      el.open.disabled = shown.length === 0;
-      el.open.title = `Study ${shown.length === 1 ? "this card" : `these ${shown.length} cards`}`;
-      el.open.setAttribute("aria-label", el.open.title);
+      el.start.disabled = shown === 0;
+      el.start.title = `Study ${shown === 1 ? "this card" : `these ${shown} cards`}`;
+      el.start.setAttribute("aria-label", el.start.title);
       if (updateURL) {
         const url = new URL(window.location.href);
         const state = [["search", el.search.value.trim()], ...facets.map(facet => [facet.key, [...facet.chosen].join(",")])];
@@ -117,9 +127,10 @@
     // ---- The popup: one card at a time over the page ------------------------
     // The popup (the <dialog> from deck.lua) opens over the page, which stays
     // where it was. It holds the real card from the list: the card moves into
-    // the popup, and `place` marks the spot it returns to. Two uses:
-    //   - reading one card, opened by clicking it or by a link to it;
-    //   - a study session, which quizzes the shown cards one after another.
+    // the popup, and `place` marks the spot it returns to. Two uses, named in
+    // the popup's `data-use` so that deck.css can lay each out:
+    //   "read"   one card, opened by clicking it or by a link to it;
+    //   "study"  a session that quizzes the shown cards one after another.
     let session = null; // the study session: {pool, queue, position, size, missed}
     let current = null; // the card in the popup
     const place = document.createComment("the card in the popup");
@@ -143,33 +154,31 @@
       card.element.replaceWith(place);
       el.slot.append(card.element);
       closeMenus();
-      if (!el.study.open) el.study.showModal();
-      el.study.scrollTop = 0;
+      if (!el.popup.open) el.popup.showModal();
+      el.popup.scrollTop = 0;
     }
 
     // Reading one card: all of it, large, with nothing to answer.
     function readCard(card) {
       session = null;
+      el.popup.dataset.use = "read";
       el.status.textContent = "";
-      [el.bar, el.again, el.good, el.restart, el.done].forEach(part => { part.hidden = true; });
-      el.study.dataset.use = "read";
       moveToPopup(card, true);
       el.exit.focus({preventScroll: true});
       // The address names the card, so the view can be linked to; no scrolling.
       window.history.replaceState(null, "", `#${card.id}`);
     }
 
-    // A link such as #term-latent-variable opens that card in the popup.
-    function revealAnchor() {
-      const card = cards.find(item => item.id && `#${item.id}` === window.location.hash);
+    // A link to a card opens that card in the popup.
+    function openLinkedCard() {
+      const card = cardAt(window.location.hash);
       if (card && card !== current) readCard(card);
     }
 
     function startStudy(pool) {
       if (!pool.length) return;
       session = {pool, queue: shuffle([...pool]), position: 0, size: pool.length, missed: new Set()};
-      el.bar.hidden = false;
-      el.study.dataset.use = "study";
+      el.popup.dataset.use = "study";
       showCard();
     }
 
@@ -211,32 +220,25 @@
       showCard();
     }
 
-    // Empties and closes the popup, whichever use it had. The browser can also
-    // close it by itself (Escape, the back gesture on a phone): it sends "cancel"
-    // at once and "close" a moment later, so the card is put back on "cancel"
-    // and the list is never without it; "close" is the safety net.
+    // Empties the popup, whichever use it had: the card goes back to the list
+    // and the address stops naming it.
     function emptyPopup() {
       if (!session && !current) return;
       returnCard();
       session = null;
-      // The address no longer names a card.
       const url = new URL(window.location.href);
-      if (cards.some(card => `#${card.id}` === url.hash)) {
+      if (cardAt(url.hash)) {
         url.hash = "";
         window.history.replaceState(null, "", url);
       }
       filter({updateURL: false});
     }
-    function stopStudy() {
+    function closePopup() {
       emptyPopup();
-      if (el.study.open) el.study.close();
+      if (el.popup.open) el.popup.close();
     }
-    el.study.addEventListener("cancel", emptyPopup);
-    // "close" arrives late: if the popup has been opened again by then (a card
-    // clicked right after closing), it must not empty the new one.
-    el.study.addEventListener("close", () => { if (!el.study.open) emptyPopup(); });
 
-    // ---- Events ------------------------------------------------------------
+    // ---- Events: the controls ----------------------------------------------
     el.search.addEventListener("input", () => filter());
     // A filter row switches its value on or off; the first row ("All") clears the filter.
     // The menu stays open, so several values can be picked in one go.
@@ -267,18 +269,19 @@
     // A subject link on a card filters the whole deck by that subject alone.
     root.addEventListener("click", event => {
       const link = event.target.closest("a[data-facet-link]");
-      if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+      if (!link || modified(event) || event.button !== 0) return;
       event.preventDefault();
-      stopStudy();
+      closePopup();
       facets.forEach(facet => { facet.chosen = new Set(facet.key === link.dataset.facetLink ? [link.dataset.value] : []); });
       filter();
       el.search.focus({preventScroll: true});
       root.scrollIntoView({block: "start"});
     });
-    el.open.addEventListener("click", () => startStudy(cards.filter(card => !card.element.hidden)));
-    // A card in the list opens large in the popup: click anywhere on it that is
-    // not a control of its own (a subject, a layer's toggle), or use its title,
-    // which is a link so that the keyboard can reach it. Selecting text does not count.
+    el.start.addEventListener("click", () => startStudy(cards.filter(card => !card.element.hidden)));
+
+    // ---- Events: the list --------------------------------------------------
+    // A card in the list opens large in the popup: click the card itself, or
+    // use its title, which is made a link so that the keyboard can reach it.
     cards.forEach(card => {
       const title = card.element.querySelector(".deck-card-title");
       const link = document.createElement("a");
@@ -288,31 +291,50 @@
       title.append(link);
     });
     el.list.addEventListener("click", event => {
-      const link = event.target.closest(".deck-card-link");
-      if (!link && (event.target.closest("a, button, summary") || String(window.getSelection()))) return;
-      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      const onTitle = event.target.closest(".deck-card-link");
+      if ((!onTitle && !onCardItself(event)) || modified(event)) return;
       const card = cards.find(item => item.element === event.target.closest(".deck-card"));
       if (!card) return;
       event.preventDefault();
       readCard(card);
     });
-    el.restart.addEventListener("click", () => startStudy(session.pool));
-    el.done.addEventListener("click", stopStudy);
-    // The dialog's own box fills it, so a click that lands on the dialog itself is on the dimmed page.
-    el.study.addEventListener("click", event => { if (event.target === el.study) stopStudy(); });
+    window.addEventListener("popstate", () => { readURL(); openLinkedCard(); });
+    window.addEventListener("hashchange", openLinkedCard);
+    // Print every card with its answers, then restore what was open.
+    let printState;
+    window.addEventListener("beforeprint", () => {
+      closePopup(); // the card in the popup goes back into the list first
+      printState = cards.map(card => card.details.map(details => details.open));
+      setOpen(() => true);
+    });
+    window.addEventListener("afterprint", () => {
+      if (printState) cards.forEach((card, i) => card.details.forEach((details, j) => { details.open = printState[i][j]; }));
+    });
+
+    // ---- Events: the popup -------------------------------------------------
+    el.exit.addEventListener("click", closePopup);
+    el.done.addEventListener("click", closePopup);
     el.again.addEventListener("click", () => grade(false));
     el.good.addEventListener("click", () => grade(true));
-    el.exit.addEventListener("click", stopStudy);
-    // While studying, a click on the card (not on a control of its own, and not
-    // a text selection) reveals its next layer, like turning a flashcard over.
+    el.restart.addEventListener("click", () => startStudy(session.pool));
+    // The dialog's own box fills it, so a click that lands on the dialog itself is on the dimmed page.
+    el.popup.addEventListener("click", event => { if (event.target === el.popup) closePopup(); });
+    // The browser can also close the popup by itself (Escape, the back gesture
+    // on a phone). It sends "cancel" at once and "close" a moment later, so the
+    // card is put back on "cancel" and the list is never without it. "close"
+    // is the safety net; if the popup has been opened again by the time it
+    // arrives (a card clicked right after closing), it must not empty the new one.
+    el.popup.addEventListener("cancel", emptyPopup);
+    el.popup.addEventListener("close", () => { if (!el.popup.open) emptyPopup(); });
+    // While studying, a click on the card itself reveals its next layer, like
+    // turning a flashcard over.
     el.slot.tabIndex = -1;
     el.slot.addEventListener("click", event => {
-      if (!session || !current || event.target.closest("a, button, summary") || String(window.getSelection())) return;
-      revealNext();
+      if (session && current && onCardItself(event)) revealNext();
     });
     document.addEventListener("keydown", event => {
       // Escape closes the popup in either use, at once.
-      if (event.key === "Escape" && el.study.open) { stopStudy(); return; }
+      if (event.key === "Escape" && el.popup.open) { closePopup(); return; }
       if (!session || !current || event.ctrlKey || event.metaKey || event.altKey) return;
       if (event.target.closest?.("input, textarea, select, [contenteditable]")) return;
       // Space reveals the next layer; 1 is "Learning", 2 is "Mastered".
@@ -322,22 +344,10 @@
       } else if (event.key === "1") grade(false);
       else if (event.key === "2") grade(true);
     });
-    window.addEventListener("popstate", () => { readURL(); revealAnchor(); });
-    window.addEventListener("hashchange", revealAnchor);
-    // Print every card with its answers, then restore what was open.
-    let printState;
-    window.addEventListener("beforeprint", () => {
-      stopStudy(); // the studied card goes back into the list first
-      printState = cards.map(card => card.details.map(details => details.open));
-      setOpen(() => true);
-    });
-    window.addEventListener("afterprint", () => {
-      if (printState) cards.forEach((card, i) => card.details.forEach((details, j) => { details.open = printState[i][j]; }));
-    });
 
-    restList();
+    setOpen(openAtRest);
     readURL();
     el.controls.hidden = false;
-    revealAnchor();
+    openLinkedCard();
   });
 })();

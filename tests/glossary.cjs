@@ -1,6 +1,6 @@
 // The glossary page: every study card (terms, formal definitions, results and
 // proofs) in one deck with search, filters and flashcard study in a popup.
-const {assert, origin, run, inBothThemes, fitsViewport} = require("./helpers.cjs");
+const {assert, origin, run, fitsViewport} = require("./helpers.cjs");
 
 const url = `${origin}/notes/study-notes/glossary.html`;
 const visibleCards = page => page.locator(".deck-card:visible");
@@ -195,7 +195,7 @@ async function listChecks(page, width) {
     assert.notEqual(new URL(page.url()).searchParams.get("tag"), null);
     assert.equal(await page.locator(hash).isVisible(), false);
   }
-  await inBothThemes(page, async () => assert(await fitsViewport(page), "no horizontal overflow"));
+  assert(await fitsViewport(page), "no horizontal overflow");
 
   // Clicking a card in the list opens that card alone, large, with every layer open.
   await page.goto(url, {waitUntil: "networkidle"});

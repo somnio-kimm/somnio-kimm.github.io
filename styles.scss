@@ -80,6 +80,21 @@ main.content > #title-block-header { margin-bottom: 1.75rem; }
 // Section sidebars start with the "All ..." entry; everything after it is
 // indented one step, so it reads as belonging under that entry.
 #quarto-sidebar .sidebar-menu-container > ul > li:not(:first-child) { padding-left: 1rem; }
+// A thin vertical line down the left of a list, with round ends, that stops
+// `$inset` short of the list's top and bottom. It is drawn as its own shape
+// because a border cannot have round ends. The list must be positioned.
+@mixin side-line($left, $inset, $width) {
+  &::before {
+    content: "";
+    position: absolute;
+    top: $inset;
+    bottom: $inset;
+    left: $left;
+    width: $width;
+    border-radius: 999px;
+    background: $site-rule;
+  }
+}
 // The notes under a subject have long titles that run to two or three lines.
 // To keep them apart: looser lines inside a title, a gap between titles that
 // is clearly larger than that, slightly smaller text than the subject names,
@@ -89,17 +104,7 @@ main.content > #title-block-header { margin-bottom: 1.75rem; }
   position: relative;
   margin: 0.15rem 0 0.6rem 0.2rem;
   padding: 0 0 0 0.9rem;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0.3rem;
-    bottom: 0.3rem;
-    left: 0;
-    width: 2px;
-    border-radius: 999px;
-    background: $site-rule;
-  }
+  @include side-line($left: 0, $inset: 0.3rem, $width: 2px);
   > .sidebar-item { margin: 0; padding-block: 0.32rem; }
   .sidebar-item-text { font-size: 0.85rem; }
 }
@@ -107,8 +112,7 @@ main.content > #title-block-header { margin-bottom: 1.75rem; }
 // The Notes dropdown has one layout on every screen: a panel with round corners
 // that starts under the left edge of "Notes", a round-ended line inside it, and
 // the list beside the line, with a tint on the item under the pointer.
-// The line is drawn as its own shape rather than as a border, so that its two
-// ends are round and it stops a little short of the first and last items.
+// (The line is a side-line, defined above: round ends, short of the first and last items.)
 .navbar .navbar-nav .nav-item.dropdown .dropdown-menu {
   min-width: 13rem;
   margin-left: 0;
@@ -117,17 +121,7 @@ main.content > #title-block-header { margin-bottom: 1.75rem; }
   border: 0;
   border-radius: 0.75rem;
   box-shadow: none;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0.85rem;
-    bottom: 0.85rem;
-    left: 1.1rem;
-    width: 4px;   // thick enough for its round ends to show
-    border-radius: 999px;
-    background: $site-rule;
-  }
+  @include side-line($left: 1.1rem, $inset: 0.85rem, $width: 4px);   // thick enough for its round ends to show
 }
 .navbar .dropdown-item {
   padding: 0.4rem 0.75rem;

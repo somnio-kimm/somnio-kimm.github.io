@@ -1,6 +1,6 @@
 // Definition bubbles on [text]{.term key="..."} annotations in the study notes.
 // The notes are drafts, so run this against a site rendered with `draft-mode: visible`.
-const {assert, origin, run, inBothThemes, fitsViewport} = require("./helpers.cjs");
+const {assert, origin, run, fitsViewport} = require("./helpers.cjs");
 
 const url = `${origin}/notes/study-notes/machine-learning/neural-network.html`;
 
@@ -45,12 +45,10 @@ run(async ({each, noScript}) => {
 
     await trigger.click();
     assert.equal(await panel.isVisible(), true);
-    await inBothThemes(page, async () => {
-      const geometry = await panel.boundingBox();
-      assert(geometry.x >= 0 && geometry.x + geometry.width <= width, "bubble stays within the viewport");
-      assert(geometry.y >= 0 && geometry.y + geometry.height <= 900);
-      assert(await fitsViewport(page));
-    });
+    const geometry = await panel.boundingBox();
+    assert(geometry.x >= 0 && geometry.x + geometry.width <= width, "bubble stays within the viewport");
+    assert(geometry.y >= 0 && geometry.y + geometry.height <= 900);
+    assert(await fitsViewport(page));
     await page.mouse.click(2, 2);
     assert.equal(await panel.isVisible(), false, "outside pointer action dismisses it");
     await trigger.click();

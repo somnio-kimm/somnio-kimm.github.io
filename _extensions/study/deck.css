@@ -9,7 +9,7 @@
 .deck [hidden] { display: none; }
 
 /* ---- Controls: one row above the cards ---- */
-/* The search box, then one dropdown menu per filter and the Study menu. */
+/* The search box, then one dropdown menu per filter and the Study button. */
 .deck-controls { margin-block: 1.5rem; }
 .deck-bar { position: relative; display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.6rem; }
 .deck-search, .deck-menu > summary, .deck .deck-study-open {
@@ -109,28 +109,12 @@
   .deck-menu > summary::after { margin-left: auto; }
   .deck-menu-panel { left: 0; }
 }
-/* Shown only while a search or filter is on (deck.js empties the chips and the
-   count and hides the button): the chosen values as chips, each with an × that
-   takes it off, then the number of cards shown and "Clear filters". */
-/* The chosen values as chips under the row, each with an × that takes it off.
-   They stay on one line, which scrolls sideways (no scrollbar is drawn), and a
-   chip looks like a subject on a card (.deck-tag). The padding leaves room for
-   a focus ring inside the scrolling box. With nothing chosen the line is gone. */
-.deck-picked {
-  display: flex;
-  gap: 0.3rem;
-  margin: 0.5rem -0.25rem -0.25rem;
-  padding: 0.25rem;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.deck-picked::-webkit-scrollbar { display: none; }
-.deck-picked:empty { display: none; }
-.deck-token {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  padding-left: 0.6rem;
+
+/* ---- Tags and chips ---- */
+/* A subject on a card (.deck-tag) and a chosen subject under the bar
+   (.deck-token) are the same small quiet pill: no border, a faint fill, small
+   type. On a card it cannot be mistaken for the title. */
+.deck-tag, .deck-token {
   border-radius: 999px;
   color: var(--bs-secondary-color);
   background: var(--site-tint, var(--bs-tertiary-bg));
@@ -138,14 +122,26 @@
   line-height: 1.5;
   white-space: nowrap;
 }
+.deck-tag { padding: 0.05rem 0.6rem; text-decoration: none; }
+/* A chip also carries an × that takes its value off. */
+.deck-token { display: inline-flex; align-items: center; padding-left: 0.6rem; }
 .deck .deck-token button { padding: 0.05rem 0.55rem 0.05rem 0.3rem; border: 0; background: none; font-size: 0.9rem; line-height: 1.25; }
-.deck-study-head, .deck-study-actions, .deck-card-meta {
+/* Both sit on one line that scrolls sideways (no scrollbar is drawn), so that
+   many of them never make a card or the controls taller. The padding leaves
+   room for a focus ring inside the scrolling box. */
+.deck-card-meta, .deck-picked {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.3rem;
+  padding: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
-.deck-card summary { cursor: pointer; font-weight: 600; }
+:is(.deck-card-meta, .deck-picked)::-webkit-scrollbar { display: none; }
+:is(.deck-card-meta, .deck-picked) > * { flex: none; }
+.deck-card-meta { margin: -0.25rem -0.25rem 0.55rem; }
+.deck-picked { margin: 0.5rem -0.25rem -0.25rem; }
+.deck-picked:empty { display: none; }   /* nothing chosen: no line */
 
 /* Buttons share one chip shape. */
 .deck button {
@@ -158,18 +154,6 @@
   font-size: 0.9rem;
   overflow-wrap: anywhere;
   cursor: pointer;
-}
-/* A subject on a card is a small quiet pill, so it cannot be mistaken for the
-   card's title: no border, a faint fill, and much smaller type. */
-.deck-tag {
-  padding: 0.05rem 0.6rem;
-  border-radius: 999px;
-  color: var(--bs-secondary-color);
-  background: var(--site-tint, var(--bs-tertiary-bg));
-  font-size: 0.75rem;
-  line-height: 1.5;
-  text-decoration: none;
-  white-space: nowrap;
 }
 .deck button:disabled { opacity: 0.4; cursor: default; }
 .deck button[aria-pressed="true"], .deck button.deck-primary:not(:disabled) {
@@ -199,23 +183,9 @@
   scroll-margin-top: 6rem;
 }
 .deck-grid .deck-card { margin: 0; }
-.deck-card:target { outline: 2px solid var(--deck-accent); }
 .deck-card h2.deck-card-title { font-size: 1.2rem; margin: 0 0 0.6rem; padding: 0; border: 0; }
-/* The subjects stay on one line however many there are: the row scrolls
-   sideways (no scrollbar is drawn), so a card never grows taller for its tags.
-   The padding leaves room for a tag's focus ring inside the scrolling box. */
-.deck-card-meta {
-  flex-wrap: nowrap;
-  gap: 0.3rem;
-  margin: -0.25rem -0.25rem 0.55rem;
-  padding: 0.25rem;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.deck-card-meta::-webkit-scrollbar { display: none; }
-.deck-card-meta .deck-tag { flex: none; }
 .deck-card details { margin-top: 0.7rem; border-top: 1px solid var(--bs-border-color); }
-.deck-card summary { padding-block: 0.5rem; font-size: 0.9rem; }
+.deck-card summary { padding-block: 0.5rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
 .deck-card details > :last-child { margin-bottom: 0.3rem; }
 .deck-card :is(.math.display, mjx-container[display="true"]) {
   display: block;
@@ -253,6 +223,7 @@
 html:has(.deck-study[open]) { overflow: hidden; }
 /* The box fills the dialog, so a click on the dialog element itself is a click beside the popup. */
 .deck-study-box { --deck-pad: 1.5rem; position: relative; display: grid; gap: 1.25rem; padding: var(--deck-pad); }
+.deck-study-head, .deck-study-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
 .deck-study-head { flex-wrap: nowrap; gap: 0.9rem; }
 /* Reading one card: the head holds only the ×, so it does not get a line of
    its own. The × sits at the right end of the title's line, and the title
@@ -271,8 +242,8 @@ html:has(.deck-study[open]) { overflow: hidden; }
 /* While studying, the card is clickable: a click turns over its next layer. */
 .deck-study-card:focus { outline: none; }
 .deck-study[data-use="study"] .deck-study-card { cursor: pointer; }
-/* Nothing to choose when a single card is being read. */
-.deck-study-actions:not(:has(button:not([hidden]))) { display: none; }
+/* Nothing to count or to answer when a single card is being read. */
+.deck-study[data-use="read"] :is(.deck-study-progress, .deck-study-actions) { display: none; }
 .deck-study-actions { justify-content: center; }
 .deck-study-actions button { padding: 0.55rem 1.4rem; font-size: 1rem; }
 /* On a phone the popup is the whole screen. */
