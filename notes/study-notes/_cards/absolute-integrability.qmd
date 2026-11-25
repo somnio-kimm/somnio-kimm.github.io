@@ -1,0 +1,7 @@
+---
+title: absolute integrability
+tags: [mathematics]
+---
+
+A random quantity is absolutely integrable when its expected absolute value is finite.
+This guarantees that its expectation is a finite number.

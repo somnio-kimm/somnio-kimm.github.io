@@ -1,0 +1,7 @@
+---
+title: automatic differentiation
+tags: [machine-learning, mathematics]
+---
+
+Computing derivatives of a program by combining the derivative rules of its elementary operations through the chain rule.
+Operations such as stop-gradient can intentionally define special differentiation behaviour.

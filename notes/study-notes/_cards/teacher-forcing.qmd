@@ -1,0 +1,7 @@
+---
+title: teacher forcing
+tags: [machine-learning]
+---
+
+Training a sequence predictor using the observed earlier outputs as context for later predictions.
+Generation usually supplies the model’s own earlier outputs instead.

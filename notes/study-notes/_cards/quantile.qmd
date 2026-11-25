@@ -1,0 +1,7 @@
+---
+title: quantile
+tags: [mathematics]
+---
+
+A threshold associated with a chosen cumulative probability level.
+A percentile is a quantile whose level is expressed as a percentage; finite-sample estimation conventions can differ.

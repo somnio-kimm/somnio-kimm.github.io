@@ -1,0 +1,7 @@
+---
+title: feedback
+tags: [physics, robotics]
+---
+
+Information measured from a system and used to update subsequent decisions about that system.
+In control, the relevant feedback level may be task planning or a lower-level motor loop.

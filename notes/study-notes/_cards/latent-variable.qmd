@@ -1,0 +1,7 @@
+---
+title: latent variable
+tags: [machine-learning, mathematics]
+---
+
+A variable included in a model but not directly observed in the example being explained.
+Its coordinates need not correspond to identifiable physical causes.

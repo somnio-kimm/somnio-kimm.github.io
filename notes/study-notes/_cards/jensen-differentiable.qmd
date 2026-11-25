@@ -1,0 +1,34 @@
+---
+title: "Jensen's inequality: differentiable case"
+tags: [mathematics]
+---
+
+## Prompt
+
+State a version for a differentiable convex function and prove it using a supporting tangent line.
+
+## Statement
+
+Let $I\subseteq\mathbb R$ be an open interval, let $f:I\to\mathbb R$ be differentiable and convex, and let $X\in I$ almost surely.
+Assume $X$ and $f(X)$ are integrable and $m=\mathbb E[X]\in I$. Then
+
+$$
+f(\mathbb E[X])\leq\mathbb E[f(X)].
+$$
+
+This card proves the differentiable case; the general convex form does not require differentiability.
+
+## Proof
+
+For any $x\in I$ and $0<t<1$, convexity gives
+
+$$
+\frac{f(m+t(x-m))-f(m)}{t}\leq f(x)-f(m).
+$$
+
+Letting $t\downarrow0$ yields $f'(m)(x-m)\leq f(x)-f(m)$.
+Thus $f(X)\geq f(m)+f'(m)(X-m)$ almost surely. Taking expectations gives
+
+$$
+\mathbb E[f(X)]\geq f(m)+f'(m)(\mathbb E[X]-m)=f(m).
+$$

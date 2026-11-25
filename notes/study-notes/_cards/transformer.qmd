@@ -1,0 +1,6 @@
+---
+title: transformer
+tags: [machine-learning]
+---
+
+A neural-network architecture built from blocks that combine attention with positionwise transformations, typically using residual connections and normalization.

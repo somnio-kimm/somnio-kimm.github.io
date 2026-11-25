@@ -1,0 +1,7 @@
+---
+title: euclidean norm
+tags: [mathematics]
+---
+
+The square root of the sum of squared magnitudes of a vector’s coordinates.
+It is the usual vector length in the specified coordinates.

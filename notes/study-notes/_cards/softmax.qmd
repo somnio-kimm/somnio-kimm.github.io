@@ -1,0 +1,6 @@
+---
+title: softmax
+tags: [machine-learning]
+---
+
+A function that exponentiates scores and divides each exponential by their sum, producing positive values that sum to one for finite scores.

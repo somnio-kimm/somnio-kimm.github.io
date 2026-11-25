@@ -1,0 +1,7 @@
+---
+title: standard deviation
+tags: [mathematics]
+---
+
+The nonnegative square root of a variance.
+It measures spread in the same units as the random quantity.

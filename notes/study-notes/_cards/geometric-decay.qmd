@@ -1,0 +1,7 @@
+---
+title: geometric decay
+tags: [mathematics]
+---
+
+A sequence of nonnegative weights in which each successive weight is multiplied by the same factor smaller than one.
+In an EMA, this factor determines how quickly older observations lose weight.

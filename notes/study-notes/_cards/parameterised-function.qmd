@@ -1,0 +1,7 @@
+---
+title: parameterised function
+tags: [machine-learning]
+---
+
+A family of functions indexed by parameters.
+Fixing the parameters selects the function applied to an input.

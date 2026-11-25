@@ -1,17 +1,25 @@
 -- Study cards: the one source for definition bubbles and the glossary page.
--- Every card lives in notes/study-notes/_cards/*.qmd:
+-- Every card is its own file, notes/study-notes/_cards/KEY.qmd. The file name
+-- is the card's key, which a note's `.term` annotation names:
 --
--- :::: {.concept-card key="convex-function" tags="mathematics"}
--- ## convex function
+--   ---
+--   title: convex function
+--   tags: [mathematics]
+--   ---
 --
--- Definition: what the thing is, in plain text (shown in bubbles).
+--   The definition: what the thing is, in plain text (shown in bubbles).
 --
--- ::: {.concept-prompt} What to recall. :::
--- ::: {.concept-statement} The formal statement, with math: a mathematical definition or a claim. :::
--- ::: {.concept-proof} Proof of the statement. :::
--- ::::
+--   ## Prompt
+--   What to recall.
 --
--- Only the title and the definition are needed; the statement and the proof are optional layers.
+--   ## Statement
+--   The formal statement, with math: a mathematical definition or a claim.
+--
+--   ## Proof
+--   Proof of the statement.
+--
+-- Only the title, the tags and the definition are needed; the three headed
+-- sections are optional layers, in any order.
 local deck = require("./deck")
 local project = require("../wiki/project")
 local M = {}
@@ -27,44 +35,59 @@ local function plain(blocks)
   return table.concat(texts, " ")
 end
 
--- Turns one `.concept-card` Div into a checked card record.
-local function read_card(div, file)
-  local key = div.attributes.key or ""
-  local where = "card '" .. key .. "' in " .. file
-  if not key:match("^[a-z0-9][a-z0-9%-]*$") then error("Invalid or missing key on " .. where) end
-  if div.attributes.kind then error("Card types are no longer used: remove the kind attribute from " .. where) end
-  local title = div.content[1]
-  if not title or title.t ~= "Header" or title.level ~= 2 then error("An H2 title must come first in " .. where) end
-  local list = {}
-  for tag in (div.attributes.tags or ""):gmatch("%S+") do list[#list + 1] = tag end
-  local card = {key = key, title = title.content, label = pandoc.utils.stringify(title),
-    tags = deck.tags(list, where), definition = pandoc.Blocks({})}
-  if #card.tags == 0 then error("No subject tags on " .. where) end
+-- The subject tags of a card file: a YAML list, or one line of names.
+local function tag_names(value)
+  local names = {}
+  if pandoc.utils.type(value) == "List" then
+    for _, item in ipairs(value) do names[#names + 1] = pandoc.utils.stringify(item) end
+  elseif value then
+    for name in pandoc.utils.stringify(value):gmatch("[^%s,]+") do names[#names + 1] = name end
+  end
+  return names
+end
 
-  for i = 2, #div.content do
-    local block, part = div.content[i], nil
-    for _, name in ipairs(PARTS) do
-      if block.t == "Div" and block.classes:includes("concept-" .. name) then part = name end
-    end
-    if not part then
-      card.definition:insert(block)
-    elseif card[part] then
-      error("Two concept-" .. part .. " blocks in " .. where)
-    elseif #block.content == 0 then
-      error("Empty concept-" .. part .. " in " .. where)
+-- Turns one card file (already parsed by pandoc) into a checked card record.
+local function read_card(doc, file)
+  local key = file:gsub("%.qmd$", "")
+  local where = "card " .. file
+  if not key:match("^[a-z0-9][a-z0-9%-]*$") then
+    error("A card's file name is its key: lowercase letters, digits and hyphens only (" .. file .. ")")
+  end
+  local title = doc.meta.title
+  if not title or pandoc.utils.stringify(title) == "" then error("No title in the header of " .. where) end
+  if pandoc.utils.type(title) ~= "Inlines" then title = pandoc.Inlines(pandoc.utils.stringify(title)) end
+  local card = {key = key, title = title, label = pandoc.utils.stringify(title),
+    tags = deck.tags(tag_names(doc.meta.tags), where), definition = pandoc.Blocks({})}
+  if #card.tags == 0 then error("No subject tags in the header of " .. where) end
+
+  -- Text before the first H2 is the definition; each H2 opens one of the layers.
+  local part = "definition"
+  for _, block in ipairs(doc.blocks) do
+    if block.t == "Header" and block.level == 2 then
+      part = nil
+      local heading = pandoc.utils.stringify(block)
+      for _, name in ipairs(PARTS) do
+        if heading:lower() == name then part = name end
+      end
+      if not part then error("Unknown section '" .. heading .. "' in " .. where .. ": use Prompt, Statement or Proof") end
+      if card[part] then error("Two " .. heading .. " sections in " .. where) end
+      card[part] = pandoc.Blocks({})
     else
-      card[part] = block.content
+      card[part]:insert(block)
     end
+  end
+  for _, name in ipairs(PARTS) do
+    if card[name] and #card[name] == 0 then error("Empty " .. name .. " section in " .. where) end
   end
 
   -- The definition is what a bubble shows, so it has to read as plain text.
   card.definition:walk({
-    Math = function() error("Put equations in concept-statement, not in the definition of " .. where) end,
+    Math = function() error("Put equations in the Statement section, not in the definition of " .. where) end,
     Link = function() error("The definition cannot contain links: " .. where) end,
   })
   card.text = plain(card.definition)
-  if card.text == "" and not card.statement then error("No definition or concept-statement in " .. where) end
-  if card.proof and not card.statement then error("A concept-proof needs a concept-statement to prove in " .. where) end
+  if card.text == "" and not card.statement then error("No definition or Statement section in " .. where) end
+  if card.proof and not card.statement then error("A Proof section needs a Statement section to prove in " .. where) end
   return card
 end
 
@@ -78,19 +101,10 @@ function M.all()
   for _, name in ipairs(files) do
     if name:match("%.qmd$") then
       local file = assert(io.open(pandoc.path.join({directory, name}), "r"))
-      local doc = pandoc.read(file:read("a"), "markdown")
+      local card = read_card(pandoc.read(file:read("a"), "markdown"), name)
       file:close()
-      for _, block in ipairs(doc.blocks) do
-        if block.t == "Div" and block.classes:includes("concept-card") then
-          local card = read_card(block, name)
-          if by_key[card.key] then error("Duplicate card key '" .. card.key .. "' in " .. name) end
-          by_key[card.key] = card
-          cards[#cards + 1] = card
-        elseif block.t ~= "RawBlock" then
-          -- Usually a fence that closed early or was never opened.
-          error("Text outside a card in " .. name .. ": " .. pandoc.utils.stringify(block):sub(1, 60))
-        end
-      end
+      by_key[card.key] = card
+      cards[#cards + 1] = card
     end
   end
   table.sort(cards, function(a, b) return a.label:lower() < b.label:lower() end)

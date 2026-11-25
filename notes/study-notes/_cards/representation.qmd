@@ -1,0 +1,7 @@
+---
+title: representation
+tags: [machine-learning]
+---
+
+An encoding of information used by a model or computation.
+Its form and usefulness depend on what later operations need to do with it.

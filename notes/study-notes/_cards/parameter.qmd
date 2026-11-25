@@ -1,0 +1,7 @@
+---
+title: model parameter
+tags: [machine-learning]
+---
+
+A value that selects a model's behaviour, such as a learned weight or bias.
+It is held fixed during an ordinary prediction, unlike the input.

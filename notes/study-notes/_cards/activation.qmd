@@ -1,0 +1,6 @@
+---
+title: activation
+tags: [machine-learning]
+---
+
+An intermediate value computed by a network for a particular input, as distinct from a learned parameter.

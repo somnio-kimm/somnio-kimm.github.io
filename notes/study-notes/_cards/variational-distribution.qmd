@@ -1,0 +1,7 @@
+---
+title: variational distribution
+tags: [machine-learning, mathematics]
+---
+
+A distribution from a chosen family with adjustable parameters, used to approximate a posterior that is difficult to work with directly.
+Optimising its parameters does not guarantee equality with the true posterior.

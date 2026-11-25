@@ -1,0 +1,7 @@
+---
+title: token
+tags: [machine-learning]
+---
+
+A sequence element processed by a model.
+Depending on the input path, it may originate from a discrete vocabulary item or a continuous feature vector.

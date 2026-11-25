@@ -1,0 +1,28 @@
+---
+title: subdifferential of absolute value at zero
+tags: [mathematics]
+---
+
+## Prompt
+
+Find $\partial f(0)$ for $f(x)=|x|$, and prove both necessity and sufficiency.
+
+## Statement
+
+For $f:\mathbb R\to\mathbb R$, $f(x)=|x|$,
+
+$$
+\partial f(0)=[-1,1].
+$$
+
+Every number in this interval is a supporting slope at zero.
+
+## Proof
+
+The defining inequality at zero is $|z|\geq gz$ for every $z\in\mathbb R$.
+For $z>0$, division by $z$ gives $g\leq1$.
+For $z<0$, division reverses the inequality and gives $g\geq-1$.
+These conditions are necessary.
+
+Conversely, if $g\in[-1,1]$, then for $z\geq0$, $gz\leq z=|z|$; for $z<0$, $gz\leq-z=|z|$.
+The inequality holds everywhere, so these conditions are also sufficient.

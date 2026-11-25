@@ -1,0 +1,6 @@
+---
+title: regularisation penalty
+tags: [machine-learning, mathematics]
+---
+
+An additional objective term that penalizes specified properties of parameters or predictions, expressing a preference beyond fitting the observed targets.

@@ -1,0 +1,6 @@
+---
+title: minibatch
+tags: [machine-learning]
+---
+
+A group of training examples processed together to compute an update or shared batch statistics.

@@ -1,0 +1,7 @@
+---
+title: matrix exponential
+tags: [mathematics]
+---
+
+The matrix function defined by the power series I + A + A squared divided by 2 factorial, and so on.
+It propagates a constant-coefficient homogeneous linear differential equation.

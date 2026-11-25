@@ -1,0 +1,6 @@
+---
+title: training objective
+tags: [machine-learning, mathematics]
+---
+
+A scalar-valued function of model parameters that the training procedure seeks to optimize, often combining data loss and additional penalties.

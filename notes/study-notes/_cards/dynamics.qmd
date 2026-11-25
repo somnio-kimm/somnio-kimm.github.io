@@ -1,0 +1,7 @@
+---
+title: environment dynamics
+tags: [physics, robotics]
+---
+
+The rule or probability law by which a system’s state evolves, potentially depending on the current state and action.
+It describes the environment’s evolution rather than the policy’s action selection.

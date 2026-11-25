@@ -1,0 +1,6 @@
+---
+title: behavioural cloning
+tags: [machine-learning, robotics]
+---
+
+Learning a policy from demonstrated observations and actions using a supervised learning objective.

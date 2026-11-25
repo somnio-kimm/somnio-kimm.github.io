@@ -1,0 +1,6 @@
+---
+title: autoregressive generation
+tags: [machine-learning]
+---
+
+Generating an output sequence by repeatedly predicting the next element conditioned on earlier elements and any supplied context.

@@ -1,0 +1,7 @@
+---
+title: independent samples
+tags: [mathematics]
+---
+
+Random samples whose joint distribution factors into the product of their individual distributions.
+Independence alone does not say that they have the same distribution.

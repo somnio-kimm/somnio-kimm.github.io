@@ -1,0 +1,7 @@
+---
+title: learned feature vector
+tags: [machine-learning]
+---
+
+A numerical description whose coordinates are produced or adjusted through learning for an objective.
+The coordinates need not each correspond to a named human-interpretable property.

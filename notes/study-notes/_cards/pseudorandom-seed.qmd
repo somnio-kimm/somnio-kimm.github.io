@@ -1,0 +1,7 @@
+---
+title: pseudorandom seed
+tags: [computer-software]
+---
+
+A value used to initialise a deterministic random-number generator.
+Reusing it with the same algorithm and draw sequence reproduces the same sequence; successive draws within that sequence can still differ.

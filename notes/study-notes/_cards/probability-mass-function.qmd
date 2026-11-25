@@ -1,0 +1,7 @@
+---
+title: probability mass function
+tags: [mathematics]
+---
+
+A function assigning the probability of each value of a discrete random variable.
+Its values are nonnegative and sum to one.

@@ -1,0 +1,7 @@
+---
+title: gaussian distribution
+tags: [mathematics]
+---
+
+A probability distribution specified by a mean and covariance; in one dimension with positive variance its density is bell-shaped.
+A standard multivariate Gaussian has zero mean and identity covariance.

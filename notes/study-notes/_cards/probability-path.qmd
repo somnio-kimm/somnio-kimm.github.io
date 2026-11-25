@@ -1,0 +1,7 @@
+---
+title: probability path
+tags: [machine-learning, mathematics]
+---
+
+A family of probability distributions indexed by a time-like variable.
+A generative flow chooses such a family to connect a simple starting distribution to a data distribution.

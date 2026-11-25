@@ -1,0 +1,7 @@
+---
+title: autoregressive model
+tags: [machine-learning, mathematics]
+---
+
+A probability model that factorises a joint distribution into conditional distributions, each conditioned on earlier variables in a chosen order.
+The variables may be discrete or continuous.

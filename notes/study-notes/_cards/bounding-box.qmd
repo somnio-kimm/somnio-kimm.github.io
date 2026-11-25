@@ -1,0 +1,6 @@
+---
+title: bounding box
+tags: [machine-learning, robotics]
+---
+
+A rectangle used to specify the location and extent of a region in an image, under a stated coordinate convention.

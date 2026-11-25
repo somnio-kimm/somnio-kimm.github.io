@@ -1,0 +1,29 @@
+---
+title: linearity of expectation
+tags: [mathematics]
+---
+
+## Prompt
+
+State and prove linearity for two real random variables. Is independence required?
+
+## Statement
+
+If $X,Y$ are integrable real random variables on the same probability space and $a,b\in\mathbb R$, then
+
+$$
+\mathbb E[aX+bY]=a\mathbb E[X]+b\mathbb E[Y].
+$$
+
+Independence is not required.
+
+## Proof
+
+The triangle inequality gives $|aX+bY|\leq |a||X|+|b||Y|$, so $aX+bY$ is integrable.
+Linearity of the integral then gives
+
+$$
+\int_\Omega(aX+bY)\,dP=a\int_\Omega X\,dP+b\int_\Omega Y\,dP.
+$$
+
+Both variables are integrated against the same joint probability measure; no factorisation or independence assumption appears.

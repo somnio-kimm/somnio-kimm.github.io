@@ -1,0 +1,7 @@
+---
+title: encoder
+tags: [machine-learning]
+---
+
+A function or model component that maps an input into a representation used by subsequent computation.
+Its architecture and training objective determine what information the representation carries.

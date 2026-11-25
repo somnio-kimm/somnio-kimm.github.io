@@ -1,0 +1,7 @@
+---
+title: conditional distribution
+tags: [mathematics]
+---
+
+A distribution describing a random quantity given specified information, on conditioning events or values for which it is defined.
+It may retain uncertainty or assign all probability to a single outcome.

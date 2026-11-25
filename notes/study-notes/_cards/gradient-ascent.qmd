@@ -1,0 +1,7 @@
+---
+title: gradient ascent
+tags: [machine-learning, mathematics]
+---
+
+An iterative optimisation method that moves parameters or inputs in the direction of a function’s gradient to increase its value locally.
+The step size determines how far each update moves.

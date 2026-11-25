@@ -1,0 +1,7 @@
+---
+title: discounted return
+tags: [machine-learning, robotics]
+---
+
+A sum of rewards along a trajectory in which later rewards are multiplied by progressively higher powers of a discount factor.
+Its expectation is one common reinforcement-learning objective.

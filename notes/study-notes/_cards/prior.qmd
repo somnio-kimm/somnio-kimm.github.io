@@ -1,0 +1,7 @@
+---
+title: prior distribution
+tags: [machine-learning, mathematics]
+---
+
+A distribution specified before incorporating the observation currently being explained.
+It may describe parameters or latent variables and may already condition on other supplied context.

@@ -1,0 +1,7 @@
+---
+title: measurable function
+tags: [mathematics]
+---
+
+A function whose preimage of every measurable output set is a measurable input event.
+This lets a probability model assign probabilities consistently to events defined through the function.

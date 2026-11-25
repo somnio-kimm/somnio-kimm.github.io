@@ -1,0 +1,7 @@
+---
+title: confidence score
+tags: [machine-learning, mathematics]
+---
+
+A numerical score used to rank or select a model prediction.
+Its interpretation as a probability requires additional assumptions or calibration.

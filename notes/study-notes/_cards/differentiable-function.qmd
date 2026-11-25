@@ -1,0 +1,7 @@
+---
+title: differentiable function
+tags: [mathematics]
+---
+
+A function that admits a linear approximation near the point being considered, with an error that becomes negligible relative to the input change.
+In one dimension, the slope of that approximation is the derivative.

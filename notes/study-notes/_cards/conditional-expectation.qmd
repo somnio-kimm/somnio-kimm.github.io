@@ -1,0 +1,7 @@
+---
+title: conditional expectation
+tags: [mathematics]
+---
+
+The average of a random quantity under the distribution remaining after specified information is given.
+With squared-error loss and finite second moments, it is the best unrestricted predictor from that information.

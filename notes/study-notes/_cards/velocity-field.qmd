@@ -1,0 +1,7 @@
+---
+title: velocity field
+tags: [machine-learning, mathematics]
+---
+
+A function assigning a local direction and rate of change to each position and time.
+In flow generation, it changes a sample with respect to internal generative time.

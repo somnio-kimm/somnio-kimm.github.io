@@ -1,0 +1,7 @@
+---
+title: chain rule
+tags: [machine-learning, mathematics]
+---
+
+The rule for differentiating a composition of functions by multiplying the appropriate local derivatives or Jacobians.
+Contributions are added when several graph paths connect an input to an output.

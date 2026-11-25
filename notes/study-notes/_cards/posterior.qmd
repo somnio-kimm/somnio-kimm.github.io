@@ -1,0 +1,7 @@
+---
+title: posterior distribution
+tags: [machine-learning, mathematics]
+---
+
+The conditional distribution of unknown parameters or latent variables after incorporating specified observations under a model.
+It combines the likelihood of those observations with the prior.

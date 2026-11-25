@@ -1,0 +1,7 @@
+---
+title: policy
+tags: [machine-learning, robotics]
+---
+
+A rule for choosing actions from available information, such as a state, observation, or history.
+It may return an action directly or specify a distribution from which an action is selected.

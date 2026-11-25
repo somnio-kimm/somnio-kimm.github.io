@@ -1,0 +1,7 @@
+---
+title: random variable
+tags: [mathematics]
+---
+
+A measurable function assigning a value to each outcome of a probability model.
+Its distribution describes the probabilities of those values, while a realisation is one value it takes.

@@ -1,0 +1,7 @@
+---
+title: cosine similarity
+tags: [mathematics]
+---
+
+The dot product of two nonzero vectors divided by the product of their Euclidean lengths.
+It compares directions rather than vector magnitudes.

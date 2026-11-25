@@ -1,0 +1,19 @@
+---
+title: subgradient and subdifferential
+tags: [mathematics]
+---
+
+## Prompt
+
+Define a subgradient of a convex function at a point. How does it differ from the subdifferential?
+
+## Statement
+
+For a convex function $f:C\to\mathbb R$ on a convex set $C\subseteq\mathbb R^d$, a vector $g\in\mathbb R^d$ is a **subgradient at $x\in C$** if
+
+$$
+f(z)\geq f(x)+g^\top(z-x)\qquad\text{for every }z\in C.
+$$
+
+The **subdifferential** $\partial f(x)$ is the set of all such vectors $g$.
+The inequality is global over $C$; it describes an affine supporting function.

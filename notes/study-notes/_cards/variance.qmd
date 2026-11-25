@@ -1,0 +1,7 @@
+---
+title: variance
+tags: [mathematics]
+---
+
+The expected squared deviation of a random quantity from its mean, when this quantity exists.
+It measures spread in squared units.

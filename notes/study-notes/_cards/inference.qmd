@@ -1,0 +1,7 @@
+---
+title: inference
+tags: [machine-learning]
+---
+
+Using a trained model to compute predictions or generate outputs from supplied inputs.
+Ordinary inference does not update the learned parameters.

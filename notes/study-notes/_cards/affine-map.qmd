@@ -1,0 +1,6 @@
+---
+title: affine map
+tags: [mathematics]
+---
+
+A transformation consisting of a linear map followed by a translation.

@@ -1,0 +1,7 @@
+---
+title: activation function
+tags: [machine-learning]
+---
+
+A nonlinear function applied to a network's intermediate values, often elementwise.
+It allows the network to represent nonlinear functions of its input.

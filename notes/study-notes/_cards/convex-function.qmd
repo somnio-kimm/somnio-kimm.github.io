@@ -1,0 +1,22 @@
+---
+title: convex function
+tags: [machine-learning, mathematics]
+---
+
+A function on a convex domain whose value at a weighted average of two inputs is no greater than the same weighted average of their function values.
+Its graph lies below the line segment joining any two points on the graph.
+
+## Prompt
+
+State the definition, including the condition on the domain and the quantifiers.
+
+## Statement
+
+Let $C\subseteq\mathbb R^d$ be convex. A function $f:C\to\mathbb R$ is **convex** if, for every $x,y\in C$ and every $t\in[0,1]$,
+
+$$
+f(tx+(1-t)y)\leq t f(x)+(1-t)f(y).
+$$
+
+The graph lies at or below each chord joining two of its points.
+The domain condition ensures that $tx+(1-t)y$ belongs to $C$.

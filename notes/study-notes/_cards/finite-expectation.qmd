@@ -1,0 +1,19 @@
+---
+title: finite expectation
+tags: [mathematics]
+---
+
+## Prompt
+
+Define the expectation of a real random variable, and state a condition that makes it finite.
+
+## Statement
+
+For a real random variable $X$ on a probability space $(\Omega,\mathcal F,P)$, if $\mathbb E[|X|]<\infty$, its finite **expectation** is
+
+$$
+\mathbb E[X]=\int_\Omega X(\omega)\,dP(\omega).
+$$
+
+For a discrete distribution, this is $\sum_x xP(X=x)$; for a distribution with density $p$, it is $\int_{\mathbb R}x p(x)\,dx$.
+Absolute integrability excludes an undefined cancellation of positive and negative infinities.

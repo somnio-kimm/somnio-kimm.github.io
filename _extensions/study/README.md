@@ -1,7 +1,7 @@
 # Study-note filter
 
 Enabled for everything under `notes/study-notes/` by `_metadata.yml` (`filters: [study]`).
-Everything it shows comes from one place: the cards in `notes/study-notes/_cards/`, one file per subject.
+Everything it shows comes from one place: the cards in `notes/study-notes/_cards/`, one file per card.
 
 | Feature | Markup | What it shows |
 |---|---|---|
@@ -14,15 +14,15 @@ Everything it shows comes from one place: the cards in `notes/study-notes/_cards
 |---|---|
 | `study.lua` | Filter entry point, and the definition bubbles |
 | `cards.lua` | Reads and checks the card files; builds the glossary page |
-| `deck.lua` | The two panels above the cards (find, study), subject links, text helpers |
+| `deck.lua` | The row of controls above the cards, the popup, subject links, text helpers |
 | `deck.js`, `deck.css` | Search, filters, and the flashcard popup on the page |
 | `study-terms.js`, `study-terms.css` | Behaviour and style of the definition bubbles |
 | `../wiki/project.lua` | Project paths and the wiki index (shared with the wiki filter) |
 
 ## Writing a card
 
-Add a card anywhere in the closest subject file under `_cards/`; the page sorts all cards by title.
-A new `.qmd` file in that folder is picked up automatically.
+Each card is its own file in `_cards/`, named after its key: `_cards/latent-variable.qmd` is the card `latent-variable`.
+To add a card, add a file; the page sorts all cards by title.
 
 A card has up to three layers. There are no card types.
 
@@ -30,46 +30,49 @@ A card has up to three layers. There are no card types.
 - **Statement:** the formal version, with math. This is where a mathematical definition, or a claim such as a lemma or theorem, goes.
 - **Proof:** the proof of the statement.
 
-The smallest card is a title and a definition:
+The smallest card is a title, its subjects, and a definition:
 
 ```markdown
-:::: {.concept-card key="your-term" tags="mathematics machine-learning"}
-## your term
+---
+title: your term
+tags: [mathematics, machine-learning]
+---
 
 What the thing is, in one or two plain sentences.
-::::
 ```
 
-A fuller card adds a recall prompt, a statement, and a proof:
+A fuller card adds a recall prompt, a statement, and a proof, each under its own heading:
 
 ```markdown
-:::: {.concept-card key="unique-key" tags="mathematics"}
-## name of the result
+---
+title: name of the result
+tags: [mathematics]
+---
 
 The definition: what it is or says, in plain words.
 
-::: {.concept-prompt}
+## Prompt
+
 State the result, its assumptions, and reconstruct the proof.
-:::
 
-::: {.concept-statement}
+## Statement
+
 The precise statement, with $inline$ or $$display$$ math.
-:::
 
-::: {.concept-proof}
+## Proof
+
 The proof in paragraphs, equations, or lists.
-:::
-::::
 ```
 
-Rules, all checked at render time with a message naming the card and file:
+Rules, all checked at render time with a message naming the card's file:
 
-- `key` is unique across all files and uses lowercase letters, digits, and hyphens. It is what notes refer to, and the card's link is `glossary.html#term-KEY`.
-- A card needs a definition or a `concept-statement`. A `concept-proof` needs a `concept-statement` to prove. The prompt is optional.
-- A lemma, proposition, or theorem is written like any other card; put its usual name in the title. The old `kind` attribute is rejected.
-- `tags` are separated by spaces and name study-note subject folders: `mathematics`, `machine-learning`, `robotics`, `physics`, `computer-hardware`, `computer-software`. At least one is required.
+- The file name is the key: lowercase letters, digits, and hyphens, then `.qmd`. It is what notes refer to, and the card's link is `glossary.html#term-KEY`. Two cards cannot share a key, because two files cannot share a name.
+- Put a title that contains a colon in quotes: `title: "Jensen's inequality: differentiable case"`.
+- A card needs a definition or a Statement section. A Proof section needs a Statement section to prove. The Prompt is optional. No other `##` headings are allowed.
+- A lemma, proposition, or theorem is written like any other card; put its usual name in the title.
+- `tags` name study-note subject folders: `mathematics`, `machine-learning`, `robotics`, `physics`, `computer-hardware`, `computer-software`. At least one is required.
 - Start titles with a lowercase letter unless they begin with a name.
-- The definition is the text directly under the title. It appears in bubbles, so it is plain text: no equations and no links.
+- The definition is the text before the first heading. It appears in bubbles, so it is plain text: no equations and no links.
 - Put every assumption and quantifier in the statement so it stands alone, and keep the proof readable whether or not the statement is open.
 - Cards are plain Markdown and math. Shortcodes and `[[wikilinks]]` are not processed inside them.
 - When a concept has both a plain definition and a formal one, write one card: the plain one as the definition, the formal one as the statement.

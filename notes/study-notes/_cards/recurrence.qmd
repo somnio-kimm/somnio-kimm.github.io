@@ -1,0 +1,7 @@
+---
+title: recurrence
+tags: [computer-software, mathematics]
+---
+
+A rule defining each value of a sequence using earlier values and, when applicable, new inputs.
+Initial values are needed to determine the sequence.

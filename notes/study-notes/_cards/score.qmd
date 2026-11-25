@@ -1,0 +1,7 @@
+---
+title: score of a density
+tags: [machine-learning, mathematics]
+---
+
+The gradient of log density with respect to the sample coordinates.
+It indicates the local direction and rate of increase of log density, and differs from a gradient with respect to model parameters.

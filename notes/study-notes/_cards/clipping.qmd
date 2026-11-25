@@ -1,0 +1,7 @@
+---
+title: clipping
+tags: [machine-learning, mathematics]
+---
+
+Replacing values outside a specified interval by its nearest endpoint.
+Several distinct original values can then share the same result, so clipping generally cannot be inverted.

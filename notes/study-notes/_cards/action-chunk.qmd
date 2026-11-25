@@ -1,0 +1,7 @@
+---
+title: action chunk
+tags: [robotics]
+---
+
+An ordered sequence of proposed robot commands for several control steps.
+The controller may execute only part of the chunk before replacing it.

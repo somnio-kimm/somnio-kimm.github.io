@@ -1,0 +1,7 @@
+---
+title: sampler
+tags: [machine-learning, mathematics]
+---
+
+A procedure for producing draws from, or approximating draws from, a specified distribution.
+It includes the random inputs and numerical update rules, not only the trained network.

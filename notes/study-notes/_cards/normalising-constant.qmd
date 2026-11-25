@@ -1,0 +1,7 @@
+---
+title: normalising constant
+tags: [mathematics]
+---
+
+A sum or integral of unnormalised weights used to make their total probability equal one.
+It must be positive and finite for the resulting distribution to be well defined.

@@ -1,0 +1,7 @@
+---
+title: second moment
+tags: [mathematics]
+---
+
+The expectation of a squared scalar random variable, or of a squared norm for a random vector.
+A finite second moment means that this expectation is finite.

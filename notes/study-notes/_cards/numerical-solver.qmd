@@ -1,0 +1,7 @@
+---
+title: numerical solver
+tags: [computer-software, mathematics]
+---
+
+An algorithm that approximates the solution to a mathematical problem.
+For an ordinary differential equation, it computes successive approximate states from a derivative field.

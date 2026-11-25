@@ -1,0 +1,6 @@
+---
+title: marginal distribution
+tags: [mathematics]
+---
+
+The distribution of selected variables obtained from a joint distribution by summing or integrating over the other variables.

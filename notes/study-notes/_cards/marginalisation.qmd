@@ -1,0 +1,7 @@
+---
+title: marginalisation
+tags: [mathematics]
+---
+
+Summing or integrating a joint distribution over variables that are not retained.
+The result describes the remaining variables while accounting for the possible values of the removed variables.

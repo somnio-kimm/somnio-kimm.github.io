@@ -1,0 +1,24 @@
+---
+title: zero subgradient and a global minimum
+tags: [mathematics]
+---
+
+## Prompt
+
+Characterise a global minimiser using the subdifferential. Prove both directions.
+
+## Statement
+
+Let $f:C\to\mathbb R$ be convex on a convex set $C$, with the subdifferential defined relative to $C$.
+For $x_*\in C$,
+
+$$
+0\in\partial f(x_*)\quad\Longleftrightarrow\quad
+f(x_*)\leq f(z)\ \text{for all }z\in C.
+$$
+
+## Proof
+
+Substitute $g=0$ into the subgradient inequality:
+$f(z)\geq f(x_*)+0^\top(z-x_*)=f(x_*)$ for every $z\in C$.
+This is exactly the definition of a global minimum, so the same calculation proves both directions.

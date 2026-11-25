@@ -1,0 +1,7 @@
+---
+title: state vector
+tags: [mathematics, physics, robotics]
+---
+
+Coordinates representing the information a dynamical model uses to specify subsequent evolution, or its probability law, given future inputs.
+The entries may describe physical quantities or an internal model representation.

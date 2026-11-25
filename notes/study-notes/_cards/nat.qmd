@@ -1,0 +1,7 @@
+---
+title: nat
+tags: [mathematics]
+---
+
+The unit of information obtained when logarithms use base e.
+Changing the logarithm base changes the unit and rescales the numerical information value.
